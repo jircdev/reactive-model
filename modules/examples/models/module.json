@@ -1,0 +1,10 @@
+{
+  "name": "examples/models",
+  "description": "Model samples",
+  "ts": {
+    "path": "ts",
+    "files": [
+      "*"
+    ]
+  }
+}

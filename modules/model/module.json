@@ -1,0 +1,10 @@
+{
+  "name": "model",
+  "description": "Reactive Model",
+  "ts": {
+    "path": "ts",
+    "files": [
+      "*"
+    ]
+  }
+}
