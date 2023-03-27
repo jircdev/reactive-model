@@ -1,10 +1,9 @@
 {
-  "name": "model",
-  "description": "Reactive Model",
-  "ts": {
-    "path": "ts",
-    "files": [
-      "*"
-    ]
-  }
+	"name": "model",
+	"description": "Reactive Model",
+	"platforms": "*",
+	"ts": {
+		"path": "ts",
+		"files": ["*"]
+	}
 }

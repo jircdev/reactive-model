@@ -1,79 +1,88 @@
 import { Events } from "@beyond-js/events/events";
-import { routing } from "@beyond-js/kernel/routing";
-import Ajv from "ajv";
-import { JSONSchemaType, JSONType } from "ajv";
+import { reactiveProps } from "./property";
 
-type KeyedObject<K extends string | number | symbol, V> = {
-    [key in K]?: V;
-};
+interface ReactiveModelPublic<T> {
+	ready: boolean | undefined;
+	fetching: boolean | undefined;
+	fetched: boolean;
+	processing: boolean;
+	processed: boolean;
+	loaded: boolean;
+	[key: string]: any;
+}
 
+/**
+ * The `ReactiveModel` class is a subclass of the `Events` class that provides a simple way to create
+ * reactive properties that can trigger events when they change. It also provides methods for setting
+ * and getting property values.
+ *
+ * @template T - The type of the properties that can be defined in the model.
+ * @extends Events
+ */
 export /*bundle*/
 class ReactiveModel<T> extends Events {
-    #ready: boolean | undefined;
-    protected schema: unknown;
-    #ajv: Ajv;
+	protected schema: unknown;
+	[key: string]: any;
 
-    #properties: Record<keyof T, any> = {} as Record<keyof T, any>;
+	@reactiveProps(["fetching", "fetched", "processing", "processed", "loaded", "ready"])
+	fetching!: boolean;
+	fetched: boolean = false;
+	processing: boolean = false;
+	ready: boolean = false;
+	processed: boolean = false;
+	loaded: boolean = false;
 
-    get ready() {
-        return this.#ready;
-    }
+	/**
+	 * The `triggerEvent` method triggers a change event on the model, which can be used to notify
+	 * subscribers of changes to the model's properties.
+	 *
+	 * @param {string} event - The name of the event to trigger.
+	 * @returns {void}
+	 */
+	triggerEvent = (event: string = "change"): void => this.trigger(event);
+	/**
+	 * The `set` method sets one or more properties on the model.
+	 *
+	 * @param {keyof ReactiveModelPublic<T>} property - The name of the property to set.
+	 * @param {*} value - The value to set the property to.
+	 * @returns {void}
+	 */
+	set(property: keyof ReactiveModelPublic<T>, value: any): void {
+		let props: Partial<ReactiveModelPublic<T>> = {};
+		if (property && value !== undefined) {
+			props[property] = value;
+		} else if (typeof property === "object" && property !== null) {
+			props = property;
+		}
+		let updated = false;
 
-    #fetching: boolean | undefined;
-    get fetching() {
-        return this.#fetching;
-    }
+		for (const prop in props) {
+			const key = `#${prop}`;
+			if (!Object.prototype.hasOwnProperty.call(this, key)) continue;
 
-    set fetching(value: boolean | undefined) {
-        if (value === this.#fetching) return;
-        this.#fetching = value;
-        this.triggerEvent();
-    }
+			if (this[key] === props[prop]) continue;
+			this[key] = props[prop];
+			updated = true;
+		}
 
-    #fetched: boolean = false;
-    get fetched(): boolean {
-        return this.#fetched;
-    }
-    set fetched(value: boolean) {
-        if (value === this.#fetched) return;
-        this.#fetched = value;
-        this.#fetched;
-    }
+		if (updated) this.triggerEvent();
+	}
 
-    #processing: boolean = false;
-    get processing(): boolean {
-        return this.#processing;
-    }
+	/**
+	 * The `set` method sets one or more properties on the model.
+	 *
+	 * @param {keyof ReactiveModelPublic<T>} property - The name of the property to set.
+	 * @param {*} value - The value to set the property to.
+	 * @returns {void}
+	 */
 
-    #processed: boolean = false;
-    get processed(): boolean {
-        return this.#processed;
-    }
-
-    #loaded: boolean = false;
-    get loaded(): boolean {
-        return this.#loaded;
-    }
-
-    #compiled: any;
-    #currentSchema: any;
-    constructor() {
-        super();
-        console.log(100, this.schema);
-        this.#ajv = new Ajv();
-    }
-
-    triggerEvent = (event: string = "change"): void => {
-        this.trigger(event);
-    };
-
-    set<K extends keyof T>(key: K, value: T[K]) {
-        if (!this.#compiled) {
-        }
-        this.#properties[key] = value;
-    }
-
-    get<K extends keyof T>(key: K): T[K] {
-        return this.#properties[key];
-    }
+	getProperties(): Record<string, any> {
+		const props: Record<string, any> = {};
+		Object.keys(this).forEach(property => {
+			if (property.startsWith("#")) {
+				props[property.replace("#", "")] = this[property];
+			}
+		});
+		return props;
+	}
 }
