@@ -5,6 +5,7 @@
 		"experimentalDecorators": true,
 		"allowSyntheticDefaultImports": true,
 		"moduleResolution": "Node",
+		"jsx": "react",
 		"strictNullChecks": true
 	}
 }

@@ -1,4 +1,4 @@
-import { ReactiveModel } from "reactive-model/model";
+import { ReactiveModel } from "reactive-model/main";
 // import { JSONSchemaType, JSONType } from "ajv";
 
 interface IUser {
