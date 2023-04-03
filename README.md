@@ -1,4 +1,11 @@
-# ReactiveModel
+# @beyond-js/reactive
+
+![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
+![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E)
+![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
+![Deno JS](https://img.shields.io/badge/deno%20js-000000?style=for-the-badge&logo=deno&logoColor=white)
+![Bun](https://img.shields.io/badge/Bun-%23000000.svg?style=for-the-badge&logo=bun&logoColor=white)
+![Browser](https://img.shields.io/badge/Browser-4285F4?style=for-the-badge&logo=GoogleChrome&logoColor=white)
 
 ReactiveModel is a class that allows you to create reactive objects that can be observed for changes. It can be used in both Node.js and web environments and is agnostic to any specific front-end framework.
 
@@ -15,7 +22,7 @@ npm install reactive-model
 To create a new `ReactiveModel`, simply instantiate the class with the desired properties:
 
 ```
-import { ReactiveModel } from "reactive-model";
+import { ReactiveModel } from "reactive/model";
 
 interface Person {
   name: string;
@@ -33,7 +40,7 @@ console.log(person.get("name")); // "Bob"
 You can also use the `@reactiveProps` decorator to automatically create reactive properties:
 
 ```
-import { ReactiveModel, reactiveProps } from "reactive-model";
+import { ReactiveModel, reactiveProps } from "reactive";
 
 interface Person {
   name: string;

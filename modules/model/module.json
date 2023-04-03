@@ -1,5 +1,5 @@
 {
-	"name": "main",
+	"name": "model",
 	"description": "Reactive Model",
 	"platforms": "*",
 	"ts": {

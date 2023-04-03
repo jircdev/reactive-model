@@ -1,6 +1,6 @@
 import type { ReactiveModel } from ".";
 
-export function reactiveProp<T>(target: ReactiveModel<T>, propKey: string): void {
+export /*bundle */ function reactiveProp<T>(target: ReactiveModel<T>, propKey: string): void {
 	let val: T[keyof T] = target[propKey];
 
 	Object.defineProperty(target, propKey, {
@@ -17,7 +17,9 @@ export function reactiveProp<T>(target: ReactiveModel<T>, propKey: string): void
 	});
 }
 
-export function reactiveProps<T>(props: Array<keyof T>): (target: ReactiveModel<T>, propKey: string) => void {
+export /*bundle */ function reactiveProps<T>(
+	props: Array<keyof T>
+): (target: ReactiveModel<T>, propKey: string) => void {
 	return function (target: ReactiveModel<T>, propKey: string): void {
 		if (!props.includes(propKey as keyof T)) return;
 		reactiveProp(target, propKey);

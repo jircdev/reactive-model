@@ -1,4 +1,4 @@
-import { ReactiveModel } from "reactive-model/main";
+import { ReactiveModel } from "@beyond-js/reactive/model";
 // import { JSONSchemaType, JSONType } from "ajv";
 
 interface IUser {
