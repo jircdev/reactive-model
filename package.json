@@ -1,10 +1,18 @@
 {
 	"name": "@beyond-js/reactive",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"title": "Reactive",
 	"description": "A model for creating reactive objects with events that enable the creation of reactive models based on the Observer pattern.",
 	"layout": "main-layout",
 	"template": "template/template.json",
+	"keywords": [
+		"Observer",
+		"reactive-model",
+		"beyond-js",
+		"observable",
+		"nodejs",
+		"events"
+	],
 	"languages": {
 		"default": "en",
 		"supported": [
@@ -16,6 +24,9 @@
 		"path": "./modules"
 	},
 	"deployment": {
+		"build": {
+			"path": "./compiled"
+		},
 		"distributions": [
 			{
 				"name": "web-typed",

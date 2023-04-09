@@ -1,0 +1,12 @@
+{
+  "types": "./layout/main.d.ts",
+  "amd": "./layout/main.amd.js",
+  "sjs": "./layout/main.sjs.js",
+  "browser": "./layout/main.browser.mjs",
+  "module": "./layout/main.browser.mjs",
+  "node": {
+    "require": "./layout/main.cjs.js",
+    "import": "./layout/main.mjs"
+  },
+  "css": "./layout/main.css"
+}
