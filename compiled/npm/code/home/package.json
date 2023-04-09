@@ -1,8 +1,0 @@
-{
-  "types": "./home.d.ts",
-  "amd": "./home.amd.js",
-  "sjs": "./home.sjs.js",
-  "browser": "./home.browser.mjs",
-  "module": "./home.browser.mjs",
-  "css": "./home.css"
-}
