@@ -1,0 +1,10 @@
+{
+  "name": "entities",
+  "description": "Collection and Item abstract models",
+  "ts": {
+    "path": "ts",
+    "files": [
+      "*"
+    ]
+  }
+}

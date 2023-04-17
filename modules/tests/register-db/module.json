@@ -1,0 +1,11 @@
+{
+	"name": "register-db",
+	"description": "Module to register indexedDB tables",
+	"platforms": ["web"],
+	"start": {
+		"ts": {
+			"path": "/start/ts",
+			"files": ["*"]
+		}
+	}
+}

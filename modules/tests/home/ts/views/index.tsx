@@ -1,13 +1,11 @@
 import * as React from "react";
-import config from "@beyond-js/reactive/config";
 
+// console.log(1000, app, BrowserWindow);
 export /*bundle*/
 function Page(): JSX.Element {
 	return (
 		<div className="page__container">
-			<h1>
-				ReactiveModel sample <span className="beyond">React</span>!
-			</h1>
+			<h1>Hola felix</h1>
 		</div>
 	);
 }

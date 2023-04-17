@@ -28,7 +28,7 @@ interface IProps {
  * @extends Events
  */
 export /*bundle*/
-class ReactiveModel<T> extends Events {
+abstract class ReactiveModel<T> extends Events {
 	protected schema: unknown;
 	[key: string]: any;
 
@@ -38,6 +38,7 @@ class ReactiveModel<T> extends Events {
 	processing: boolean = false;
 	ready: boolean = false;
 	processed: boolean = false;
+	protected localdb = false;
 	protected properties: string[];
 	loaded: boolean = false;
 
@@ -87,10 +88,9 @@ class ReactiveModel<T> extends Events {
 
 	getProperties(): Record<string, any> {
 		const props: Record<string, any> = {};
-		Object.keys(this).forEach(property => {
-			if (property.startsWith("#")) {
-				props[property.replace("#", "")] = this[property];
-			}
+		const properties = this.properties || this.skeleton;
+		properties.forEach(property => {
+			props[property] = this[property];
 		});
 		return props;
 	}

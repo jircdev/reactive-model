@@ -1,0 +1,9 @@
+{
+	"name": "tests/backend/provider",
+	"description": "Model test provider bridge",
+	"bridge": {
+		"path": "bridge",
+		"files": ["*"]
+	},
+	"platforms": ["web", "android", "ios", "backend"]
+}
