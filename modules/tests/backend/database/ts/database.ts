@@ -63,4 +63,7 @@ export /*bundle*/ class UserStore {
 
 		return users as User[];
 	}
+
+
+	
 }

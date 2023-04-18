@@ -55,7 +55,9 @@ export /*bundle*/ class LocalProvider extends ReactiveModel<IProvider> {
 		if (!this.#originalData) return true;
 		return properties.some(prop => this.#originalData[prop] !== data[prop]);
 	}
-	async load({ id }) {
+	async load({ id = undefined } = {}) {
+		id = id ?? this.id;
+		console.log("id", id, this.id, this);
 		try {
 			if (!id) {
 				throw new Error("id is required");
