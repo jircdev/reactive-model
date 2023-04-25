@@ -1,7 +1,7 @@
 import { UserStore } from "@beyond-js/reactive/tests/backend/database";
 import { Server, Socket } from "socket.io";
 
-export /*actions*/ /*bundle*/ class UserProvider {
+export /*actions*/ /*bundle*/ class UsersProvider {
 	socket: Server;
 	constructor(socket: Server) {
 		this.socket = socket;
@@ -20,7 +20,7 @@ export /*actions*/ /*bundle*/ class UserProvider {
 		try {
 			const user = new UserStore();
 			const data = await user.loadUser(id);
-			console.log(20, data);
+
 			return { status: true, data };
 		} catch (e) {
 			return { error: true, message: e.message };
@@ -37,14 +37,7 @@ export /*actions*/ /*bundle*/ class UserProvider {
 		}
 	}
 
-	async bulkSave(data) {
-		try {
-			const user = new UserStore();
-			const entries = await user.bulkSave(data);
-
-			return { status: true, data: { entries } };
-		} catch (e) {
-			return { error: true, message: e.message };
-		}
+	send() {
+		this.socket.emit("user", { name: "algo" });
 	}
 }

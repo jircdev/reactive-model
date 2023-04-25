@@ -57,7 +57,7 @@ abstract class ReactiveModel<T> extends Events {
 	 * @param {*} value - The value to set the property to.
 	 * @returns {void}
 	 */
-	set(property: keyof ReactiveModelPublic<T>, value: any): void {
+	set(property: keyof ReactiveModelPublic<T>, value: any | undefined = undefined): void {
 		let props: Partial<ReactiveModelPublic<T>> = {};
 		if (property && value !== undefined) {
 			props[property] = value;
@@ -67,24 +67,14 @@ abstract class ReactiveModel<T> extends Events {
 		let updated = false;
 
 		for (const prop in props) {
-			const key = `#${prop}`;
-			if (!Object.prototype.hasOwnProperty.call(this, key)) continue;
-
-			if (this[key] === props[prop]) continue;
-			this[key] = props[prop];
+			if (!Object.prototype.hasOwnProperty.call(this, prop)) continue;
+			if (this[prop] === props[prop]) continue;
+			this[prop] = props[prop];
 			updated = true;
 		}
 
 		if (updated) this.triggerEvent();
 	}
-
-	/**
-	 * The `set` method sets one or more properties on the model.
-	 *
-	 * @param {keyof ReactiveModelPublic<T>} property - The name of the property to set.
-	 * @param {*} value - The value to set the property to.
-	 * @returns {void}
-	 */
 
 	getProperties(): Record<string, any> {
 		const props: Record<string, any> = {};

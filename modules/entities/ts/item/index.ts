@@ -1,7 +1,7 @@
 import Dexie from "dexie";
 import { ReactiveModel, reactiveProps } from "@beyond-js/reactive/model";
 import { IProvider } from "../interfaces/provider";
-import { LocalProvider } from "../local-provider";
+import { LocalProvider } from "./local-provider";
 import { ItemSaveManager } from "./save";
 import { ItemLoadManager } from "./load";
 
@@ -37,22 +37,31 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 		return this.#skeleton;
 	}
 
+	private __get(property) {
+		return this[property];
+	}
+
 	get store() {
 		return this.localProvider.store;
 	}
 	#loadManager: ItemLoadManager;
 	constructor(id) {
 		super();
-		this.#saveManager = new ItemSaveManager(this);
-		this.#loadManager = new ItemLoadManager(this);
+
 		this.on("change", this.checkUnpublished);
 	}
 
+	setOffline = value => this.localProvider.setOffline(value);
+
 	checkUnpublished = () => {};
 
-	protected async init(id) {
+	protected async init({ id }) {
 		try {
-			this.localProvider = new LocalProvider(this.db, this.storeName);
+			const getProperty = property => this.__get(property);
+
+			this.localProvider = new LocalProvider(this, getProperty);
+			this.#saveManager = new ItemSaveManager(this, getProperty);
+			this.#loadManager = new ItemLoadManager(this, getProperty);
 			if (!id) return;
 
 			const data = await this.localProvider.init(id);
@@ -73,10 +82,7 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 	set(data, init = false) {
 		// If init is true, store the data in localData Map
 		if (init) {
-			Object.keys(data).forEach(key => {
-				if (!this.properties.includes(key)) return;
-				this.#localData.set(key, data[key]);
-			});
+			this.#localData = new Map(Object.entries(data));
 		}
 
 		// If a property is in the properties array, define it as a public property

@@ -51,7 +51,6 @@ export class Database extends Events {
 	}
 
 	register = async data => {
-		console.log(88, data);
 		Object.keys(data).forEach(store => {
 			const items = data[store].split(",");
 			const filter = new Set(items);

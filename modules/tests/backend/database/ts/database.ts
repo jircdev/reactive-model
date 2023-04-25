@@ -7,6 +7,11 @@ interface User {
 	lastnames: string;
 }
 
+interface LoadAllOptions {
+	filter?: string;
+	limit?: number;
+}
+
 export /*bundle*/ class UserStore {
 	private db: Database;
 
@@ -54,16 +59,64 @@ export /*bundle*/ class UserStore {
 		}
 	}
 
-	async loadAll(): Promise<User[]> {
+	async loadAll(options?: LoadAllOptions): Promise<User[]> {
 		if (!this.db) {
 			await this.connect();
 		}
 
-		const users = await this.db.all("SELECT * FROM users");
+		let filter = "";
+		let limit = 30;
+
+		if (options) {
+			if (options.filter) {
+				filter = `WHERE ${options.filter}`;
+			}
+			if (options.limit) {
+				limit = options.limit;
+			}
+		}
+
+		const query = `SELECT * FROM users ${filter} LIMIT ${limit}`;
+
+		const users = await this.db.all(query);
 
 		return users as User[];
 	}
 
+	async bulkSave(users) {
+		if (!this.db) {
+			await this.connect();
+		}
 
-	
+		const insertedUsers = [];
+
+		// Start a transaction
+		await this.db.run("BEGIN TRANSACTION");
+
+		try {
+			for (const user of users) {
+				const insertQuery = `INSERT INTO users (name, lastnames) VALUES (?, ?)`;
+				await this.db.run(insertQuery, [user.name, user.lastnames]);
+
+				// Get the last inserted id
+				const lastIdResult = await this.db.get("SELECT last_insert_rowid() as lastId");
+				const lastId = lastIdResult.lastId;
+
+				// Create a new user object with the inserted id
+				const insertedUser = { ...user, id: lastId };
+				insertedUsers.push(insertedUser);
+			}
+
+			// Commit the transaction
+			await this.db.run("COMMIT");
+		} catch (error) {
+			console.error("Error inserting users:", error);
+
+			// Rollback the transaction in case of an error
+			await this.db.run("ROLLBACK");
+			throw error;
+		}
+
+		return insertedUsers;
+	}
 }

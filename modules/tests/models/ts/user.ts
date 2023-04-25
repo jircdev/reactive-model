@@ -14,13 +14,10 @@ export /*bundle */ class User extends Item<IUser> {
 	protected storeName = "user";
 	protected db = "test";
 
-	constructor(id) {
+	constructor({ id = undefined } = {}) {
 		super(id);
 		this.provider = new UserProvider();
-		if (id) {
-			console.log("init user", id);
-			this.init(id);
-		}
+		this.init({ id });
 	}
 
 	example() {

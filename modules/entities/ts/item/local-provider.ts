@@ -1,5 +1,5 @@
 import { ReactiveModel } from "@beyond-js/reactive/model";
-import { IProvider } from "./interfaces/provider";
+import { IProvider } from "../interfaces/provider";
 import { PendingPromise } from "@beyond-js/kernel/core";
 import { DBManager, DatabaseManager } from "@beyond-js/reactive/database";
 import Dexie from "dexie";
@@ -9,6 +9,7 @@ export /*bundle*/ class LocalProvider extends ReactiveModel<IProvider> {
 	get store() {
 		return this.#store;
 	}
+	#offline: boolean;
 	#database!: DatabaseManager;
 	#storeName!: string;
 	#databaseName!: string;
@@ -21,18 +22,27 @@ export /*bundle*/ class LocalProvider extends ReactiveModel<IProvider> {
 	}
 	#db: Dexie;
 	get isOnline() {
-		return this.#isOnline && !localStorage.getItem("reactive.offline");
+		return this.#isOnline && !this.#offline && !localStorage.getItem("reactive.offline");
 	}
-	constructor(databaseName, storeName) {
+	#parent;
+	#getProperty;
+	constructor(parent, getProperty) {
 		super();
-		if (!databaseName || !storeName) throw new Error("database and store are required");
-		this.#databaseName = databaseName;
+		this.#getProperty = getProperty;
+		const { db, storeName } = parent;
+		this.#parent = parent;
+		if (!db || !storeName) throw new Error("database and store are required");
+		this.#databaseName = db;
 		this.#storeName = storeName;
 
 		globalThis.addEventListener("online", this.handleConnection);
 		globalThis.addEventListener("offline", this.handleConnection);
 	}
 
+	setOffline(value) {
+		this.#offline = value;
+		this.triggerEvent();
+	}
 	init = async (id: string | number) => {
 		try {
 			const database: DatabaseManager = await DBManager.get(this.#databaseName);
@@ -56,8 +66,7 @@ export /*bundle*/ class LocalProvider extends ReactiveModel<IProvider> {
 		return properties.some(prop => this.#originalData[prop] !== data[prop]);
 	}
 	async load({ id = undefined } = {}) {
-		id = id ?? this.id;
-		console.log("id", id, this.id, this);
+		id = id ?? this.#parent.id;
 		try {
 			if (!id) {
 				throw new Error("id is required");
@@ -79,7 +88,6 @@ export /*bundle*/ class LocalProvider extends ReactiveModel<IProvider> {
 			if (!this.isOnline) data.offline = true;
 			if (this.#exists) return this.#update(data);
 			await this.#store.put(data);
-			console.log("guardado...");
 		} catch (e) {}
 	}
 
@@ -87,7 +95,6 @@ export /*bundle*/ class LocalProvider extends ReactiveModel<IProvider> {
 		try {
 			if (!this.isUnpublished) return;
 			await this.#store.update(data.id, data);
-			console.log("actualizado...");
 		} catch (e) {}
 	}
 }

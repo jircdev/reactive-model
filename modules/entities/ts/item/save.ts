@@ -1,7 +1,9 @@
 export class ItemSaveManager {
 	#parent;
-	constructor(parent) {
+	#getProperty;
+	constructor(parent, getProperty) {
 		this.#parent = parent;
+		this.#getProperty = getProperty;
 		this.init();
 	}
 
@@ -17,7 +19,6 @@ export class ItemSaveManager {
 			}
 
 			if (!this.#parent.isUnpublished) {
-				console.log("all saved");
 				return;
 			}
 
@@ -25,21 +26,25 @@ export class ItemSaveManager {
 
 			const promises = [];
 			if (this.#parent.localProvider) {
-				promises.push(this.#parent.localProvider.save(properties));
+				await this.#parent.localProvider.save(properties);
 			}
 
 			if (this.#parent.provider && this.#parent.provider.isOnline) {
-				promises.push(this.#parent.provider.save(properties));
+				const response = await this.#parent.provider.save(properties);
+
+				if (this.#parent.localProvider) {
+					// this.#parenst.set()
+					this.#parent.localProvider.triggerEvent();
+				}
 			}
 
-			return Promise.all(promises);
+			await Promise.all(promises);
 		} catch (e) {
 			console.error("error saving", e);
 		}
 	};
 
 	sync = () => {
-		const data = this.#parent.localProvider.store.where("offline").equals(true).toArray();
-		console.log(1300, data);
+		const data = this.#getProperty("localProvider").store.where("offline").equals(true).toArray();
 	};
 }

@@ -13,7 +13,7 @@ const createTable = async () => {
 		filename: "reactive.db",
 		driver: sqlite3.Database,
 	});
-	console.log("starting....");
+
 	await db.exec(`
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY,

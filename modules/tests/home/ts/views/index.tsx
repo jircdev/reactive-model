@@ -1,6 +1,5 @@
 import * as React from "react";
 
-// console.log(1000, app, BrowserWindow);
 export /*bundle*/
 function Page(): JSX.Element {
 	return (
