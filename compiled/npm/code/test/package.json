@@ -1,0 +1,7 @@
+{
+  "types": "./test.d.ts",
+  "amd": "./test.amd.js",
+  "sjs": "./test.sjs.js",
+  "browser": "./test.browser.mjs",
+  "module": "./test.browser.mjs"
+}

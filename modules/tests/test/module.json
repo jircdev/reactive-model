@@ -1,9 +1,8 @@
 {
-  "name": "test",
-  "ts": {
-    "path": "ts",
-    "files": [
-      "*"
-    ]
-  }
+	"name": "test",
+	"platforms": ["web"],
+	"ts": {
+		"path": "ts",
+		"files": ["*"]
+	}
 }

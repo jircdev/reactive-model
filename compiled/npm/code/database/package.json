@@ -1,0 +1,7 @@
+{
+  "types": "./database.d.ts",
+  "amd": "./database.amd.js",
+  "sjs": "./database.sjs.js",
+  "browser": "./database.browser.mjs",
+  "module": "./database.browser.mjs"
+}

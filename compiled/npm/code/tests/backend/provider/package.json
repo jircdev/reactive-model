@@ -1,0 +1,11 @@
+{
+  "types": "./tests/backend/provider.d.ts",
+  "amd": "./tests/backend/provider.amd.js",
+  "sjs": "./tests/backend/provider.sjs.js",
+  "browser": "./tests/backend/provider.browser.mjs",
+  "module": "./tests/backend/provider.browser.mjs",
+  "node": {
+    "require": "./tests/backend/provider.cjs.js",
+    "import": "./tests/backend/provider.mjs"
+  }
+}

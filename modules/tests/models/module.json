@@ -1,10 +1,9 @@
 {
-  "name": "examples/models",
-  "description": "Model samples",
-  "ts": {
-    "path": "ts",
-    "files": [
-      "*"
-    ]
-  }
+	"name": "examples/models",
+	"description": "Model samples",
+	"platforms": ["web"],
+	"ts": {
+		"path": "ts",
+		"files": ["*"]
+	}
 }

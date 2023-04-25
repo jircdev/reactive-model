@@ -1,0 +1,7 @@
+{
+  "types": "./tests/backend/database.d.ts",
+  "node": {
+    "require": "./tests/backend/database.cjs.js",
+    "import": "./tests/backend/database.mjs"
+  }
+}
