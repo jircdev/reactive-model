@@ -72,7 +72,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<IProvider>
 		});
 	}
 
-	save(data) {
+	save(data): Promise<any>{
 		if (!this.isOnline) data = data.forEach(item => ({ ...item, offline: true }));
 
 		return this.#store.bulkPut(data);

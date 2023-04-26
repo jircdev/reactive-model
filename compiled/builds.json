@@ -1,9 +1,0 @@
-{
-  "npm": {
-    "environment": "production",
-    "base": "C:\\workspace\\gameroom\\reactive-model\\compiled\\npm",
-    "archive": "C:\\workspace\\gameroom\\reactive-model\\compiled\\npm\\build.zip",
-    "finalised": true,
-    "time": 1682426962914
-  }
-}

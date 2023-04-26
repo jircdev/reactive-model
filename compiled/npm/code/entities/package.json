@@ -1,7 +1,0 @@
-{
-  "types": "./entities.d.ts",
-  "amd": "./entities.amd.js",
-  "sjs": "./entities.sjs.js",
-  "browser": "./entities.browser.mjs",
-  "module": "./entities.browser.mjs"
-}
