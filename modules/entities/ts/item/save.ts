@@ -44,6 +44,8 @@ export class ItemSaveManager {
 		}
 	};
 
+	publish = this.save;
+
 	sync = () => {
 		const data = this.#getProperty("localProvider").store.where("offline").equals(true).toArray();
 	};
