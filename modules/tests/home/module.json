@@ -3,17 +3,21 @@
 	"platforms": ["web"],
 	"widget": {
 		"is": "page",
-		"route": "/",
+		"route": "/home-reactive",
 		"element": {
 			"name": "home-page"
 		},
 		"sass": {
 			"path": "sass",
-			"files": ["*"]
+			"files": [
+				"*"
+			]
 		},
 		"ts": {
 			"path": "ts",
-			"files": ["*"]
+			"files": [
+				"*"
+			]
 		}
 	}
 }

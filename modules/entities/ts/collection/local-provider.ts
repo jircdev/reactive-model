@@ -63,14 +63,21 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<IProvider>
 	#isUnpublished(data) {}
 
 	async load(params) {
-		const conditions = Object.keys(params);
-		const controls = ["and", "or"];
-		conditions.forEach(condition => {
-			if (controls.includes(condition)) {
-				this.#processControl(condition, params[condition]);
-			}
-		});
-	}
+        const conditions = Object.keys(params);
+        const controls = ["and", "or"];
+        conditions.forEach(condition => {
+            if (controls.includes(condition)) {
+                this.#processControl(condition, params[condition]);
+            }
+        });
+
+        try {
+            return await this.#store.toArray();
+        } catch (error) {
+            console.error('Error al cargar los elementos del store:', error);
+            return [];
+        }
+    }
 
 	save(data): Promise<any>{
 		if (!this.isOnline) data = data.forEach(item => ({ ...item, offline: true }));
