@@ -34,8 +34,11 @@ export class CollectionSaveManager {
 		}
 	};
 
-	sync = () => {
+	sync = async () => {
 		const data = this.#parent.localProvider.store.where("offline").equals(true).toArray();
-		console.log(1300, data);
+		const response = await this.#provider.bulkSave(data);
+		if (!response.status) {
+			console.log("error...", response);
+		}
 	};
 }
