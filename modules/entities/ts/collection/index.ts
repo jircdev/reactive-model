@@ -7,6 +7,8 @@ import { CollectionLoadManager } from "./load";
 interface IColleciton {
 	items: object[];
 	item: Item<IITem>;
+	next: number | undefined;
+	provider: object;
 }
 
 interface ISpecs {}
@@ -16,11 +18,14 @@ interface ICollectionProvider {
 	delete: Function;
 }
 
-export /*bundle*/ abstract class Collection extends ReactiveModel<IColleciton> {
+export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> {
 	#items: Array<string | undefined> = [];
 
-	@reactiveProps(["items", "counters", "next", "provider"])
-	items!: any[];
+	get items() {
+		return this.#items;
+	}
+
+	counters: any = {};
 	/**
 	 * Represents the number of elements in the collection
 	 */
@@ -41,14 +46,30 @@ export /*bundle*/ abstract class Collection extends ReactiveModel<IColleciton> {
 	#provider: ICollectionProvider;
 	#initSpecs: ISpecs = {};
 
+	constructor() {
+		super();
+		this.reactiveProps<IColleciton>(["item", "next", "provider"]);
+	}
+
+	protected setItems(values) {
+		this.#items = values;
+	}
 	protected async init(specs: ISpecs = {}) {
 		this.#initSpecs = specs;
 		const getProperty = property => this[property];
 		const setProperty = (property, value) => (this[property] = value);
 		const bridge = { get: getProperty, set: setProperty };
 		this.#localProvider = new CollectionLocalProvider(this, bridge);
+		this.#localProvider.on("items.changed", this.#listenItems);
 		this.localProvider.init();
 		this.#saveManager = new CollectionSaveManager(this, bridge);
 		this.#loadManager = new CollectionLoadManager(this, bridge);
 	}
+
+	#listenItems = () => {
+		this.#items = this.#localProvider.items;
+		this.trigger("change");
+	};
+
+	setOffline = value => this.localProvider.setOffline(value);
 }

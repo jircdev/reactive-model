@@ -1,6 +1,7 @@
 import { ReactiveModel } from "@beyond-js/reactive/model";
 import { IProvider } from "../interfaces/provider";
-
+import { liveQuery } from "dexie";
+import { PendingPromise } from "@beyond-js/kernel/core";
 import { DBManager, DatabaseManager } from "@beyond-js/reactive/database";
 import Dexie from "dexie";
 export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<IProvider> {
@@ -13,13 +14,13 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<IProvider>
 	#database!: DatabaseManager;
 	#storeName!: string;
 	#databaseName!: string;
-	#originalData: {};
+	#items = [];
+	get items() {
+		return this.#items;
+	}
 	#exists = false;
 	#found = false;
 
-	get originalData() {
-		return this.#originalData;
-	}
 	#db: Dexie;
 	get isOnline() {
 		return this.#isOnline && !this.#offline && !localStorage.getItem("reactive.offline");
@@ -61,25 +62,47 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<IProvider>
 	 * @returns
 	 */
 	#isUnpublished(data) {}
-
+	#promiseLoad: PendingPromise<any>;
+	#params;
 	async load(params) {
-        const conditions = Object.keys(params);
-        const controls = ["and", "or"];
-        conditions.forEach(condition => {
-            if (controls.includes(condition)) {
-                this.#processControl(condition, params[condition]);
-            }
-        });
+		if (JSON.stringify(this.#params) === JSON.stringify(params)) {
+			if (this.#promiseLoad) return this.#promiseLoad;
+			return;
+		}
 
-        try {
-            return await this.#store.toArray();
-        } catch (error) {
-            console.error('Error al cargar los elementos del store:', error);
-            return [];
-        }
-    }
+		const conditions = Object.keys(params);
+		const controls = ["and", "or"];
+		conditions.forEach(condition => {
+			if (controls.includes(condition)) {
+				this.#processControl(condition, params[condition]);
+			}
+		});
 
-	save(data): Promise<any>{
+		try {
+			const live = liveQuery(() => this.#store.toArray());
+			live.subscribe({
+				next: items => {
+					if (this.#promiseLoad) {
+						this.#promiseLoad.resolve(items);
+						this.#promiseLoad = null;
+					}
+
+					this.#items = items;
+					this.trigger("items.changed");
+				},
+				error: err => {
+					console.error(err);
+				},
+			});
+
+			//return await this.live.toArray();
+		} catch (error) {
+			console.error("Error al cargar los elementos del store:", error);
+			return [];
+		}
+	}
+
+	save(data): Promise<any> {
 		if (!this.isOnline) data = data.forEach(item => ({ ...item, offline: true }));
 
 		return this.#store.bulkPut(data);

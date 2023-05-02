@@ -4,6 +4,7 @@ import { IProvider } from "../interfaces/provider";
 import { LocalProvider } from "./local-provider";
 import { ItemSaveManager } from "./save";
 import { ItemLoadManager } from "./load";
+import { PendingPromise } from "@beyond-js/kernel/core";
 
 export interface IITem {
 	provider: any;
@@ -12,6 +13,7 @@ export interface IITem {
 	save: Function;
 	load: Function;
 	publish: Function;
+	unique: Array<string>;
 	sync: Function;
 }
 
@@ -29,6 +31,8 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 	#skeleton: Array<string> = [];
 	protected localProvider: LocalProvider;
 
+	protected unique: Array<string> = [];
+
 	get isUnpublished() {
 		return this.localProvider.isUnpublished(this.getProperties());
 	}
@@ -44,16 +48,20 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 	get store() {
 		return this.localProvider.store;
 	}
-	#loadManager: ItemLoadManager;
-	constructor(id) {
-		super();
 
-		this.on("change", this.checkUnpublished);
+	get isOnline() {
+		return this.localProvider.isOnline && !localStorage.getItem("reactive.offline");
 	}
+	#loadManager: ItemLoadManager;
 
-	setOffline = value => this.localProvider.setOffline(value);
+	#objectReady = false;
+	#ready = false;
+	#promiseReady: PendingPromise<boolean>;
 
-	checkUnpublished = () => {};
+	constructor() {
+		super();
+		this.on("object.loaded", this.checkReady);
+	}
 
 	protected async init({ id }) {
 		try {
@@ -62,18 +70,42 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 			this.localProvider = new LocalProvider(this, getProperty);
 			this.#saveManager = new ItemSaveManager(this, getProperty);
 			this.#loadManager = new ItemLoadManager(this, getProperty);
-			if (!id) return;
 
-			const data = await this.localProvider.init(id);
+			if (!id) {
+				this.trigger("object.loaded");
+				id = "new";
+			}
+
+			await this.localProvider.init(id);
 			if (this.#skeleton && this.#skeleton.length > 0) {
 				this.properties = this.#skeleton;
 			}
+			this.#ready = true;
 
-			if (data) this.set(data, true);
+			this.trigger("object.loaded");
 		} catch (e) {
 			console.error("error initializing", e);
 		}
 	}
+
+	protected checkReady = () => {
+		if (this.#ready) {
+			return this.#ready;
+		}
+		if (this.#promiseReady) return this.#promiseReady;
+
+		this.#promiseReady = new PendingPromise();
+		if (this.objectReady) this.#promiseReady.resolve(this.#objectReady);
+		const onReady = () => {
+			this.#objectReady = true;
+			this.#promiseReady.resolve(this.#objectReady);
+			this.#promiseReady = undefined;
+		};
+		this.on("object.loaded", onReady);
+		return this.#promiseReady;
+	};
+
+	setOffline = value => this.localProvider.setOffline(value);
 
 	addLocalProvider(db: string, table: string) {
 		if (this.localProvider) return;

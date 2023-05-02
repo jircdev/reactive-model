@@ -43,20 +43,25 @@ export /*bundle*/ class UserStore {
 		return user as User;
 	}
 
-	async storeUser(user: User): Promise<void> {
+	async storeUser(user: User): Promise<any> {
 		if (!this.db) {
 			await this.connect();
 		}
 
-		const existingUser = await this.loadUser(user.id);
+		let recordId = user.id;
+		const existingUser = await this.loadUser(recordId);
+		let data;
 
 		if (existingUser) {
 			const { name, lastnames } = user;
-			await this.db.run("UPDATE users SET name = ?, lastnames = ? WHERE id = ?", name, lastnames, user.id);
+			data = await this.db.run("UPDATE users SET name = ?, lastnames = ? WHERE id = ?", name, lastnames, user.id);
 		} else {
 			const { id, name, lastnames } = user;
-			await this.db.run("INSERT INTO users (id, name, lastnames) VALUES (?, ?, ?)", id, name, lastnames);
+			data = await this.db.run("INSERT INTO users (id, name, lastnames) VALUES (?, ?, ?)", id, name, lastnames);
+			recordId = data.lastID;
 		}
+		const response = await this.loadUser(recordId);
+		return response;
 	}
 
 	async loadAll(options?: LoadAllOptions): Promise<User[]> {

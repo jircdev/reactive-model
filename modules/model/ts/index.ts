@@ -27,12 +27,11 @@ interface IProps {
  * @template T - The type of the properties that can be defined in the model.
  * @extends Events
  */
-export /*bundle*/
-abstract class ReactiveModel<T> extends Events {
+
+export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 	protected schema: unknown;
 	[key: string]: any;
 
-	@reactiveProps<IProps>(["fetching", "fetched", "processing", "processed", "loaded", "ready"])
 	fetching!: boolean;
 	fetched: boolean = false;
 	processing: boolean = false;
@@ -41,6 +40,41 @@ abstract class ReactiveModel<T> extends Events {
 	protected localdb = false;
 	protected properties: string[];
 	loaded: boolean = false;
+
+	constructor() {
+		super();
+		this.reactiveProps<IProps>(["fetching", "fetched", "processing", "processed", "loaded", "ready"]);
+	}
+
+	protected reactiveProps<T>(props: Array<keyof T>): void {
+		for (const propKey of props) {
+			const descriptor = Object.getOwnPropertyDescriptor(this, propKey);
+			const initialValue = descriptor ? descriptor.value : undefined;
+
+			this.defineReactiveProp(propKey, initialValue);
+		}
+	}
+
+	protected defineReactiveProp<T>(propKey: keyof T, initialValue: T[keyof T]): void {
+		const privatePropKey = `__${String(propKey)}`;
+
+		Object.defineProperty(this, propKey, {
+			get(): T[keyof T] {
+				if (!this.hasOwnProperty(privatePropKey)) {
+					this[privatePropKey] = initialValue;
+				}
+				return this[privatePropKey];
+			},
+			set(newVal: T[keyof T]): void {
+				if (newVal === this[privatePropKey]) return;
+
+				this[privatePropKey] = newVal;
+				this.triggerEvent();
+			},
+			enumerable: true,
+			configurable: true,
+		});
+	}
 
 	/**
 	 * The `triggerEvent` method triggers a change event on the model, which can be used to notify
@@ -59,7 +93,7 @@ abstract class ReactiveModel<T> extends Events {
 	 */
 	set(property: Partial<ReactiveModelPublic<T>>, value: any | undefined = undefined): void {
 		let props: Partial<ReactiveModelPublic<T>> = {};
-
+		console.log(5, "in set", property, value);
 		let updated = false;
 
 		for (const prop in props) {
@@ -75,6 +109,7 @@ abstract class ReactiveModel<T> extends Events {
 	getProperties(): Record<string, any> {
 		const props: Record<string, any> = {};
 		const properties = this.properties || this.skeleton;
+
 		properties.forEach(property => {
 			props[property] = this[property];
 		});

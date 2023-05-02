@@ -8,11 +8,13 @@ export class ItemLoadManager {
 	constructor(parent, getProperty) {
 		this.#parent = parent;
 		this.#getProperty = getProperty;
+
 		this.init();
 	}
 
 	init = async () => {
 		this.#parent.load = this.load;
+
 		this.#localProvider = this.#getProperty("localProvider");
 		this.#provider = this.#getProperty("provider");
 	};
@@ -22,16 +24,22 @@ export class ItemLoadManager {
 	 * @param id
 	 * @returns
 	 */
-	load = async id => {
+	load = async (id: undefined | string | number) => {
 		try {
-			const parent = this.#parent;
-			this.#parent.fetching = true;
+			await this.#getProperty("checkReady")();
 
-			if (await this.#parent.get("localdb")) {
+			const parent = this.#parent;
+			parent.fetching = true;
+			if (!id) id = parent.id;
+
+			if (await this.#getProperty("localdb")) {
 				const localData = await this.#localProvider.load(id);
+				if (localData) this.#parent.set(localData);
 			}
 
 			if (this.#localProvider && !this.#localProvider.isOnline) return;
+
+			if (!this.#provider) return;
 
 			const remoteData = await this.remoteLoad({ id });
 
@@ -42,7 +50,7 @@ export class ItemLoadManager {
 			if (remoteData) {
 				let same = true;
 				Object.keys(remoteData).forEach(key => {
-					let original = this.#localProvider.originalData;
+					let original = this.#localProvider.registry.values;
 					if (original[key] !== remoteData[key]) same = false;
 				});
 

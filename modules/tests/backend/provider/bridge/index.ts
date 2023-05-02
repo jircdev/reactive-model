@@ -9,8 +9,8 @@ export /*actions*/ /*bundle*/ class UserProvider {
 	async publish(data) {
 		try {
 			const user = new UserStore();
-			await user.storeUser(data);
-			return { status: true };
+			const response = await user.storeUser(data);
+			return { status: true, data: response };
 		} catch (e) {
 			return { error: true, message: e.message };
 		}
@@ -20,7 +20,7 @@ export /*actions*/ /*bundle*/ class UserProvider {
 		try {
 			const user = new UserStore();
 			const data = await user.loadUser(id);
-			console.log(20, data);
+
 			return { status: true, data };
 		} catch (e) {
 			return { error: true, message: e.message };
