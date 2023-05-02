@@ -1,7 +1,7 @@
 {
 	"name": "database",
 	"description": "IndexedDB database using dexiejs",
-	"platforms": ["web"],
+	"platforms": ["web", "android", "ios"],
 	"ts": {
 		"path": "ts",
 		"files": ["*"]

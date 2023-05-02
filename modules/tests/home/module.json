@@ -1,6 +1,6 @@
 {
 	"name": "home",
-	"platforms": ["web"],
+	"platforms": ["web", "android", "ios"],
 	"widget": {
 		"is": "page",
 		"route": "/home-reactive",

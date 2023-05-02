@@ -1,7 +1,7 @@
 {
 	"name": "register-db",
 	"description": "Module to register indexedDB tables",
-	"platforms": ["web"],
+	"platforms": ["web", "android", "ios"],
 	"start": {
 		"ts": {
 			"path": "/start/ts",

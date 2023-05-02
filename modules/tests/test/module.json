@@ -1,6 +1,6 @@
 {
 	"name": "test",
-	"platforms": ["web"],
+	"platforms": ["web", "android", "ios"],
 	"ts": {
 		"path": "ts",
 		"files": ["*"]
