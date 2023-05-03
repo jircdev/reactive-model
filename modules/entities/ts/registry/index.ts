@@ -3,102 +3,110 @@ import { ReactiveModel } from "@beyond-js/reactive/model";
 import { DBManager, DatabaseManager } from "@beyond-js/reactive/database";
 
 interface IRegistry {
-	values: object;
-	id: string;
+  values: object;
+  id: string;
 }
 export class Registry extends ReactiveModel<IRegistry> {
-	#values: any = {};
-	get values() {
-		return this.#values;
-	}
-	#id;
-	local = false;
-	#store;
-	#isNew;
-	#instanceId;
-	#keyId;
-	get instanceId() {
-		return this.#instanceId;
-	}
-	constructor(store, data) {
-		super();
-		const { id } = data;
-		this.#store = store;
-		this.#instanceId = Registry.generateUUID();
+  #values: any = {};
+  get values() {
+    return this.#values;
+  }
+  #id;
+  local = false;
+  #store;
+  #isNew;
+  #instanceId;
+  #keyId;
+  #found;
+  get found() {
+    return this.#found;
+  }
 
-		this.#id = id === "new" ? undefined : id;
-		this.#isNew = id === "new";
-		this.#keyId = this.isNew ? "#instanceId" : "#id";
-		if (this.#id) this.#values.id = id;
-	}
+  get instanceId() {
+    return this.#instanceId;
+  }
+  constructor(store, data) {
+    super();
+    const { id } = data;
+    this.#store = store;
+    this.#instanceId = Registry.generateUUID();
 
-	#promise;
-	async get() {
-		if (this.#promise) {
-			return this.#promise;
-		}
+    this.#id = id === "new" ? undefined : id;
+    this.#isNew = id === "new";
+    this.#keyId = this.isNew ? "#instanceId" : "#id";
+    if (this.#id) this.#values.id = id;
+  }
 
-		this.#promise = new PendingPromise();
+  #promise;
+  async get() {
+    if (this.#promise) {
+      return this.#promise;
+    }
 
-		if (this.#isNew) {
-			this.#promise.resolve(this);
-			this.#promise = undefined;
-		} else {
-			this.#store.get(this.#id).then(item => {
-				if (!item) {
-					this.#promise.resolve(false);
+    this.#promise = new PendingPromise();
 
-					this.#setValues({ id: this.#id });
-					this.#promise = undefined;
-					return;
-				}
-				this.#setValues(item);
-				this.#promise.resolve(this);
-				this.#promise = undefined;
-			});
-		}
+    if (this.#isNew) {
+      this.#promise.resolve(this);
+      this.#promise = undefined;
+    } else {
+      this.#store.get(this.#id).then(item => {
+        if (!item) {
+          this.#promise.resolve(false);
+          this.#found = false;
 
-		return this.#promise;
-	}
+          this.#setValues({ id: this.#id });
+          this.#promise = undefined;
+          return;
+        }
 
-	#setValues = async (data, backend = false) => {
-		const props = Object.keys(data);
-		let updated = false;
-		// specify if the item was generated locally
-		if (backend) {
-			this.#isNew = false;
-			this.#instanceId = undefined;
-			delete this.#values.instanceId;
-		}
-		if (!data.id) {
-			data.id = this.#id;
-		}
-		this.local = this.local;
-		if (this.#isNew) {
-			this.#values.instanceId = this.#instanceId;
-		}
+        this.#found = true;
+        this.#setValues(item);
+        this.#promise.resolve(this);
+        this.#promise = undefined;
+      });
+    }
 
-		props.forEach(property => {
-			if (data[property] === this.#values[property]) return;
-			this.#values[property] = data[property];
-			updated = true;
-		});
-		return updated;
-	};
+    return this.#promise;
+  }
 
-	static generateUUID() {
-		return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
-			var r = (Math.random() * 16) | 0,
-				v = c === "x" ? r : (r & 0x3) | 0x8;
-			return v.toString(16);
-		});
-	}
-	update = async (data, backend) => {
-		const updated = this.#setValues(data, backend);
+  #setValues = async (data, backend = false) => {
+    const props = Object.keys(data);
+    let updated = false;
+    // specify if the item was generated locally
+    if (backend) {
+      this.#isNew = false;
+      this.#instanceId = undefined;
+      delete this.#values.instanceId;
+    }
+    if (!data.id) {
+      data.id = this.#id;
+    }
+    this.local = this.local;
+    if (this.#isNew) {
+      this.#values.instanceId = this.#instanceId;
+    }
 
-		if (updated) {
-			await this.#store.put(this.#values);
-			this.trigger("change");
-		}
-	};
+    props.forEach(property => {
+      if (data[property] === this.#values[property]) return;
+      this.#values[property] = data[property];
+      updated = true;
+    });
+    return updated;
+  };
+
+  static generateUUID() {
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+      var r = (Math.random() * 16) | 0,
+        v = c === "x" ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
+  }
+  update = async (data, backend) => {
+    const updated = this.#setValues(data, backend);
+
+    if (updated) {
+      await this.#store.put(this.#values);
+      this.trigger("change");
+    }
+  };
 }
