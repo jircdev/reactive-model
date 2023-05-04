@@ -19,7 +19,7 @@ export class CollectionSaveManager {
 		if (this.#localdb) {
 			this.#localProvider = this.#bridge.get('localProvider');
 		} else {
-			console.log('la colleccion no usa indexeddb');
+			console.warn('la colleccion no usa indexeddb');
 		}
 
 		this.#provider = this.#bridge.get('provider');
@@ -33,19 +33,23 @@ export class CollectionSaveManager {
 	publish = async (data = []): Promise<any> => {
 		try {
 			await this.save(data);
-
 			if (!this.#provider || this.#bridge.get('isOffline')) return;
+
 			const response = await this.#provider.bulkSave(data);
-			if (!response.status) throw response;
+			if (!response.status) {
+				console.error('error...', response);
+			}
 		} catch (e) {
-			console.log(e);
+			console.error(e.message);
 		}
 	};
 
 	sync = async () => {
 		const data = this.#parent.localProvider.store.where('offline').equals(true).toArray();
 		const response = await this.#provider.bulkSave(data);
-		if (!response.status) throw response;
+		if (!response.status) {
+			console.error('error...', response);
+		}
 
 		return data;
 	};

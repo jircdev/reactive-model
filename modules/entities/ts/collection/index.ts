@@ -21,6 +21,10 @@ interface ICollectionProvider {
 export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> {
 	#items: Array<string | undefined> = [];
 
+	get items() {
+		return this.#items;
+	}
+
 	counters: any = {};
 	/**
 	 * Represents the number of elements in the collection
@@ -39,7 +43,6 @@ export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> 
 	#loadManager: CollectionLoadManager;
 	#provider: ICollectionProvider;
 	#initSpecs: ISpecs = {};
-	protected localdb;
 
 	constructor() {
 		super();

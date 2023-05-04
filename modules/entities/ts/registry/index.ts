@@ -17,9 +17,10 @@ export class Registry extends ReactiveModel<IRegistry> {
 	#isNew;
 	#instanceId;
 	#keyId;
-	#found;
-	get found() {
-		return this.#found;
+
+	#landed;
+	get landed() {
+		return this.#landed;
 	}
 
 	get instanceId() {
@@ -52,14 +53,14 @@ export class Registry extends ReactiveModel<IRegistry> {
 			this.#store.get(this.#id).then((item) => {
 				if (!item) {
 					this.#promise.resolve(false);
-					this.#found = false;
+					this.#landed = false;
 
 					this.#setValues({ id: this.#id });
 					this.#promise = undefined;
 					return;
 				}
 
-				this.#found = true;
+				this.#landed = true;
 				this.#setValues(item);
 				this.#promise.resolve(this);
 				this.#promise = undefined;

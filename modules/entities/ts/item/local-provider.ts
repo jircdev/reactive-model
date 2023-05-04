@@ -20,8 +20,8 @@ class LocalProvider extends ReactiveModel<IProvider> {
 	#originalData: {};
 	#exists = false;
 
-	get found() {
-		return this.#registry?.found;
+	get landed() {
+		return this.#registry?.landed;
 	}
 
 	get originalData() {
@@ -84,7 +84,6 @@ class LocalProvider extends ReactiveModel<IProvider> {
 
 	private handleConnection = () => {
 		this.triggerEvent();
-		console.log('cambio la conexión');
 	};
 
 	isUnpublished(data) {
@@ -151,7 +150,7 @@ class LocalProvider extends ReactiveModel<IProvider> {
 
 			return this;
 		} catch (e) {
-			console.error('error saving', e);
+			console.error('error saving', e.message);
 		}
 	}
 

@@ -56,9 +56,8 @@ export class ItemLoadManager {
 
 				if (!same) await this.#localProvider.save(remoteData);
 			}
-			return { status: true };
 		} catch (exc) {
-			console.error('ERROR LOAD', exc);
+			console.error('ERROR LOAD', exc.message);
 		} finally {
 			this.#parent.fetching = false;
 		}

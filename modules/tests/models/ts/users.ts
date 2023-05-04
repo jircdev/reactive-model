@@ -1,4 +1,3 @@
-import { ReactiveModel } from '@beyond-js/reactive-2/model';
 import { Collection } from '@beyond-js/reactive-2/entities';
 import { User } from './user';
 import { UserProvider } from '@beyond-js/reactive-2/tests/backend/provider';
