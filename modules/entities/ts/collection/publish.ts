@@ -54,4 +54,3 @@ export class CollectionSaveManager {
 		return data;
 	};
 }
-

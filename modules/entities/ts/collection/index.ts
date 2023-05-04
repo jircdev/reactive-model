@@ -70,4 +70,9 @@ export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> 
 	};
 
 	setOffline = value => this.localProvider.setOffline(value);
+
+
+	localQuery() {
+		return this.#localProvider.store;
+	}
 }
