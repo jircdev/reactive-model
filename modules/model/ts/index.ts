@@ -91,18 +91,18 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 	 * @param {*} value - The value to set the property to.
 	 * @returns {void}
 	 */
-	set(property: Partial<ReactiveModelPublic<T>>, value: any | undefined = undefined): void {
-		let props: Partial<ReactiveModelPublic<T>> = {};
-		console.log(5, "in set", property, value);
+	set(properties: Partial<ReactiveModelPublic<T>>): void {
+		let props: Partial<ReactiveModelPublic<T>> = Object.keys(properties);
 		let updated = false;
+		Object.keys(properties).forEach(prop => {
+			console.log(10, prop, properties[prop]);
+			const sameObject =
+				typeof properties[prop] === "object" && JSON.stringify(properties[prop]) === JSON.stringify(this[prop]);
+			if (this[prop] === properties[prop] || sameObject) return;
 
-		for (const prop in props) {
-			if (!Object.prototype.hasOwnProperty.call(this, prop)) continue;
-			if (this[prop] === props[prop]) continue;
-			this[prop] = props[prop];
+			this[prop] = properties[prop];
 			updated = true;
-		}
-
+		});
 		if (updated) this.triggerEvent();
 	}
 

@@ -21,10 +21,6 @@ interface ICollectionProvider {
 export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> {
 	#items: Array<string | undefined> = [];
 
-	get items() {
-		return this.#items;
-	}
-
 	counters: any = {};
 	/**
 	 * Represents the number of elements in the collection
@@ -49,7 +45,7 @@ export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> 
 
 	constructor() {
 		super();
-		this.reactiveProps<IColleciton>(["item", "next", "provider"]);
+		this.reactiveProps<IColleciton>(["item", "items", "next", "provider"]);
 	}
 
 	protected setItems(values) {
@@ -68,6 +64,7 @@ export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> 
 	}
 
 	#listenItems = () => {
+		if (!this.localdb) return;
 		this.#items = this.#localProvider.items;
 		this.trigger("change");
 	};
