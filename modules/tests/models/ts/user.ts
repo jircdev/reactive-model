@@ -13,9 +13,9 @@ class User extends Item<IUser> {
   protected storeName = "user";
   protected db = "test";
 
-  constructor({id = undefined} = {}) {
-    super(id);
-    this.provider = new UserProvider();
-    this.init({id});
+  constructor({ id = undefined } = {}) {
+    super();
+
+    this.init({ id });
   }
 }

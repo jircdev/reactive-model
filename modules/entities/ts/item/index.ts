@@ -53,9 +53,20 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
     return this.localProvider.isOnline && !localStorage.getItem("reactive.offline");
   }
 
+  #found;
   get found() {
-    return this.localProvider?.found;
+    return this.#found;
   }
+  set found(v: boolean) {
+    if (v !== this.#found) return;
+    this.#found = v;
+    this.triggerEvent();
+  }
+
+  get landed() {
+    return this.localProvider?.landed;
+  }
+
   #loadManager: ItemLoadManager;
   #objectReady = false;
   #ready = false;
