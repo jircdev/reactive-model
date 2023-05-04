@@ -10,6 +10,7 @@ export class CollectionLoadManager {
 	#provider;
 	#getProperty;
 	#parentBridge;
+	#localdb;
 
 	constructor(parent, parentBridge) {
 		this.#parent = parent;
@@ -19,6 +20,7 @@ export class CollectionLoadManager {
 
 	init = async () => {
 		this.#parent.load = this.load;
+		this.#localdb = this.#parentBridge.get("localdb");
 		this.#localProvider = this.#parentBridge.get("localProvider");
 		this.#provider = this.#parentBridge.get("provider");
 		this.#parent.load = this.load;
@@ -63,7 +65,6 @@ export class CollectionLoadManager {
 			}
 
 			if (this.#localProvider && !this.#localProvider.isOnline) {
-				console.log(10, "is offline");
 				return;
 			}
 			if (!this.#provider) return;

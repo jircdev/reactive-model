@@ -45,6 +45,7 @@ export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> 
 	#loadManager: CollectionLoadManager;
 	#provider: ICollectionProvider;
 	#initSpecs: ISpecs = {};
+	protected localdb;
 
 	constructor() {
 		super();

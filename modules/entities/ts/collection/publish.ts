@@ -3,6 +3,8 @@ export class CollectionSaveManager {
 	#bridge;
 	#localProvider;
 	#provider;
+	#localdb;
+
 	constructor(parent, bridge) {
 		this.#parent = parent;
 		this.#bridge = bridge;
@@ -13,11 +15,18 @@ export class CollectionSaveManager {
 		this.#parent.save = this.save;
 		this.#parent.sync = this.sync;
 		this.#parent.publish = this.publish;
-		this.#localProvider = this.#bridge.get("localProvider");
+		this.#localdb = this.#bridge.get("localdb");
+		if (this.#localdb) {
+			this.#localProvider = this.#bridge.get("localProvider");
+		} else {
+			console.log("la colleccion no usa indexeddb");
+		}
+
 		this.#provider = this.#bridge.get("provider");
 	}
 
 	save = async (data = []): Promise<any> => {
+		if (!this.#localdb) return true;
 		await this.#localProvider.save(data);
 	};
 
@@ -40,5 +49,7 @@ export class CollectionSaveManager {
 		if (!response.status) {
 			console.log("error...", response);
 		}
+
+		return data;
 	};
 }
