@@ -14,7 +14,7 @@ export class ItemSaveManager {
 
 	save = async (data = undefined) => {
 		try {
-			await this.#getProperty("checkReady")();
+			await this.#getProperty('checkReady')();
 			if (data) {
 				this.#parent.set(data);
 			}
@@ -31,26 +31,11 @@ export class ItemSaveManager {
 
 			return this.#publish(properties);
 		} catch (e) {
-			console.error("error saving", e);
+			console.error('error saving', e);
 		}
 	};
 
-	publish = this.save;
-
-	sync = () => {
-		const provider = this.#getProperty("localProvider");
-
-		if (!provider.registry.values.offline) {
-			console.warn("registry already synced");
-			return;
-		}
-
-		this.#publish(provider.registry.values);
-
-		//const data = this.#getProperty("localProvider").store.where("offline").equals(true).toArray();
-	};
-
-	#publish = async properties => {
+	#publish = async (properties) => {
 		if (!this.#parent.provider || !this.#parent.isOnline) return;
 		const response = await this.#parent.provider.publish(properties);
 		if (this.#parent.localProvider) {
@@ -58,5 +43,20 @@ export class ItemSaveManager {
 			this.#parent.localProvider.save(response.data, true);
 			this.#parent.localProvider.triggerEvent();
 		}
+	};
+
+	publish = this.save;
+
+	sync = () => {
+		const provider = this.#getProperty('localProvider');
+
+		if (!provider.registry.values.offline) {
+			console.warn('registry already synced');
+			return;
+		}
+
+		this.#publish(provider.registry.values);
+
+		//const data = this.#getProperty("localProvider").store.where("offline").equals(true).toArray();
 	};
 }

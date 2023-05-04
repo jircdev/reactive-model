@@ -64,7 +64,8 @@ export class ItemLoadManager {
 	};
 
 	remoteLoad = async (params) => {
-		const response = await this.#provider.load(params);
+		// TODO: CHANGE TO LOAD
+		const response = await this.#provider.data(params);
 
 		if (!response.status) throw 'ERROR_DATA_QUERY';
 		return response.data;
