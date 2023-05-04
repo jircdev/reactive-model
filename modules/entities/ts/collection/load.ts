@@ -84,7 +84,7 @@ export class CollectionLoadManager {
 				fetching: false,
 				total: data.total ?? 0,
 			};
-
+			console.log(100, properties);
 			this.parent.set(properties);
 
 			this.parent.triggerEvent();

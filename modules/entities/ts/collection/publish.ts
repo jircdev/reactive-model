@@ -33,6 +33,7 @@ export class CollectionSaveManager {
   publish = async (data = []): Promise<any> => {
     try {
       await this.save(data);
+	  if (!this.#provider || this.#bridge.get("isOffline")) return;
 
       const response = await this.#provider.bulkSave(data);
       if (!response.status) {
@@ -42,6 +43,15 @@ export class CollectionSaveManager {
       console.error(e.message);
     }
   };
+			if (!this.#provider || this.#bridge.get("isOffline")) return;
+			const response = await this.#provider.bulkSave(data);
+			if (!response.status) {
+				console.error("error...", response);
+			}
+		} catch (e) {
+			console.error(e.message);
+		}
+	};
 
   sync = async () => {
     const data = this.#parent.localProvider.store.where("offline").equals(true).toArray();

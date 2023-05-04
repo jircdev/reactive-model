@@ -48,7 +48,7 @@ export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> 
 
   constructor() {
     super();
-    this.reactiveProps<IColleciton>(["item", "next", "provider"]);
+    this.reactiveProps<IColleciton>(["item", "items", "next", "provider"]);
   }
 
   protected setItems(values) {
@@ -67,9 +67,14 @@ export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> 
   }
 
   #listenItems = () => {
+    if (!this.localdb) return;
     this.#items = this.#localProvider.items;
     this.trigger("change");
   };
 
   setOffline = value => this.localProvider.setOffline(value);
+
+  localQuery() {
+    return this.#localProvider.store;
+  }
 }
