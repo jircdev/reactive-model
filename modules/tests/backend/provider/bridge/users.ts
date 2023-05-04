@@ -1,5 +1,5 @@
-import { UserStore } from "@beyond-js/reactive/tests/backend/database";
-import { Server, Socket } from "socket.io";
+import { UserStore } from '@beyond-js/reactive-2/tests/backend/database';
+import { Server, Socket } from 'socket.io';
 
 export /*actions*/ /*bundle*/ class UsersProvider {
 	socket: Server;
@@ -38,6 +38,6 @@ export /*actions*/ /*bundle*/ class UsersProvider {
 	}
 
 	send() {
-		this.socket.emit("user", { name: "algo" });
+		this.socket.emit('user', { name: 'algo' });
 	}
 }

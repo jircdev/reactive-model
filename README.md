@@ -1,4 +1,4 @@
-# @beyond-js/reactive
+# @beyond-js/reactive-2
 
 ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E)
@@ -9,13 +9,11 @@
 
 ReactiveModel is a class that allows you to create reactive objects that can be observed for changes. It can be used in any JavaScript environment and is agnostic to any framework.
 
-
-
 Installation
 To install ReactiveModel, you can use your favorite package manager. For example, with npm:
 
 ```
-npm install @beyond-js/reactive
+npm install @beyond-js/reactive-2
 ```
 
 ## Usage
@@ -23,7 +21,7 @@ npm install @beyond-js/reactive
 To create a new `ReactiveModel`, simply instantiate the class with the desired properties:
 
 ```
-import { ReactiveModel } from "@beyond-js/reactive";
+import { ReactiveModel } from "@beyond-js/reactive-2";
 
 interface Person {
   name: string;
@@ -38,6 +36,7 @@ const person = new ReactiveModel<Person>({
 person.set("name", "Bob");
 console.log(person.get("name")); // "Bob"
 ```
+
 You can also use the `@reactiveProps` decorator to automatically create reactive properties:
 
 ```
@@ -63,9 +62,6 @@ const person = new PersonModel({
 person.name = "Bob";
 console.log(person.name); // "Bob"
 ```
-
-
-
 
 ## API
 
@@ -94,4 +90,5 @@ Triggers an event.
 Destroys the ReactiveModel instance and clears all listeners.
 
 ### License
+
 ReactiveModel is licensed under the MIT License. See the LICENSE file for details.

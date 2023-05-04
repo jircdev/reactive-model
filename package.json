@@ -1,5 +1,5 @@
 {
-	"name": "@beyond-js/reactive",
+	"name": "@beyond-js/reactive-2",
 	"version": "0.0.4",
 	"title": "Reactive",
 	"description": "A model for creating reactive objects with events that enable the creation of reactive models based on the Observer pattern.",

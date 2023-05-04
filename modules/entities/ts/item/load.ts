@@ -1,4 +1,4 @@
-import type { Item } from ".";
+import type { Item } from '.';
 export class ItemLoadManager {
 	#parent: Item<any>;
 
@@ -15,8 +15,8 @@ export class ItemLoadManager {
 	init = async () => {
 		this.#parent.load = this.load;
 
-		this.#localProvider = this.#getProperty("localProvider");
-		this.#provider = this.#getProperty("provider");
+		this.#localProvider = this.#getProperty('localProvider');
+		this.#provider = this.#getProperty('provider');
 	};
 
 	/**
@@ -26,13 +26,13 @@ export class ItemLoadManager {
 	 */
 	load = async (id: undefined | string | number) => {
 		try {
-			await this.#getProperty("checkReady")();
+			await this.#getProperty('checkReady')();
 
 			const parent = this.#parent;
 			parent.fetching = true;
 			if (!id) id = parent.id;
 
-			if (await this.#getProperty("localdb")) {
+			if (await this.#getProperty('localdb')) {
 				const localData = await this.#localProvider.load(id);
 				if (localData) this.#parent.set(localData);
 			}
@@ -49,24 +49,25 @@ export class ItemLoadManager {
 
 			if (remoteData) {
 				let same = true;
-				Object.keys(remoteData).forEach(key => {
+				Object.keys(remoteData).forEach((key) => {
 					let original = this.#localProvider.registry.values;
 					if (original[key] !== remoteData[key]) same = false;
 				});
 
 				if (!same) await this.#localProvider.save(remoteData);
 			}
+			return { status: true };
 		} catch (exc) {
-			console.log("ERROR LOAD", exc);
+			console.error('ERROR LOAD', exc);
 		} finally {
 			this.#parent.fetching = false;
 		}
 	};
 
-	remoteLoad = async params => {
+	remoteLoad = async (params) => {
 		const response = await this.#provider.load(params);
 
-		if (!response.status) throw "ERROR_DATA_QUERY";
+		if (!response.status) throw 'ERROR_DATA_QUERY';
 		return response.data;
 	};
 }

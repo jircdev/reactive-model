@@ -1,8 +1,8 @@
-import { DBManager } from "@beyond-js/reactive/database";
+import { DBManager } from '@beyond-js/reactive-2/database';
 async function create() {
 	try {
-		const db = await DBManager.config("test@2", {
-			user: "++id, name, lastnames",
+		const db = await DBManager.config('test@2', {
+			user: '++id, name, lastnames',
 		});
 
 		const users = [];
@@ -18,7 +18,7 @@ async function create() {
 
 		//db.user.bulkAdd(users);
 	} catch (e) {
-		console.trace("error", e);
+		console.trace('error', e);
 	}
 }
 

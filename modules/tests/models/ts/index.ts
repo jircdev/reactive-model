@@ -1,3 +1,3 @@
-import { DBManager } from "@beyond-js/reactive/database";
+import { DBManager } from '@beyond-js/reactive-2/database';
 
 (async () => {})();

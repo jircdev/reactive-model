@@ -13,30 +13,29 @@ Aquí tienes un resumen de cómo funcionan las clases y métodos auxiliares:
 Un ejemplo de cómo se podría utilizar la clase `Collection` sería creando una clase `UserCollection` que extienda de `Collection`:
 
 ```typescript
-import { ReactiveModel } from "@beyond-js/reactive/model";
-import { Collection } from "@beyond-js/reactive/entities";
-import { User } from "./user";
-import { UserProvider } from "@package/name/bundle";
+import { ReactiveModel } from '@beyond-js/reactive-2/model';
+import { Collection } from '@beyond-js/reactive-2/entities';
+import { User } from './user';
+import { UserProvider } from '@package/name/bundle';
 interface IUsers {
 	items: User[];
 }
 export /*bundle*/ class Users extends Collection {
 	item = User;
-	protected storeName = "users";
-	protected db = "database-name";
+	protected storeName = 'users';
+	protected db = 'database-name';
 	constructor() {
 		super();
 		this.provider = new UserProvider();
 		this.init();
 	}
 }
-
 ```
 
 En este ejemplo, se crea la clase `UserCollection` que hereda de `Collection`. Se especifica que los elementos de esta colección serán objetos de la clase `User`. Para utilizar esta clase, simplemente se instanciaría un objeto `UserCollection` y se utilizarían los métodos heredados como `load`, `save`, `sync`, etc., para interactuar con la base de datos local y remota.
 
-
 ## Methods
+
 The `Collection` object has several methods that handle various aspects of managing a collection of reactive objects. These methods are designed to interact with local and remote data sources for loading, saving, and syncing data.
 
 Here's a summary of the main methods in the `Collection` object:

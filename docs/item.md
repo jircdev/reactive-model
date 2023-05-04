@@ -1,4 +1,3 @@
-
 ## Item
 
 La clase Item es una clase abstracta que extiende de ReactiveModel. Esta clase representa un objeto "reactivo" en el sentido de que puede manejar cambios en sus propiedades y actualizar automáticamente otras partes del código, gracias a la herencia de ReactiveModel.
@@ -10,9 +9,9 @@ La clase Item también incluye instancias de ItemSaveManager y ItemLoadManager p
 El siguiente ejemplo de uso crea una clase User que extiende de Item:
 
 ```
-import { ReactiveModel } from "@beyond-js/reactive/model";
-import { Item } from "@beyond-js/reactive/entities";
-import { UserProvider } from "@beyond-js/reactive/tests/backend/provider";
+import { ReactiveModel } from "@beyond-js/reactive-2/model";
+import { Item } from "@beyond-js/reactive-2/entities";
+import { UserProvider } from "@beyond-js/reactive-2/tests/backend/provider";
 
 interface IUser {
 	name?: string;
@@ -21,7 +20,7 @@ interface IUser {
 }
 
 export /*bundle */ class User extends Item<IUser> {
-	protected properties = ["id", "name", "lastname"];
+	protected properties = ["id", "name", "lastnames"];
 
 	protected storeName = "user";
 	protected db = "test";
@@ -38,7 +37,6 @@ export /*bundle */ class User extends Item<IUser> {
 }
 
 ```
-
 
 En este ejemplo, se define la clase User que hereda de Item. La clase User tiene propiedades como id, name y lastname, y utiliza un proveedor de usuario UserProvider para interactuar con un servidor externo. También define el nombre de la tienda local (storeName) y el nombre de la base de datos local (db).
 

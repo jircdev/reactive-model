@@ -15,14 +15,14 @@ export class CollectionSaveManager {
 		this.#parent.save = this.save;
 		this.#parent.sync = this.sync;
 		this.#parent.publish = this.publish;
-		this.#localdb = this.#bridge.get("localdb");
+		this.#localdb = this.#bridge.get('localdb');
 		if (this.#localdb) {
-			this.#localProvider = this.#bridge.get("localProvider");
+			this.#localProvider = this.#bridge.get('localProvider');
 		} else {
-			console.log("la colleccion no usa indexeddb");
+			console.log('la colleccion no usa indexeddb');
 		}
 
-		this.#provider = this.#bridge.get("provider");
+		this.#provider = this.#bridge.get('provider');
 	}
 
 	save = async (data = []): Promise<any> => {
@@ -34,22 +34,18 @@ export class CollectionSaveManager {
 		try {
 			await this.save(data);
 
-			if (!this.#provider || this.#bridge.get("isOffline")) return;
+			if (!this.#provider || this.#bridge.get('isOffline')) return;
 			const response = await this.#provider.bulkSave(data);
-			if (!response.status) {
-				console.log("error...", response);
-			}
+			if (!response.status) throw response;
 		} catch (e) {
 			console.log(e);
 		}
 	};
 
 	sync = async () => {
-		const data = this.#parent.localProvider.store.where("offline").equals(true).toArray();
+		const data = this.#parent.localProvider.store.where('offline').equals(true).toArray();
 		const response = await this.#provider.bulkSave(data);
-		if (!response.status) {
-			console.log("error...", response);
-		}
+		if (!response.status) throw response;
 
 		return data;
 	};

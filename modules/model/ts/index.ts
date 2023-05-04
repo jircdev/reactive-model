@@ -1,5 +1,5 @@
-import { Events } from "@beyond-js/events/events";
-import { reactiveProps } from "./property";
+import { Events } from '@beyond-js/events/events';
+import { reactiveProps } from './property';
 
 interface ReactiveModelPublic<T> {
 	ready: boolean | undefined;
@@ -43,7 +43,7 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 
 	constructor() {
 		super();
-		this.reactiveProps<IProps>(["fetching", "fetched", "processing", "processed", "loaded", "ready"]);
+		this.reactiveProps<IProps>(['fetching', 'fetched', 'processing', 'processed', 'loaded', 'ready']);
 	}
 
 	protected reactiveProps<T>(props: Array<keyof T>): void {
@@ -83,7 +83,7 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 	 * @param {string} event - The name of the event to trigger.
 	 * @returns {void}
 	 */
-	triggerEvent = (event: string = "change"): void => this.trigger(event);
+	triggerEvent = (event: string = 'change'): void => this.trigger(event);
 	/**
 	 * The `set` method sets one or more properties on the model.
 	 *
@@ -94,10 +94,9 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 	set(properties: Partial<ReactiveModelPublic<T>>): void {
 		let props: Partial<ReactiveModelPublic<T>> = Object.keys(properties);
 		let updated = false;
-		Object.keys(properties).forEach(prop => {
-			console.log(10, prop, properties[prop]);
+		Object.keys(properties).forEach((prop) => {
 			const sameObject =
-				typeof properties[prop] === "object" && JSON.stringify(properties[prop]) === JSON.stringify(this[prop]);
+				typeof properties[prop] === 'object' && JSON.stringify(properties[prop]) === JSON.stringify(this[prop]);
 			if (this[prop] === properties[prop] || sameObject) return;
 
 			this[prop] = properties[prop];
@@ -110,7 +109,7 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 		const props: Record<string, any> = {};
 		const properties = this.properties || this.skeleton;
 
-		properties.forEach(property => {
+		properties.forEach((property) => {
 			props[property] = this[property];
 		});
 		return props;
