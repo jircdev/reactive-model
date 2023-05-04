@@ -34,6 +34,7 @@ export class CollectionSaveManager {
 		try {
 			await this.save(data);
 
+			if (!this.#provider || this.#bridge.get("isOffline")) return;
 			const response = await this.#provider.bulkSave(data);
 			if (!response.status) {
 				console.log("error...", response);
@@ -53,3 +54,4 @@ export class CollectionSaveManager {
 		return data;
 	};
 }
+
