@@ -37,6 +37,7 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 		return this.localProvider.isUnpublished(this.getProperties());
 	}
 	#saveManager: ItemSaveManager;
+
 	get skeleton() {
 		return this.#skeleton;
 	}

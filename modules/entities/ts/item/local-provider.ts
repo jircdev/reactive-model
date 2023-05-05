@@ -92,7 +92,8 @@ class LocalProvider extends ReactiveModel<IProvider> {
 		return properties.some((prop) => this.#originalData[prop] !== data[prop]);
 	}
 
-	async load({ id = undefined } = {}) {
+	async load(params: any = {}) {
+		let id = params.id;
 		id = id ?? this.#parent.id;
 
 		try {
@@ -101,8 +102,10 @@ class LocalProvider extends ReactiveModel<IProvider> {
 			this.#parent.loaded = true;
 
 			this.#parent.set(this.#registry.values);
+			return { status: true };
 		} catch (e) {
 			console.error(e);
+			return e;
 		}
 	}
 

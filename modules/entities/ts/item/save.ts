@@ -9,6 +9,7 @@ export class ItemSaveManager {
 
 	init() {
 		this.#parent.save = this.save;
+		this.#parent.publish = this.publish;
 		this.#parent.sync = this.sync;
 	}
 
