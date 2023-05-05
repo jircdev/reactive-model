@@ -30,7 +30,6 @@ export class ItemLoadManager {
 			let id = params.id;
 			const parent = this.#parent;
 			parent.fetching = true;
-			console.log(id);
 			if (!id) id = parent.id;
 
 			if (await this.#getProperty('localdb')) {
@@ -43,7 +42,6 @@ export class ItemLoadManager {
 			if (!this.#provider) return console.warn('No provider');
 
 			const remoteData = await this.remoteLoad(params);
-			console.log('REMOTE DATA RESPONSE => ', remoteData, params);
 			if (!remoteData) this.#parent.found = false;
 
 			if (remoteData) {
