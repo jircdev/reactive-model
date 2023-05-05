@@ -32,10 +32,12 @@ export class CollectionSaveManager {
 
 	publish = async (data = []): Promise<any> => {
 		try {
-			await this.save(data);
+			const r = await this.save(data);
+			console.log('LOCAL PROVIDER RESPONSE => ', r);
 			if (!this.#provider || this.#bridge.get('isOffline')) return;
 
 			const response = await this.#provider.bulkSave(data);
+			console.log('BULK SABE RESPONSE => ', response);
 			if (!response.status) {
 				console.error('error...', response);
 			}
