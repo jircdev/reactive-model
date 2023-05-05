@@ -1,5 +1,5 @@
-import type { Collection } from ".";
-import { PendingPromise } from "@beyond-js/kernel/core";
+import type { Collection } from '.';
+import { PendingPromise } from '@beyond-js/kernel/core';
 export class CollectionLoadManager {
 	#parent: Collection;
 	get parent() {
@@ -19,10 +19,9 @@ export class CollectionLoadManager {
 	}
 
 	init = async () => {
-		this.#parent.load = this.load;
-		this.#localdb = this.#parentBridge.get("localdb");
-		this.#localProvider = this.#parentBridge.get("localProvider");
-		this.#provider = this.#parentBridge.get("provider");
+		this.#localdb = this.#parentBridge.get('localdb');
+		this.#localProvider = this.#parentBridge.get('localProvider');
+		this.#provider = this.#parentBridge.get('provider');
 		this.#parent.load = this.load;
 	};
 
@@ -59,9 +58,9 @@ export class CollectionLoadManager {
 			const { next } = this.parent;
 			start = start ?? (update === true && next ? next : 0);
 
-			if (await this.#parentBridge.get("localProvider")) {
+			if (await this.#parentBridge.get('localProvider')) {
 				const localData = await this.#localProvider.load(params);
-				if (localData) this.#parentBridge.get("setItems")(this.processEntries(localData));
+				if (localData) this.#parentBridge.get('setItems')(this.processEntries(localData));
 			}
 
 			if (this.#localProvider && !this.#localProvider.isOnline) {
@@ -72,7 +71,7 @@ export class CollectionLoadManager {
 			const remoteData = await this.#provider.list(params);
 			const { status, data, error } = remoteData;
 
-			if (!status) throw error ?? "ERROR_LIST_QUERY";
+			if (!status) throw error ?? 'ERROR_LIST_QUERY';
 
 			const items: any[] = this.processEntries(data.entries);
 
@@ -92,7 +91,7 @@ export class CollectionLoadManager {
 
 			return { status: true, data: items };
 		} catch (exc) {
-			console.error("ERROR LOAD", exc);
+			console.error('ERROR LOAD', exc);
 			this.#parent.set({ loaded: false, fetchig: true });
 			this.parent.triggerEvent();
 			return { status: false, error: { message: exc } };
@@ -100,17 +99,17 @@ export class CollectionLoadManager {
 	};
 
 	processEntries = (entries): any[] => {
-		return entries.map(record => {
+		return entries.map((record) => {
 			const item = new this.parent.item();
 			item.set(record, true);
 			return item;
 		});
 	};
 
-	remoteLoad = async params => {
+	remoteLoad = async (params) => {
 		const response = await this.#provider.load(params);
 
-		if (!response.status) throw "ERROR_DATA_QUERY";
+		if (!response.status) throw 'ERROR_DATA_QUERY';
 		return response.data;
 	};
 }

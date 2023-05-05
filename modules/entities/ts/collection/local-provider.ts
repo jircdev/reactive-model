@@ -1,10 +1,10 @@
-import { ReactiveModel } from "@beyond-js/reactive-2/model";
+import { ReactiveModel } from '@beyond-js/reactive-2/model';
 
-import { IProvider } from "../interfaces/provider";
-import { liveQuery } from "dexie";
-import { PendingPromise } from "@beyond-js/kernel/core";
-import { DBManager, DatabaseManager } from "@beyond-js/reactive-2/database";
-import Dexie from "dexie";
+import { IProvider } from '../interfaces/provider';
+import { liveQuery } from 'dexie';
+import { PendingPromise } from '@beyond-js/kernel/core';
+import { DBManager, DatabaseManager } from '@beyond-js/reactive-2/database';
+import Dexie from 'dexie';
 export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<IProvider> {
 	#isOnline = globalThis.navigator.onLine;
 	#store!: Dexie.Table<any, any>;
@@ -24,21 +24,20 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<IProvider>
 
 	#db: Dexie;
 	get isOnline() {
-		return this.#isOnline && !this.#offline && !localStorage.getItem("reactive.offline");
+		return this.#isOnline && !this.#offline && !localStorage.getItem('reactive.offline');
 	}
 	#parent;
 	constructor(parent, bridge) {
 		super();
-		console.log(0.1, parent, parent.db);
 		const { db, storeName } = parent;
 		this.#parent = parent;
 
-		if (!db || !storeName) throw new Error("database and store are required");
+		if (!db || !storeName) throw new Error('database and store are required');
 		this.#databaseName = db;
 		this.#storeName = storeName;
 
-		globalThis.addEventListener("online", this.handleConnection);
-		globalThis.addEventListener("offline", this.handleConnection);
+		globalThis.addEventListener('online', this.handleConnection);
+		globalThis.addEventListener('offline', this.handleConnection);
 	}
 
 	setOffline(value) {
@@ -81,8 +80,8 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<IProvider>
 		}
 
 		const conditions = Object.keys(params);
-		const controls = ["and", "or"];
-		conditions.forEach(condition => {
+		const controls = ['and', 'or'];
+		conditions.forEach((condition) => {
 			if (controls.includes(condition)) {
 				this.#processControl(condition, params[condition]);
 			}
@@ -91,30 +90,29 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<IProvider>
 		try {
 			const live = liveQuery(() => this.#store.toArray());
 			live.subscribe({
-				next: items => {
+				next: (items) => {
 					if (this.#promiseLoad) {
 						this.#promiseLoad.resolve(items);
 						this.#promiseLoad = null;
 					}
 
 					this.#items = items;
-					this.trigger("items.changed");
+					this.trigger('items.changed');
 				},
-				error: err => {
+				error: (err) => {
 					console.error(err);
 				},
 			});
 
 			//return await this.live.toArray();
 		} catch (error) {
-			console.error("Error al cargar los elementos del store:", error);
+			console.error('Error al cargar los elementos del store:', error);
 			return [];
 		}
 	}
 
 	save(data): Promise<any> {
-		if (!this.isOnline) data = data.forEach(item => ({ ...item, offline: true }));
-
+		if (!this.isOnline) data = data.map((item) => ({ ...item, offline: 'true' }));
 		return this.#store.bulkPut(data);
 	}
 	#processControl(control, conditions) {
