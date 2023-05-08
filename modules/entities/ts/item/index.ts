@@ -7,151 +7,152 @@ import { ItemLoadManager } from "./load";
 import { PendingPromise } from "@beyond-js/kernel/core";
 
 export interface IITem {
-	provider: any;
-	skeleton: Array<string>;
-	isUnpublished: boolean;
-	save: Function;
-	load: Function;
-	publish: Function;
-	unique: Array<string>;
-	sync: Function;
+  provider: any;
+  skeleton: Array<string>;
+  isUnpublished: boolean;
+  save: Function;
+  load: Function;
+  publish: Function;
+  unique: Array<string>;
+  sync: Function;
 }
 
 export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
-	#info = new Map();
-	/**
-	 * Represent the data that is stored in the local database
-	 */
-	#localData = new Map();
-	protected localdb = true;
-	protected provider: IProvider;
-	protected storeName: string;
-	protected db: string;
-	#ignoredFields: Array<string> = [];
-	#skeleton: Array<string> = [];
-	protected localProvider: LocalProvider;
+  #info = new Map();
+  /**
+   * Represent the data that is stored in the local database
+   */
+  #localData = new Map();
+  protected localdb = true;
+  protected provider: IProvider;
+  protected storeName: string;
+  protected db: string;
+  #ignoredFields: Array<string> = [];
+  #skeleton: Array<string> = [];
+  protected localProvider: LocalProvider;
 
-	protected unique: Array<string> = [];
+  protected unique: Array<string> = [];
 
-	get isUnpublished() {
-		return this.localProvider.isUnpublished(this.getProperties());
-	}
-	#saveManager: ItemSaveManager;
+  get isUnpublished() {
+    return this.localProvider.isUnpublished(this.getProperties());
+  }
+  #saveManager: ItemSaveManager;
 
-	get skeleton() {
-		return this.#skeleton;
-	}
+  get skeleton() {
+    return this.#skeleton;
+  }
 
-	private __get(property) {
-		return this[property];
-	}
+  private __get(property) {
+    return this[property];
+  }
 
-	get store() {
-		return this.localProvider.store;
-	}
+  get store() {
+    return this.localProvider.store;
+  }
 
-	get isOnline() {
-		return this.localProvider.isOnline && !localStorage.getItem("reactive.offline");
-	}
+  get isOnline() {
+    return this.localProvider.isOnline && !localStorage.getItem("reactive.offline");
+  }
 
-	#found;
-	get found() {
-		return this.#found;
-	}
-	set found(v: boolean) {
-		if (v !== this.#found) return;
-		this.#found = v;
-		this.triggerEvent();
-	}
+  #found;
+  get found() {
+    return this.#found;
+  }
+  set found(v: boolean) {
+    if (v !== this.#found) return;
+    this.#found = v;
+    this.triggerEvent();
+  }
 
-	get landed() {
-		return this.localProvider?.landed;
-	}
+  get landed() {
+    return this.localProvider?.landed;
+  }
 
-	#loadManager: ItemLoadManager;
-	#objectReady = false;
-	#ready = false;
-	#promiseReady: PendingPromise<boolean>;
+  #loadManager: ItemLoadManager;
+  #objectReady = false;
+  #ready = false;
+  #promiseReady: PendingPromise<boolean>;
 
-	constructor() {
-		super();
-		this.on("object.loaded", this.checkReady);
-	}
+  constructor() {
+    super();
+    this.on("object.loaded", this.checkReady);
+  }
 
-	protected async init(config: { id?: string | number } = {}) {
-		try {
-			let id;
-			if (config.id) id = config.id;
+  protected async init(config: { id?: string | number } = {}) {
+    try {
+      let id;
+      if (config.id) id = config.id;
 
-			const getProperty = property => this.__get(property);
+      const getProperty = property => this.__get(property);
 
-			this.localProvider = new LocalProvider(this, getProperty);
-			this.#saveManager = new ItemSaveManager(this, getProperty);
-			this.#loadManager = new ItemLoadManager(this, getProperty);
+      this.localProvider = new LocalProvider(this, getProperty);
+      this.#saveManager = new ItemSaveManager(this, getProperty);
+      this.#loadManager = new ItemLoadManager(this, getProperty);
 
-			if (!id) {
-				this.trigger("object.loaded");
-				id = "new";
-			}
+      if (!id) {
+        this.trigger("object.loaded");
+        id = "new";
+      }
 
-			await this.localProvider.init(id);
-			if (this.#skeleton && this.#skeleton.length > 0) {
-				this.properties = this.#skeleton;
-			}
-			this.#ready = true;
+      await this.localProvider.init(id);
+      if (this.#skeleton && this.#skeleton.length > 0) {
+        this.properties = this.#skeleton;
+      }
+      this.#ready = true;
 
-			this.trigger("object.loaded");
-		} catch (e) {
-			console.error("error initializing", e);
-		}
-	}
+      this.trigger("object.loaded");
+    } catch (e) {
+      console.error("error initializing", e);
+    }
+  }
 
-	protected checkReady = () => {
-		if (this.#ready) {
-			return this.#ready;
-		}
-		if (this.#promiseReady) return this.#promiseReady;
+  protected checkReady = () => {
+    if (this.#ready) {
+      return this.#ready;
+    }
+    if (this.#promiseReady) return this.#promiseReady;
 
-		this.#promiseReady = new PendingPromise();
-		if (this.objectReady) this.#promiseReady.resolve(this.#objectReady);
-		const onReady = () => {
-			this.#objectReady = true;
-			this.#promiseReady.resolve(this.#objectReady);
-			this.#promiseReady = undefined;
-		};
-		this.on("object.loaded", onReady);
-		return this.#promiseReady;
-	};
+    this.#promiseReady = new PendingPromise();
+    if (this.objectReady) this.#promiseReady.resolve(this.#objectReady);
+    const onReady = () => {
+      this.#objectReady = true;
+      this.#promiseReady.resolve(this.#objectReady);
+      this.#promiseReady = undefined;
+    };
+    this.on("object.loaded", onReady);
+    return this.#promiseReady;
+  };
 
-	setOffline = value => this.localProvider.setOffline(value);
+  setOffline = value => this.localProvider.setOffline(value);
 
-	addLocalProvider(db: string, table: string) {
-		if (this.localProvider) return;
-	}
+  addLocalProvider(db: string, table: string) {
+    if (this.localProvider) return;
+  }
 
-	set(data, init = false) {
-		// If init is true, store the data in localData Map
-		if (init) {
-			this.#localData = new Map(Object.entries(data));
-		}
+  set(data, init = false) {
+    // If init is true, store the data in localData Map
+    if (init) {
+      this.#localData = new Map(Object.entries(data));
+      this.localProvider.save(data, true);
+    }
 
-		// If a property is in the properties array, define it as a public property
-		this.properties.forEach(property => {
-			if (data.hasOwnProperty(property)) {
-				this[property] = data[property];
-			}
-		});
-	}
+    // If a property is in the properties array, define it as a public property
+    this.properties.forEach(property => {
+      if (data.hasOwnProperty(property)) {
+        this[property] = data[property];
+      }
+    });
+  }
 
-	getValues() {
-		const values = {};
-		this.skeleton.forEach(field => {
-			if (this.hasOwnProperty(field)) values[field] = this[field];
-		});
-		return values;
-	}
+  getValues() {
+    const values = {};
+    this.skeleton.forEach(field => {
+      if (this.hasOwnProperty(field)) values[field] = this[field];
+    });
+    return values;
+  }
 
-	getPropertyNames() {
-		return this.properties;
-	}
+  getPropertyNames() {
+    return this.properties;
+  }
 }
