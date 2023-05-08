@@ -1,7 +1,9 @@
+import type { LocalProvider } from '../item/local-provider';
+
 export class CollectionSaveManager {
 	#parent;
 	#bridge;
-	#localProvider;
+	#localProvider: LocalProvider;
 	#provider;
 	#localdb;
 	protected MAX_RETRIES = 3;
@@ -57,7 +59,7 @@ export class CollectionSaveManager {
 			const response = await this.#provider.bulkSave(chunk);
 
 			if (response.status) {
-				const data = response.data.map((item) => ({ ...item, offline: 0, instanceId: undefined }));
+				const data = response.data.entries.map((item) => ({ ...item, offline: 0, instanceId: undefined }));
 				await this.#localProvider.upsert(data, chunk);
 				return { success: true, chunk, response };
 			}

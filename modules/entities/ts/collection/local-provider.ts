@@ -138,7 +138,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<IProvider>
 			data.forEach((item) => {
 				instanceIdToIdMap.set(item.instanceId, item.id);
 			});
-
+			console.log(50, data);
 			await this.store.bulkPut(data);
 		});
 	}
