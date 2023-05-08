@@ -32,6 +32,7 @@ export class CollectionSaveManager {
 	save = async (data = []): Promise<any> => {
 		if (!this.#localdb) return true;
 		await this.#localProvider.init();
+
 		await this.#localProvider.save(data);
 	};
 
@@ -56,7 +57,7 @@ export class CollectionSaveManager {
 			const response = await this.#provider.bulkSave(chunk);
 
 			if (response.status) {
-				const data = response.data.entries.map((item) => ({ ...item, offline: 0, instanceId: undefined }));
+				const data = response.data.map((item) => ({ ...item, offline: 0, instanceId: undefined }));
 				await this.#localProvider.upsert(data, chunk);
 				return { success: true, chunk, response };
 			}

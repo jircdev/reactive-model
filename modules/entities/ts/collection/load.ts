@@ -63,7 +63,8 @@ export class CollectionLoadManager {
 				if (localData) this.#parentBridge.get('setItems')(this.processEntries(localData));
 			}
 
-			if (this.#localProvider && !this.#localProvider.isOnline) throw 'OFFLINE';
+			// Cuando seteaba reactive.offline en true e intentaba cargar la coleccion se detenia aqui.
+			// if (this.#localProvider && !this.#localProvider.isOnline) return;
 
 			if (!this.#provider) throw 'NO_PROVIDER';
 

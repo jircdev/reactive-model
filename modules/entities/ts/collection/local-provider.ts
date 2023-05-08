@@ -122,10 +122,11 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<IProvider>
 
 	async save(data): Promise<any> {
 		if (!this.isOnline) data = data.map((item) => ({ ...item, offline: 1 }));
-		console.log(1, data);
 
 		await this.#records.init();
-		await this.#records.saveAll(data, this.#storeName);
+		console.log('data to save in IDB => ', data);
+		const response = await this.#records.saveAll(data, this.#storeName);
+		console.log('local provider', response);
 	}
 	#processControl(control, conditions) {
 		this.#store[control];
