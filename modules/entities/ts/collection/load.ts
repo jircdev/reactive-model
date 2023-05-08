@@ -53,7 +53,7 @@ export class CollectionLoadManager {
 	load = async (params: any = {}) => {
 		try {
 			this.parent.fetching = true;
-			let { limit = 30, start = 1, update } = params;
+			let { start = 1, update } = params;
 
 			const { next } = this.parent;
 			start = start ?? (update === true && next ? next : 0);
@@ -63,13 +63,11 @@ export class CollectionLoadManager {
 				if (localData) this.#parentBridge.get('setItems')(this.processEntries(localData));
 			}
 
-			if (this.#localProvider && !this.#localProvider.isOnline) {
-				return;
-			}
-			if (!this.#provider) return;
+			if (this.#localProvider && !this.#localProvider.isOnline) throw 'OFFLINE';
+
+			if (!this.#provider) throw 'NO_PROVIDER';
 
 			const remoteData = await this.#provider.list(params);
-			console.log(100, remoteData);
 			const { status, data, error } = remoteData;
 
 			if (!status) throw error ?? 'ERROR_LIST_QUERY';
@@ -87,10 +85,8 @@ export class CollectionLoadManager {
 			this.parent.set(properties);
 
 			this.parent.triggerEvent();
-			console.log(99, itemsValue);
 
 			if (this.#localProvider) this.#localProvider.save(data.entries);
-
 			return { status: true, data: items };
 		} catch (exc) {
 			console.error('ERROR LOAD', exc);
