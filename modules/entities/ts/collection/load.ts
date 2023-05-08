@@ -58,15 +58,15 @@ export class CollectionLoadManager {
 			const { next } = this.parent;
 			start = start ?? (update === true && next ? next : 0);
 
-			if (await this.#parentBridge.get('localProvider')) {
-				const localData = await this.#localProvider.load(params);
-				if (localData) this.#parentBridge.get('setItems')(this.processEntries(localData));
+			if (params.local === false || (await this.#parentBridge.get('localProvider'))) {
+				const localData = (await this.#localProvider.load(params)) ?? [];
+				const items = this.processEntries(localData);
+
+				this.#parentBridge.set('items', items);
+				if (!this.#localProvider.isOnline || !this.#provider) {
+					return { status: true, data: items };
+				}
 			}
-
-			// Cuando seteaba reactive.offline en true e intentaba cargar la coleccion se detenia aqui.
-			// if (this.#localProvider && !this.#localProvider.isOnline) return;
-
-			if (!this.#provider) throw 'NO_PROVIDER';
 
 			const remoteData = await this.#provider.list(params);
 			const { status, data, error } = remoteData;
@@ -100,6 +100,7 @@ export class CollectionLoadManager {
 	processEntries = (entries): any[] => {
 		return entries.map((record) => {
 			const item = new this.parent.item();
+			console.log(500, item);
 			item.set(record, true);
 			return item;
 		});

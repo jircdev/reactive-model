@@ -37,7 +37,7 @@ export class ItemLoadManager {
 				if (localData) this.#parent.set(localData);
 			}
 
-			if (this.#localProvider && !this.#localProvider.isOnline) return;
+			// if (this.#localProvider && !this.#localProvider.isOnline) return;
 
 			if (!this.#provider) return console.warn('No provider');
 

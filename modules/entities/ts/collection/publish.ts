@@ -60,6 +60,7 @@ export class CollectionSaveManager {
 
 			if (response.status) {
 				const data = response.data.entries.map((item) => ({ ...item, offline: 0, instanceId: undefined }));
+
 				await this.#localProvider.upsert(data, chunk);
 				return { success: true, chunk, response };
 			}
@@ -99,7 +100,8 @@ export class CollectionSaveManager {
 					failedChunks.push(result);
 				}
 			}
-
+			this.#bridge.set('items', []);
+			await this.#parent.load();
 			if (failedChunks.length) {
 				const message = failedChunks.length === chunks.length ? 'FAILED_SYNC' : 'INCOMPLETE_SYNC';
 				return { status: false, message, data: failedChunks };

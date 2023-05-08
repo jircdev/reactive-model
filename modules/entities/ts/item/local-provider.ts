@@ -70,7 +70,7 @@ class LocalProvider extends ReactiveModel<IProvider> {
 		this.triggerEvent();
 	}
 
-	init = async (id: string | number) => {
+	init = async (id: string | number | undefined = undefined) => {
 		try {
 			const database: DatabaseManager = await DBManager.get(this.#databaseName);
 			this.#database = database;

@@ -85,7 +85,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<IProvider>
 	async load(params) {
 		if (JSON.stringify(this.#params) === JSON.stringify(params)) {
 			if (this.#promiseLoad) return this.#promiseLoad;
-			return;
+			return [];
 		}
 
 		const conditions = Object.keys(params);
@@ -113,6 +113,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<IProvider>
 				},
 			});
 
+			return this.#promiseLoad;
 			//return await this.live.toArray();
 		} catch (error) {
 			console.error('Error al cargar los elementos del store:', error);
@@ -138,7 +139,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<IProvider>
 			data.forEach((item) => {
 				instanceIdToIdMap.set(item.instanceId, item.id);
 			});
-			console.log(50, data);
+
 			await this.store.bulkPut(data);
 		});
 	}
