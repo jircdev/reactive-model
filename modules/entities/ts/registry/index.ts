@@ -35,7 +35,7 @@ export class Registry extends ReactiveModel<IRegistry> {
 		this.#id = id === "new" ? this.#instanceId : id;
 		this.#isNew = id === "new";
 		this.#keyId = this.isNew ? "#instanceId" : "#id";
-		console.log(12, this.#id);
+
 		if (this.#id) this.#values.id = this.#id;
 	}
 
@@ -111,7 +111,6 @@ export class Registry extends ReactiveModel<IRegistry> {
 	}
 
 	update = async (data, backend) => {
-		console.log(12, data);
 		const updated = this.setValues(data, backend);
 
 		if (updated) {

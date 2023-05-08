@@ -65,7 +65,6 @@ export class /*bundle*/ FactoryRecords extends ReactiveModel<IRecords> {
 
 	async saveAll(items, storeName) {
 		const elements = items.map(item => {
-			console.log(0.1, item);
 			const registry = new Registry(storeName);
 			registry.setValues(item);
 			return registry;
