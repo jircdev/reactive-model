@@ -4,7 +4,7 @@ import { DBManager, DatabaseManager } from "@beyond-js/reactive-2/database";
 
 interface IRegistry {
 	values?: object;
-	id?: string;
+	id?: string | number;
 }
 export class Registry extends ReactiveModel<IRegistry> {
 	#values: any = {};
@@ -26,15 +26,16 @@ export class Registry extends ReactiveModel<IRegistry> {
 	get instanceId() {
 		return this.#instanceId;
 	}
-	constructor(store, data: IRegistry = {}) {
+	constructor(store, data: IRegistry = { id: "new" }) {
 		super();
 		const { id } = data;
 		this.#store = store;
 		this.#instanceId = Registry.generateUUID();
-
+		if (!id) console.trace(11.1, id, data, this.#instanceId);
 		this.#id = id === "new" ? this.#instanceId : id;
 		this.#isNew = id === "new";
 		this.#keyId = this.isNew ? "#instanceId" : "#id";
+		console.log(12, this.#id);
 		if (this.#id) this.#values.id = this.#id;
 	}
 
@@ -110,6 +111,7 @@ export class Registry extends ReactiveModel<IRegistry> {
 	}
 
 	update = async (data, backend) => {
+		console.log(12, data);
 		const updated = this.setValues(data, backend);
 
 		if (updated) {
