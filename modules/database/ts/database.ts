@@ -1,6 +1,6 @@
-import Dexie from 'dexie';
-import { Events } from '@beyond-js/events/events';
-import { PendingPromise } from '@beyond-js/kernel/core';
+import Dexie from "dexie";
+import { Events } from "@beyond-js/events/events";
+import { PendingPromise } from "@beyond-js/kernel/core";
 
 export class Database extends Events {
 	#version = 1;
@@ -40,7 +40,7 @@ export class Database extends Events {
 		this.#promise.resolve();
 		this.#promise = undefined;
 	};
-	#onError = (error) => {
+	#onError = error => {
 		this.#promise.resolve();
 		this.#promise = undefined;
 		throw new Error(error);
@@ -50,12 +50,12 @@ export class Database extends Events {
 		return this.#version;
 	}
 
-	register = async (data) => {
-		Object.keys(data).forEach((store) => {
-			const items = data[store].split(',');
+	register = async data => {
+		Object.keys(data).forEach(store => {
+			const items = data[store].split(",");
 			const filter = new Set(items);
-			filter.add('offline');
-			data[store] = Array.from(filter).join(',');
+			filter.add("offline");
+			data[store] = Array.from(filter).join(",");
 		});
 
 		this.#currentVersion.stores(data);
@@ -64,7 +64,7 @@ export class Database extends Events {
 			await this.#db.open();
 			return this.#db;
 		} catch (e) {
-			console.error('error registering', e);
+			console.error("error registering", e);
 		}
 	};
 }

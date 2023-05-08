@@ -1,7 +1,7 @@
-import { UserStore } from '@beyond-js/reactive-2/tests/backend/database';
-import { Server, Socket } from 'socket.io';
+import { UserStore } from "@beyond-js/reactive-2/tests/backend/database";
+import { Server, Socket } from "socket.io";
 
-export /*actions*/ /*bundle*/ class UserProvider {
+export /*actions*/ /*bundle*/ class BookProvider {
 	socket: Server;
 	constructor(socket: Server) {
 		this.socket = socket;
@@ -29,8 +29,11 @@ export /*actions*/ /*bundle*/ class UserProvider {
 
 	async list() {
 		try {
+			console.log(9);
 			const user = new UserStore();
+			console.log(10, user);
 			const entries = await user.loadAll();
+			console.log(11, user);
 			return { status: true, data: { entries } };
 		} catch (e) {
 			return { error: true, message: e.message };

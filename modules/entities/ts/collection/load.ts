@@ -70,6 +70,7 @@ export class CollectionLoadManager {
 			if (!this.#provider) return;
 
 			const remoteData = await this.#provider.list(params);
+			console.log(100, remoteData);
 			const { status, data, error } = remoteData;
 
 			if (!status) throw error ?? "ERROR_LIST_QUERY";
@@ -87,8 +88,9 @@ export class CollectionLoadManager {
 			this.parent.set(properties);
 
 			this.parent.triggerEvent();
+			console.log(99, itemsValue);
 
-			if (this.#localProvider) this.#localProvider.save(itemsValue);
+			if (this.#localProvider) this.#localProvider.save(data.entries);
 
 			return { status: true, data: items };
 		} catch (exc) {

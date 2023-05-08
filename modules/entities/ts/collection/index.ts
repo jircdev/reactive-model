@@ -25,6 +25,14 @@ export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> 
 		return this.#items;
 	}
 
+	set items(value: Array<string | undefined>) {
+		if (!Array.isArray(value)) {
+			return;
+		}
+		this.#items = value;
+		this.triggerEvent();
+	}
+
 	counters: any = {};
 	/**
 	 * Represents the number of elements in the collection
@@ -46,7 +54,7 @@ export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> 
 
 	constructor() {
 		super();
-		this.reactiveProps<IColleciton>(["item", "items", "next", "provider"]);
+		this.reactiveProps<IColleciton>(["item", "next", "provider"]);
 	}
 
 	protected setItems(values) {

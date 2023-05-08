@@ -1,7 +1,7 @@
-import { ReactiveModel } from '@beyond-js/reactive-2/model';
-import { Registry } from './index';
-import { PendingPromise } from '@beyond-js/kernel/core';
-import { DBManager, DatabaseManager } from '@beyond-js/reactive-2/database';
+import { ReactiveModel } from "@beyond-js/reactive-2/model";
+import { Registry } from "./index";
+import { PendingPromise } from "@beyond-js/kernel/core";
+import { DBManager, DatabaseManager } from "@beyond-js/reactive-2/database";
 
 interface IRecords {
 	stores: Map<string, Map<string, Registry>>;
@@ -9,51 +9,7 @@ interface IRecords {
 export class /*bundle*/ FactoryRecords extends ReactiveModel<IRecords> {
 	#stores = new Map();
 	#database;
-
-	// async get({ db, store, filter: { id } }): Promise<boolean | Registry> {
-	// 	const database = this.#databases.get(db) ?? (await DBManager.get(db));
-	// 	this.#databases.set(db, database);
-
-	// 	if (!database.db[store]) {
-	// 		console.warn("Store does not exists");
-	// 		return;
-	// 	}
-	// 	const key = `${db}.${store}`;
-	// 	if (this.stores.has(key) && this.stores.get(key).has(id)) return this.stores.get(key).get(id);
-
-	// 	const registry = new Registry(db, store, id, {});
-	// 	await registry.load();
-
-	// 	await database.db[store].get(id);
-
-	// 	if (this.stores.has(store) && this.stores.get(store).has(id)) return this.stores.get(store).get(id);
-
-	// 	const promise = new PendingPromise();
-	// 	await this.load(store, id);
-	// 	this.stores.set(store, new Map([[id, promise]]));
-
-	// 	if (!this.stores.has(store) || !this.stores.get(store).has(id)) return false;
-	// 	return this.stores.get(store).get(id);
-	// }
-
-	// async load(store, id) {
-	// 	const record = await this.#database.db[store].get(id);
-	// }
-
-	// update(store, id, data) {
-	// 	if (!this.stores.has(store)) this.stores.set(store, new Map());
-	// 	if (!this.stores.get(store).has(id)) {
-	// 		this.stores.get(store).set(id, new Registry(store, id, data));
-	// 	} else {
-	// 		this.stores.get(store).get(id).update(data);
-	// 	}
-	// 	return this.stores.get(store).get(id);
-	// }
-
-	// setDatabase(database) {
-	// 	this.#database = database;
-	// }
-
+	#batches = 200;
 	#dbName;
 	constructor(dbName) {
 		super();
@@ -73,7 +29,7 @@ export class /*bundle*/ FactoryRecords extends ReactiveModel<IRecords> {
 		this.ready = true;
 	}
 
-	async load(storeName, id) {
+	async load(storeName, id = "new") {
 		const store = this.#database.db[storeName];
 		if (!store) throw new Error(`Store ${storeName} does not exists`);
 		// if the store map does not exists, create it
@@ -94,6 +50,46 @@ export class /*bundle*/ FactoryRecords extends ReactiveModel<IRecords> {
 		this.#stores.get(storeName).set(registry.instanceId, registry);
 
 		return registry;
+	}
+
+	/**
+	 * Saves a collection of items to the specified store in batches.
+	 *
+	 * @param {Array} items - The items to be saved.
+	 * @param {string} storeName - The name of the store where items will be saved.
+	 * @returns {Promise<{ status: boolean, failed?: Array }>} An object containing the status of the operation.
+	 * If the status is true, all batches have been saved successfully. If the status is false, the failed property contains an array with information about failed batches.
+	 * Each failed batch object has a status, a reason (if the batch is rejected), an index (the original batch position), and data (the failed batch data).
+	 * @throws Will throw an error if there's an issue with the Promise.allSettled() call itself.
+	 */
+
+	async saveAll(items, storeName) {
+		const elements = items.map(item => {
+			const registry = new Registry(storeName);
+			registry.setValues(item);
+			return registry;
+		});
+
+		const store = this.#database.db[storeName];
+		const promises = [];
+		const chunks = [];
+		while (elements.length > 0) {
+			const batch = elements.splice(0, this.#batches);
+			const data = batch.map(item => item.getValues());
+			chunks.push(data);
+			promises.push(store.bulkPut(data));
+		}
+		try {
+			const results = await Promise.allSettled(promises);
+			const mappedFn = (result, index) => ({ ...result, index, data: chunks[index] });
+			const failed = results.map(mappedFn).filter(result => result.status === "rejected");
+			if (!failed.length) return { status: true };
+			else {
+				return { status: false, failed };
+			}
+		} catch (e) {
+			return { status: false, failed: e };
+		}
 	}
 
 	static #dbs = new Map();

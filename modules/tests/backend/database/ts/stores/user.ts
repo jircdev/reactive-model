@@ -1,5 +1,4 @@
-import * as sqlite3 from "sqlite3";
-import { open, Database } from "sqlite";
+import { DatabaseConnection } from "../connection";
 
 interface User {
 	id: number;
@@ -13,62 +12,43 @@ interface LoadAllOptions {
 }
 
 export /*bundle*/ class UserStore {
-	private db: Database;
+	private conn: DatabaseConnection;
 
 	constructor() {
-		this.db = null;
-	}
-
-	async connect() {
-		this.db = await open({
-			filename: "reactive.db",
-			driver: sqlite3.Database,
-		});
-	}
-
-	async disconnect() {
-		if (this.db) {
-			await this.db.close();
-			this.db = null;
-		}
+		this.conn = new DatabaseConnection();
 	}
 
 	async loadUser(id: number): Promise<User> {
-		if (!this.db) {
-			await this.connect();
-		}
-
-		const user = await this.db.get("SELECT * FROM users WHERE id = ?", id);
-
+		await this.conn.connect();
+		const db = this.conn.connection;
+		const user = await db.get("SELECT * FROM users WHERE id = ?", id);
+		await this.conn.disconnect();
 		return user as User;
 	}
 
 	async storeUser(user: User): Promise<any> {
-		if (!this.db) {
-			await this.connect();
-		}
-
+		await this.conn.connect();
+		const db = this.conn.connection;
 		let recordId = user.id;
 		const existingUser = await this.loadUser(recordId);
 		let data;
 
 		if (existingUser) {
 			const { name, lastnames } = user;
-			data = await this.db.run("UPDATE users SET name = ?, lastnames = ? WHERE id = ?", name, lastnames, user.id);
+			data = await db.run("UPDATE users SET name = ?, lastnames = ? WHERE id = ?", name, lastnames, user.id);
 		} else {
 			const { id, name, lastnames } = user;
-			data = await this.db.run("INSERT INTO users (id, name, lastnames) VALUES (?, ?, ?)", id, name, lastnames);
+			data = await db.run("INSERT INTO users (id, name, lastnames) VALUES (?, ?, ?)", id, name, lastnames);
 			recordId = data.lastID;
 		}
 		const response = await this.loadUser(recordId);
+		await this.conn.disconnect();
 		return response;
 	}
 
 	async loadAll(options?: LoadAllOptions): Promise<User[]> {
-		if (!this.db) {
-			await this.connect();
-		}
-
+		await this.conn.connect();
+		const db = this.conn.connection;
 		let filter = "";
 		let limit = 30;
 
@@ -82,29 +62,26 @@ export /*bundle*/ class UserStore {
 		}
 
 		const query = `SELECT * FROM users ${filter} LIMIT ${limit}`;
-
-		const users = await this.db.all(query);
-
+		const users = await db.all(query);
+		await this.conn.disconnect();
 		return users as User[];
 	}
 
 	async bulkSave(users) {
-		if (!this.db) {
-			await this.connect();
-		}
-
+		await this.conn.connect();
+		const db = this.conn.connection;
 		const insertedUsers = [];
-
+		console.log("we will to save", users);
 		// Start a transaction
-		await this.db.run("BEGIN TRANSACTION");
+		await db.run("BEGIN TRANSACTION");
 
 		try {
 			for (const user of users) {
 				const insertQuery = `INSERT INTO users (name, lastnames) VALUES (?, ?)`;
-				await this.db.run(insertQuery, [user.name, user.lastnames]);
+				await db.run(insertQuery, [user.name, user.lastnames]);
 
 				// Get the last inserted id
-				const lastIdResult = await this.db.get("SELECT last_insert_rowid() as lastId");
+				const lastIdResult = await db.get("SELECT last_insert_rowid() as lastId");
 				const lastId = lastIdResult.lastId;
 
 				// Create a new user object with the inserted id
@@ -113,15 +90,26 @@ export /*bundle*/ class UserStore {
 			}
 
 			// Commit the transaction
-			await this.db.run("COMMIT");
+			await db.run("COMMIT");
 		} catch (error) {
 			console.error("Error inserting users:", error);
 
 			// Rollback the transaction in case of an error
-			await this.db.run("ROLLBACK");
+			await db.run("ROLLBACK");
+			this.conn.disconnect();
 			throw error;
 		}
 
 		return insertedUsers;
+	}
+
+	async clear(): Promise<void> {
+		await this.conn.connect();
+		const db = this.conn.connection;
+
+		const query = `DELETE FROM users`;
+		await db.run(query);
+
+		await this.conn.disconnect();
 	}
 }

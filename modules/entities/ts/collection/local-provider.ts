@@ -5,6 +5,13 @@ import { liveQuery } from "dexie";
 import { PendingPromise } from "@beyond-js/kernel/core";
 import { DBManager, DatabaseManager } from "@beyond-js/reactive-2/database";
 import Dexie from "dexie";
+import { FactoryRecords } from "../registry/factory";
+
+interface IItemValues {
+	[key: string]: any;
+	offline: number;
+	instanceId: string;
+}
 export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<IProvider> {
 	#isOnline = globalThis.navigator.onLine;
 	#store!: Dexie.Table<any, any>;
@@ -16,6 +23,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<IProvider>
 	#storeName!: string;
 	#databaseName!: string;
 	#items = [];
+	#records: FactoryRecords;
 	get items() {
 		return this.#items;
 	}
@@ -29,9 +37,10 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<IProvider>
 	#parent;
 	constructor(parent, bridge) {
 		super();
-		console.log(0.1, parent, parent.db);
+
 		const { db, storeName } = parent;
 		this.#parent = parent;
+		this.#records = FactoryRecords.get(db);
 
 		if (!db || !storeName) throw new Error("database and store are required");
 		this.#databaseName = db;
@@ -112,12 +121,24 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<IProvider>
 		}
 	}
 
-	save(data): Promise<any> {
-		if (!this.isOnline) data = data.forEach(item => ({ ...item, offline: true }));
+	async save(data): Promise<any> {
+		if (!this.isOnline) data = data.map(item => ({ ...item, offline: 1 }));
 
-		return this.#store.bulkPut(data);
+		await this.#records.init();
+		await this.#records.saveAll(data, this.#storeName);
 	}
 	#processControl(control, conditions) {
 		this.#store[control];
+	}
+
+	async upsert(data: IItemValues[], originalData: any[]): Promise<void> {
+		return this.#database.db.transaction("rw", this.store, async () => {
+			const instanceIdToIdMap = new Map<string, number>();
+			data.forEach(item => {
+				instanceIdToIdMap.set(item.instanceId, item.id);
+			});
+
+			await this.store.bulkPut(data);
+		});
 	}
 }
