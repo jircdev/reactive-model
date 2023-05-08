@@ -27,11 +27,6 @@ export class ItemLoadManager {
 	load = async (params: any) => {
 		try {
 			await this.#getProperty('checkReady')();
-			let id = params.id;
-			const parent = this.#parent;
-			parent.fetching = true;
-			if (!id) id = parent.id;
-
 			if (await this.#getProperty('localdb')) {
 				const localData = await this.#localProvider.load(params);
 				if (localData) this.#parent.set(localData);
@@ -53,7 +48,7 @@ export class ItemLoadManager {
 
 				if (!same) await this.#localProvider.save(remoteData);
 			}
-			return { status: true, data: remoteData };
+			return { status: true };
 		} catch (exc) {
 			console.error('ERROR LOAD', exc.message);
 			return { status: false, error: exc };
