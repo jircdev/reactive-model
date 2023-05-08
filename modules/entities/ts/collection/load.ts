@@ -100,7 +100,6 @@ export class CollectionLoadManager {
 	processEntries = (entries): any[] => {
 		return entries.map((record) => {
 			const item = new this.parent.item();
-			console.log(500, item);
 			item.set(record, true);
 			return item;
 		});

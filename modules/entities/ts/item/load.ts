@@ -37,7 +37,7 @@ export class ItemLoadManager {
 				if (localData) this.#parent.set(localData);
 			}
 
-			// if (this.#localProvider && !this.#localProvider.isOnline) return;
+			if (this.#localProvider && !this.#localProvider.isOnline) return;
 
 			if (!this.#provider) return console.warn('No provider');
 
@@ -53,7 +53,7 @@ export class ItemLoadManager {
 
 				if (!same) await this.#localProvider.save(remoteData);
 			}
-			return { status: true };
+			return { status: true, data: remoteData };
 		} catch (exc) {
 			console.error('ERROR LOAD', exc.message);
 			return { status: false, error: exc };
