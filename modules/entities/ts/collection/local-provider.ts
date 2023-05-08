@@ -37,7 +37,6 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<IProvider>
 	#parent;
 	constructor(parent, bridge) {
 		super();
-
 		const { db, storeName } = parent;
 		this.#parent = parent;
 		this.#records = FactoryRecords.get(db);

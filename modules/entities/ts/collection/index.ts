@@ -19,7 +19,7 @@ interface ICollectionProvider {
 }
 
 export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> {
-	#items: Array<string | undefined> = [];
+	#items: Array<any | undefined> = [];
 	protected localdb = true;
 	get items() {
 		return this.#items;
