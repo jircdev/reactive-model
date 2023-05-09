@@ -1,11 +1,11 @@
-import { ReactiveModel } from "@beyond-js/reactive-2/model";
+import { ReactiveModel } from '@beyond-js/reactive-2/model';
 
-import { IProvider } from "../interfaces/provider";
-import { liveQuery } from "dexie";
-import { PendingPromise } from "@beyond-js/kernel/core";
-import { DBManager, DatabaseManager } from "@beyond-js/reactive-2/database";
-import Dexie from "dexie";
-import { FactoryRecords } from "../registry/factory";
+import { IProvider } from '../interfaces/provider';
+import { liveQuery } from 'dexie';
+import { PendingPromise } from '@beyond-js/kernel/core';
+import { DBManager, DatabaseManager } from '@beyond-js/reactive-2/database';
+import Dexie from 'dexie';
+import { FactoryRecords } from '../registry/factory';
 
 interface IItemValues {
 	[key: string]: any;
@@ -32,7 +32,11 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<IProvider>
 
 	#db: Dexie;
 	get isOnline() {
+<<<<<<< HEAD
 		return this.#isOnline && !this.#offline && !localStorage.getItem("reactive.offline");
+=======
+		return this.#isOnline && !this.#offline && !localStorage.getItem('reactive.offline');
+>>>>>>> 922cd925180695a1176c78779df12b61727985cf
 	}
 	#parent;
 	constructor(parent, bridge) {
@@ -41,12 +45,21 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<IProvider>
 		this.#parent = parent;
 		this.#records = FactoryRecords.get(db);
 
+<<<<<<< HEAD
 		if (!db || !storeName) throw new Error("database and store are required");
 		this.#databaseName = db;
 		this.#storeName = storeName;
 
 		globalThis.addEventListener("online", this.handleConnection);
 		globalThis.addEventListener("offline", this.handleConnection);
+=======
+		if (!db || !storeName) throw new Error('database and store are required');
+		this.#databaseName = db;
+		this.#storeName = storeName;
+
+		globalThis.addEventListener('online', this.handleConnection);
+		globalThis.addEventListener('offline', this.handleConnection);
+>>>>>>> 922cd925180695a1176c78779df12b61727985cf
 	}
 
 	setOffline(value) {
@@ -100,11 +113,18 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<IProvider>
 		});
 
 		try {
+
+      // if (Object.keys(params).length === 0) {
+      //   const store = await this.#store;
+      //   const items = await store.toArray();
+      //   return { status: true, data: { entries: items } };
+      // }
+  
 			const live = liveQuery(() => this.#store.toArray());
 			live.subscribe({
 				next: items => {
 					if (this.#promiseLoad) {
-						this.#promiseLoad.resolve(items);
+						this.#promiseLoad.resolve({status: true, data: items});
 						this.#promiseLoad = null;
 					}
 
