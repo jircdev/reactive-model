@@ -93,19 +93,12 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<IProvider>
 
 		const controls = ['and', 'or'];
 		conditions.forEach((condition) => {
-			console.log(10, condition);
 			if (controls.includes(condition)) {
 				this.#processControl(condition, params[condition]);
 			}
 		});
 
 		try {
-			// if (Object.keys(params).length === 0) {
-			//   const store = await this.#store;
-			//   const items = await store.toArray();
-			//   return { status: true, data: { entries: items } };
-			// }
-
 			const live = liveQuery(() => this.#store.toArray());
 			live.subscribe({
 				next: (items) => {
@@ -145,7 +138,6 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<IProvider>
 			data.forEach((item) => {
 				instanceIdToIdMap.set(item.instanceId, item.id);
 			});
-			console.log(50, data);
 			await this.store.bulkPut(data);
 		});
 	}

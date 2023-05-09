@@ -21,14 +21,14 @@ export /*bundle*/ function hardcodeData(properties: Property[], count: number): 
 	const data: Element[] = [];
 	for (let i = 0; i < count; i++) {
 		const obj: Element = {};
-		properties.forEach(property => {
-			if (typeof property !== "string") {
+		properties.forEach((property) => {
+			if (typeof property !== 'string') {
 				obj[property.name] = property.value(i);
 				return;
 			}
-			if (property === "id") return;
+			if (property === 'id') return;
 
-			obj[property] = property === "year" ? getRandomInt(1900, 2023) : (obj[property] = `${property} ${i + 1}`);
+			obj[property] = property === 'year' ? getRandomInt(1900, 2023) : (obj[property] = `${property} ${i + 1}`);
 		});
 		data.push(obj);
 	}
@@ -47,4 +47,3 @@ export /*bundle*/ function hardcodeData(properties: Property[], count: number): 
 // 	],
 // 	10
 // );
-// console.log(books);

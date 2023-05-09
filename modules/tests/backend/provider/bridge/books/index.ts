@@ -29,7 +29,6 @@ export /*actions*/ /*bundle*/ class BookProvider {
 
 	async list() {
 		try {
-			console.log(9);
 			const user = new UserStore();
 			const entries = await user.loadAll();
 			return { status: true, data: { entries } };

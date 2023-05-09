@@ -60,7 +60,8 @@ export class CollectionLoadManager {
 
 			if (params.local === false || (await this.#parentBridge.get('localProvider'))) {
 				const localData = (await this.#localProvider.load(params)) ?? [];
-				const items = this.processEntries(localData);
+
+				const items = this.processEntries(localData.data);
 
 				this.#parentBridge.set('items', items);
 				if (!this.#localProvider.isOnline || !this.#provider) {

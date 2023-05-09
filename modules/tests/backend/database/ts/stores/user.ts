@@ -1,4 +1,4 @@
-import { DatabaseConnection } from "../connection";
+import { DatabaseConnection } from '../connection';
 
 interface User {
 	id: number;
@@ -21,7 +21,7 @@ export /*bundle*/ class UserStore {
 	async loadUser(id: number): Promise<User> {
 		await this.conn.connect();
 		const db = this.conn.connection;
-		const user = await db.get("SELECT * FROM users WHERE id = ?", id);
+		const user = await db.get('SELECT * FROM users WHERE id = ?', id);
 		await this.conn.disconnect();
 		return user as User;
 	}
@@ -35,10 +35,10 @@ export /*bundle*/ class UserStore {
 
 		if (existingUser) {
 			const { name, lastnames } = user;
-			data = await db.run("UPDATE users SET name = ?, lastnames = ? WHERE id = ?", name, lastnames, user.id);
+			data = await db.run('UPDATE users SET name = ?, lastnames = ? WHERE id = ?', name, lastnames, user.id);
 		} else {
 			const { id, name, lastnames } = user;
-			data = await db.run("INSERT INTO users (id, name, lastnames) VALUES (?, ?, ?)", id, name, lastnames);
+			data = await db.run('INSERT INTO users (id, name, lastnames) VALUES (?, ?, ?)', id, name, lastnames);
 			recordId = data.lastID;
 		}
 		const response = await this.loadUser(recordId);
@@ -49,7 +49,7 @@ export /*bundle*/ class UserStore {
 	async loadAll(options?: LoadAllOptions): Promise<User[]> {
 		await this.conn.connect();
 		const db = this.conn.connection;
-		let filter = "";
+		let filter = '';
 		let limit = 30;
 
 		if (options) {
@@ -71,9 +71,8 @@ export /*bundle*/ class UserStore {
 		await this.conn.connect();
 		const db = this.conn.connection;
 		const insertedUsers = [];
-		console.log("we will to save", users);
 		// Start a transaction
-		await db.run("BEGIN TRANSACTION");
+		await db.run('BEGIN TRANSACTION');
 
 		try {
 			for (const user of users) {
@@ -81,7 +80,7 @@ export /*bundle*/ class UserStore {
 				await db.run(insertQuery, [user.name, user.lastnames]);
 
 				// Get the last inserted id
-				const lastIdResult = await db.get("SELECT last_insert_rowid() as lastId");
+				const lastIdResult = await db.get('SELECT last_insert_rowid() as lastId');
 				const lastId = lastIdResult.lastId;
 
 				// Create a new user object with the inserted id
@@ -90,12 +89,12 @@ export /*bundle*/ class UserStore {
 			}
 
 			// Commit the transaction
-			await db.run("COMMIT");
+			await db.run('COMMIT');
 		} catch (error) {
-			console.error("Error inserting users:", error);
+			console.error('Error inserting users:', error);
 
 			// Rollback the transaction in case of an error
-			await db.run("ROLLBACK");
+			await db.run('ROLLBACK');
 			this.conn.disconnect();
 			throw error;
 		}
