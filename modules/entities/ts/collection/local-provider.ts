@@ -89,8 +89,11 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<IProvider>
     }
 
     const conditions = Object.keys(params);
+
+    
     const controls = ["and", "or"];
     conditions.forEach(condition => {
+      console.log(10, condition)
       if (controls.includes(condition)) {
         this.#processControl(condition, params[condition]);
       }
