@@ -88,6 +88,12 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<IProvider>
 			return;
 		}
 
+		if (Object.keys(params).length === 0) {
+			const store = await this.#store;
+			const items = await store.toArray();
+			return { status: true, data: { entries: items } };
+		}
+
 		const conditions = Object.keys(params);
 
 		const controls = ['and', 'or'];
