@@ -13,10 +13,10 @@ export class ItemLoadManager {
 	}
 
 	init = async () => {
-		this.#parent.load = this.load;
-
 		this.#localProvider = this.#getProperty('localProvider');
 		this.#provider = this.#getProperty('provider');
+
+		this.#parent.load = this.load;
 	};
 
 	/**
@@ -32,7 +32,7 @@ export class ItemLoadManager {
 				if (localData) this.#parent.set(localData);
 			}
 
-			if (this.#localProvider && !this.#localProvider.isOnline) return;
+			// if (this.#localProvider && !this.#localProvider.isOnline) return { status: true };
 
 			if (!this.#provider) return console.warn('No provider');
 
@@ -48,6 +48,9 @@ export class ItemLoadManager {
 
 				if (!same) await this.#localProvider.save(remoteData);
 			}
+
+			this.#parent.found = true;
+
 			return { status: true };
 		} catch (exc) {
 			console.error('ERROR LOAD', exc.message);

@@ -30,6 +30,11 @@ interface IProps {
 
 export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 	protected schema: unknown;
+	#isReactive: boolean = true;
+	get isReactive() {
+		return this.#isReactive;
+	}
+
 	[key: string]: any;
 
 	fetching!: boolean;

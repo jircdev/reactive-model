@@ -1,10 +1,10 @@
-import { ReactiveModel } from "@beyond-js/reactive-2/model";
-import { IProvider } from "../interfaces/provider";
-import { PendingPromise } from "@beyond-js/kernel/core";
-import { DBManager, DatabaseManager } from "@beyond-js/reactive-2/database";
-import Dexie from "dexie";
-import { FactoryRecords } from "../registry/factory";
-import type { Registry } from "../registry";
+import { ReactiveModel } from '@beyond-js/reactive-2/model';
+import { IProvider } from '../interfaces/provider';
+import { PendingPromise } from '@beyond-js/kernel/core';
+import { DBManager, DatabaseManager } from '@beyond-js/reactive-2/database';
+import Dexie from 'dexie';
+import { FactoryRecords } from '../registry/factory';
+import type { Registry } from '../registry';
 export /*bundle*/
 class LocalProvider extends ReactiveModel<IProvider> {
 	#isOnline = globalThis.navigator.onLine;
@@ -31,7 +31,7 @@ class LocalProvider extends ReactiveModel<IProvider> {
 	#db: Dexie;
 
 	get isOnline() {
-		return this.#isOnline && !this.#offline && !localStorage.getItem("reactive.offline");
+		return this.#isOnline && !this.#offline && !localStorage.getItem('reactive.offline');
 	}
 
 	#parent;
@@ -57,12 +57,12 @@ class LocalProvider extends ReactiveModel<IProvider> {
 		this.__id = Math.floor(Math.random() * (100000 - 1000 + 1)) + 1000;
 		this.#parent = parent;
 
-		if (!db || !storeName) throw new Error("database and store are required");
+		if (!db || !storeName) throw new Error('database and store are required');
 		this.#databaseName = db;
 		this.#storeName = storeName;
 		this.#records = FactoryRecords.get(db);
-		globalThis.addEventListener("online", this.handleConnection);
-		globalThis.addEventListener("offline", this.handleConnection);
+		globalThis.addEventListener('online', this.handleConnection);
+		globalThis.addEventListener('offline', this.handleConnection);
 	}
 
 	setOffline(value) {
@@ -89,7 +89,7 @@ class LocalProvider extends ReactiveModel<IProvider> {
 	isUnpublished(data) {
 		const properties = Object.keys(data);
 		if (!this.#originalData) return true;
-		return properties.some(prop => this.#originalData[prop] !== data[prop]);
+		return properties.some((prop) => this.#originalData[prop] !== data[prop]);
 	}
 
 	async load(params: any = {}) {
@@ -97,7 +97,7 @@ class LocalProvider extends ReactiveModel<IProvider> {
 		id = id ?? this.#parent.id;
 
 		try {
-			if (!id) throw new Error("id is required");
+			if (!id) throw new Error('id is required');
 			await this.#getRegistry(id);
 			this.#parent.loaded = true;
 
@@ -116,13 +116,13 @@ class LocalProvider extends ReactiveModel<IProvider> {
 	 * @param id id of the record
 	 * @returns
 	 */
-	#getRegistry = async id => {
+	#getRegistry = async (id) => {
 		const registry = await this.#records.load(this.#storeName, id);
 
 		this.#parent.set(registry.values);
 		this.#registry = registry;
 
-		registry.on("change", this.#listenRegistry);
+		registry.on('change', this.#listenRegistry);
 		return registry;
 	};
 
@@ -132,28 +132,25 @@ class LocalProvider extends ReactiveModel<IProvider> {
 	#listenRegistry = async () => {
 		if (!this.#registry) return;
 		this.#parent.set(this.#registry.values);
-		this.trigger("change");
+		this.trigger('change');
 	};
 
 	async save(data, backend = false) {
 		try {
 			if (!this.isUnpublished) return;
 			if (!this.isOnline) data.offline = true;
-			if (!this.#registry) {
-				await this.#getRegistry("new");
-			}
+			if (!this.#registry) await this.#getRegistry('new');
 
 			// Add validation for unique fields
 			const duplicated = await this.validateUniqueFields(data);
-			if (duplicated.length) {
-				return { error: "duplicated", fields: duplicated };
-			}
+			if (duplicated.length) return { error: 'duplicated', fields: duplicated };
+
 			await this.#registry.update(data, backend);
 			this.#parent.set(this.#registry.values);
 
 			return this;
 		} catch (e) {
-			console.error("error saving", e.message);
+			console.error('error saving', e.message);
 		}
 	}
 
@@ -166,14 +163,14 @@ class LocalProvider extends ReactiveModel<IProvider> {
 	}
 
 	async validateUniqueFields(data) {
-		if (!this.#getProperty("unique").length) return [];
+		if (!this.#getProperty('unique').length) return [];
 
-		const checkPromises = this.#getProperty("unique").map(field =>
+		const checkPromises = this.#getProperty('unique').map((field) =>
 			this.#store
 				.where(field)
 				.equals(data[field])
 				.count()
-				.then(count => {
+				.then((count) => {
 					if (count) {
 						return field;
 					}
@@ -181,7 +178,7 @@ class LocalProvider extends ReactiveModel<IProvider> {
 				})
 		);
 
-		const duplicateFields = (await Promise.all(checkPromises)).filter(field => field !== null);
+		const duplicateFields = (await Promise.all(checkPromises)).filter((field) => field !== null);
 
 		return duplicateFields;
 	}
