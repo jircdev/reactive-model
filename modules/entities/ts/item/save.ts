@@ -30,19 +30,29 @@ export class ItemSaveManager {
 				await this.#parent.localProvider.save(properties);
 			}
 
-			return this.#publish(properties);
+			this.#publish(properties);
+			this.#parent.triggerEvent();
+
+			return { status: true };
 		} catch (e) {
 			console.error('error saving', e);
 		}
 	};
 
 	#publish = async (properties) => {
-		if (!this.#parent.provider || !this.#parent.isOnline) return;
-		const response = await this.#parent.provider.publish(properties);
-		if (this.#parent.localProvider) {
-			// this.#parenst.set()
-			this.#parent.localProvider.save(response.data, true);
-			this.#parent.localProvider.triggerEvent();
+		try {
+			if (!this.#parent.provider || !this.#parent.isOnline) return;
+			const response = await this.#parent.provider.publish(properties);
+			if (!response?.status) throw response.error;
+
+			if (this.#parent.localProvider) {
+				this.#parent.localProvider.save(response.data, true);
+				this.#parent.localProvider.triggerEvent();
+			}
+			return { status: true, data: response };
+		} catch (error) {
+			console.error('ERROR PUBLISHING', error);
+			return { status: false, error };
 		}
 	};
 

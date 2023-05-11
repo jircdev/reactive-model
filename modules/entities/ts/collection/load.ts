@@ -59,8 +59,7 @@ export class CollectionLoadManager {
 			start = start ?? (update === true && next ? next : 0);
 
 			if (params.local === false || (await this.#parentBridge.get('localProvider'))) {
-				const localData = (await this.#localProvider.load(params)) ?? [];
-
+				const localData = (await this.#localProvider.load(params)) ?? { data: [] };
 				const items = this.processEntries(localData.data);
 
 				this.#parentBridge.set('items', items);
@@ -71,7 +70,6 @@ export class CollectionLoadManager {
 
 			const remoteData = await this.#provider.list(params);
 			const { status, data, error } = remoteData;
-
 			if (!status) throw error ?? 'ERROR_LIST_QUERY';
 
 			const items: any[] = this.processEntries(data.entries);
@@ -85,7 +83,6 @@ export class CollectionLoadManager {
 				total: data.total ?? 0,
 			};
 			this.parent.set(properties);
-
 			this.parent.triggerEvent();
 
 			if (this.#localProvider) this.#localProvider.save(data.entries);

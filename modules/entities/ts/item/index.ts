@@ -142,6 +142,8 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 				this[property] = data[property];
 			}
 		});
+
+		this.triggerEvent();
 	}
 
 	/**

@@ -28,6 +28,7 @@ export class Registry extends ReactiveModel<IRegistry> {
 	}
 	constructor(store, data: IRegistry = { id: 'new' }) {
 		super();
+
 		const { id } = data;
 		this.#store = store;
 		this.#instanceId = Registry.generateUUID();
@@ -73,6 +74,7 @@ export class Registry extends ReactiveModel<IRegistry> {
 
 	setValues = (data, backend = false) => {
 		const props = Object.keys(data);
+
 		let updated = false;
 		// specify if the item was generated locally
 		if (backend) {
@@ -88,11 +90,16 @@ export class Registry extends ReactiveModel<IRegistry> {
 			this.#values.instanceId = this.#instanceId;
 		}
 
+		const newValues = { ...this.#values };
 		props.forEach((property) => {
-			if (data[property] === this.#values[property]) return;
-			this.#values[property] = data[property];
+			if (data[property] === newValues[property]) return;
+			newValues[property] = data[property];
 			updated = true;
 		});
+
+		this.#values = newValues;
+
+		this.triggerEvent();
 		return updated;
 	};
 
@@ -113,20 +120,9 @@ export class Registry extends ReactiveModel<IRegistry> {
 	update = async (data: any, backend) => {
 		const updated = this.setValues(data, backend);
 
-		Object.entries(data).forEach(([key, value]) => {
-			const isReactive = value && typeof value === 'object' && 'isReactive' in value && value?.isReactive;
-
-			if (isReactive) {
-				data[key] = value.getProperties();
-				return;
-			}
-
-			data[key] = value;
-		});
-
 		if (updated) {
-			await this.#store.put(this.#values);
-			this.trigger('change');
+			const response = await this.#store.put(this.#values);
+			this.triggerEvent('change');
 		}
 	};
 }

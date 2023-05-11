@@ -118,7 +118,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<IProvider>
 			//return await this.live.toArray();
 		} catch (error) {
 			console.error('Error al cargar los elementos del store:', error);
-			return [];
+			return { status: false, data: [] };
 		}
 	}
 

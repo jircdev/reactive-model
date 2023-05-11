@@ -44,7 +44,7 @@ class LocalProvider extends ReactiveModel<IProvider> {
 	 * @type {Registry} Database Record
 	 *
 	 */
-	#registry;
+	#registry: Registry;
 
 	get registry() {
 		return this.#registry;
@@ -97,12 +97,11 @@ class LocalProvider extends ReactiveModel<IProvider> {
 		id = id ?? this.#parent.id;
 
 		try {
-			if (!id) throw new Error('id is required');
+			if (!id) throw 'ID IS REQUIRED';
 			await this.#getRegistry(id);
 			this.#parent.loaded = true;
-
 			this.#parent.set(this.#registry.values);
-			return { status: true };
+			return { status: true, data: this.#registry.values };
 		} catch (e) {
 			console.error(e);
 			return e;
@@ -118,6 +117,7 @@ class LocalProvider extends ReactiveModel<IProvider> {
 	 */
 	#getRegistry = async (id) => {
 		const registry = await this.#records.load(this.#storeName, id);
+		if (!registry) return console.warn('NO RECORD FOUND');
 
 		this.#parent.set(registry.values);
 		this.#registry = registry;
@@ -146,7 +146,6 @@ class LocalProvider extends ReactiveModel<IProvider> {
 			if (duplicated.length) return { error: 'duplicated', fields: duplicated };
 
 			await this.#registry.update(data, backend);
-			this.#parent.set(this.#registry.values);
 
 			return this;
 		} catch (e) {
@@ -179,7 +178,6 @@ class LocalProvider extends ReactiveModel<IProvider> {
 		);
 
 		const duplicateFields = (await Promise.all(checkPromises)).filter((field) => field !== null);
-
 		return duplicateFields;
 	}
 }

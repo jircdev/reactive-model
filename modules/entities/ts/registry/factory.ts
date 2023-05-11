@@ -1,7 +1,7 @@
-import { ReactiveModel } from "@beyond-js/reactive-2/model";
-import { Registry } from "./index";
-import { PendingPromise } from "@beyond-js/kernel/core";
-import { DBManager, DatabaseManager } from "@beyond-js/reactive-2/database";
+import { ReactiveModel } from '@beyond-js/reactive-2/model';
+import { Registry } from './index';
+import { PendingPromise } from '@beyond-js/kernel/core';
+import { DBManager, DatabaseManager } from '@beyond-js/reactive-2/database';
 
 interface IRecords {
 	stores: Map<string, Map<string, Registry>>;
@@ -29,7 +29,7 @@ export class /*bundle*/ FactoryRecords extends ReactiveModel<IRecords> {
 		this.ready = true;
 	}
 
-	async load(storeName, id = "new") {
+	async load(storeName: string, id = 'new') {
 		const store = this.#database.db[storeName];
 		if (!store) throw new Error(`Store ${storeName} does not exists`);
 		// if the store map does not exists, create it
@@ -64,7 +64,7 @@ export class /*bundle*/ FactoryRecords extends ReactiveModel<IRecords> {
 	 */
 
 	async saveAll(items, storeName) {
-		const elements = items.map(item => {
+		const elements = items.map((item) => {
 			const registry = new Registry(storeName);
 			registry.setValues(item);
 			return registry;
@@ -75,14 +75,14 @@ export class /*bundle*/ FactoryRecords extends ReactiveModel<IRecords> {
 		const chunks = [];
 		while (elements.length > 0) {
 			const batch = elements.splice(0, this.#batches);
-			const data = batch.map(item => item.getValues());
+			const data = batch.map((item) => item.getValues());
 			chunks.push(data);
 			promises.push(store.bulkPut(data));
 		}
 		try {
 			const results = await Promise.allSettled(promises);
 			const mappedFn = (result, index) => ({ ...result, index, data: chunks[index] });
-			const failed = results.map(mappedFn).filter(result => result.status === "rejected");
+			const failed = results.map(mappedFn).filter((result) => result.status === 'rejected');
 			if (!failed.length) return { status: true };
 			else {
 				return { status: false, failed };

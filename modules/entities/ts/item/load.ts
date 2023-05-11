@@ -27,12 +27,11 @@ export class ItemLoadManager {
 	load = async (params: any) => {
 		try {
 			await this.#getProperty('checkReady')();
-			if (await this.#getProperty('localdb')) {
+			const localdb = await this.#getProperty('localdb');
+			if (localdb && !this.#localProvider.isOnline) {
 				const localData = await this.#localProvider.load(params);
-				if (localData) this.#parent.set(localData);
+				if (localData?.status) this.#parent.set(localData.data, true);
 			}
-
-			// if (this.#localProvider && !this.#localProvider.isOnline) return { status: true };
 
 			if (!this.#provider) return console.warn('No provider');
 
@@ -45,15 +44,13 @@ export class ItemLoadManager {
 					let original = this.#localProvider.registry.values;
 					if (original[key] !== remoteData[key]) same = false;
 				});
-
 				if (!same) await this.#localProvider.save(remoteData);
 			}
 
 			this.#parent.found = true;
-
 			return { status: true };
 		} catch (exc) {
-			console.error('ERROR LOAD', exc.message);
+			console.error('ERROR LOAD', exc);
 			return { status: false, error: exc };
 		} finally {
 			this.#parent.fetching = false;
@@ -62,6 +59,7 @@ export class ItemLoadManager {
 
 	remoteLoad = async (params) => {
 		// TODO: CHANGE TO LOAD
+		if (!this.#parent.isOnline) return;
 		const response = await this.#provider.data(params);
 		if (!response.status) throw 'ERROR_DATA_QUERY';
 		return response.data;
