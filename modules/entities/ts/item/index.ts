@@ -24,7 +24,7 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 	 */
 	#localData = new Map();
 	protected localdb = true;
-	protected provider: IProvider;
+	protected provider: any;
 	protected storeName: string;
 	protected db: string;
 	#ignoredFields: Array<string> = [];

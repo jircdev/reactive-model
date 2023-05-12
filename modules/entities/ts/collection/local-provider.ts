@@ -12,7 +12,7 @@ interface IItemValues {
 	offline: number;
 	instanceId: string;
 }
-export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<IProvider> {
+export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 	#isOnline = globalThis.navigator.onLine;
 	#store!: Dexie.Table<any, any>;
 	get store() {
