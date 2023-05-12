@@ -59,10 +59,8 @@ export class CollectionSaveManager {
     try {
       console.log("chunk", chunk);
       const response = await this.#provider.bulkSave(chunk);
-      console.log("response======", response);
       if (response.status) {
         const data = response.data.entries.map(item => ({ ...item, offline: 0, instanceId: undefined }));
-
         await this.#localProvider.upsert(data, chunk);
         console.log("upsert");
         return { success: true, chunk, response };
