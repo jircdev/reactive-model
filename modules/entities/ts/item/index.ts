@@ -1,10 +1,10 @@
-import Dexie from 'dexie';
-import { ReactiveModel, reactiveProps } from '@beyond-js/reactive-2/model';
-import { IProvider } from '../interfaces/provider';
-import { LocalProvider } from './local-provider';
-import { ItemSaveManager } from './save';
-import { ItemLoadManager } from './load';
-import { PendingPromise } from '@beyond-js/kernel/core';
+import Dexie from "dexie";
+import { ReactiveModel, reactiveProps } from "@beyond-js/reactive-2/model";
+import { IProvider } from "../interfaces/provider";
+import { LocalProvider } from "./local-provider";
+import { ItemSaveManager } from "./save";
+import { ItemLoadManager } from "./load";
+import { PendingPromise } from "@beyond-js/kernel/core";
 
 export interface IITem {
 	provider: any;
@@ -51,7 +51,7 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 	}
 
 	get isOnline() {
-		return this.localProvider.isOnline && !localStorage.getItem('reactive.offline');
+		return this.localProvider.isOnline && !localStorage.getItem("reactive.offline");
 	}
 
 	#found;
@@ -75,7 +75,7 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 
 	constructor() {
 		super();
-		this.on('object.loaded', this.checkReady);
+		this.on("object.loaded", this.checkReady);
 	}
 
 	protected async init(config: { id?: string | number } = {}) {
@@ -83,15 +83,15 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 			let id;
 			if (config.id) id = config.id;
 
-			const getProperty = (property) => this.__get(property);
+			const getProperty = property => this.__get(property);
 
 			this.localProvider = new LocalProvider(this, getProperty);
 			this.#saveManager = new ItemSaveManager(this, getProperty);
 			this.#loadManager = new ItemLoadManager(this, getProperty);
 
 			if (!id) {
-				this.trigger('object.loaded');
-				id = 'new';
+				this.trigger("object.loaded");
+				id = "new";
 			}
 
 			await this.localProvider.init(id);
@@ -100,9 +100,9 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 			}
 			this.#ready = true;
 
-			this.trigger('object.loaded');
+			this.trigger("object.loaded");
 		} catch (e) {
-			console.error('error initializing', e);
+			console.error("error initializing", e);
 		}
 	}
 
@@ -119,11 +119,11 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 			this.#promiseReady.resolve(this.#objectReady);
 			this.#promiseReady = undefined;
 		};
-		this.on('object.loaded', onReady);
+		this.on("object.loaded", onReady);
 		return this.#promiseReady;
 	};
 
-	setOffline = (value) => this.localProvider.setOffline(value);
+	setOffline = value => this.localProvider.setOffline(value);
 
 	addLocalProvider(db: string, table: string) {
 		if (this.localProvider) return;
@@ -137,7 +137,7 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 		}
 
 		// If a property is in the properties array, define it as a public property
-		this.properties.forEach((property) => {
+		this.properties.forEach(property => {
 			if (data.hasOwnProperty(property)) {
 				this[property] = data[property];
 			}
@@ -154,7 +154,7 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 		const values = {};
 		const toIterate = this.skeleton.length ? this.skeleton : this.properties;
 
-		toIterate.forEach((field) => {
+		toIterate.forEach(field => {
 			if (this.hasOwnProperty(field)) values[field] = this[field];
 		});
 		return values;

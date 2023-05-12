@@ -1,10 +1,11 @@
 import { UserStore } from "@beyond-js/reactive-2/tests/backend/database";
-import { Server, Socket } from "socket.io";
+import type { Server, Socket } from "socket.io";
 
 export /*actions*/ /*bundle*/ class UserProvider {
 	socket: Server;
 	constructor(socket: Server) {
 		this.socket = socket;
+		console.log(10, this.socket);
 	}
 	async publish(data) {
 		try {
