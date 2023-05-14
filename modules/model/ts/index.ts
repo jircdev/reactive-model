@@ -99,7 +99,7 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 	set(properties: Partial<ReactiveModelPublic<T>>): void {
 		let props: Partial<ReactiveModelPublic<T>> = Object.keys(properties);
 		let updated = false;
-		Object.keys(properties).forEach((prop) => {
+		Object.keys(properties).forEach(prop => {
 			const sameObject =
 				typeof properties[prop] === 'object' && JSON.stringify(properties[prop]) === JSON.stringify(this[prop]);
 			if (this[prop] === properties[prop] || sameObject) return;
@@ -114,7 +114,7 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 		const props: Record<string, any> = {};
 		const properties = this.properties || this.skeleton;
 
-		properties.forEach((property) => {
+		properties.forEach(property => {
 			props[property] = this[property];
 		});
 		return props;

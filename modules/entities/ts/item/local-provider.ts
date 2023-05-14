@@ -88,8 +88,12 @@ class LocalProvider extends ReactiveModel<IProvider> {
 
 	isUnpublished(data) {
 		const properties = Object.keys(data);
-		if (!this.#originalData) return true;
-		return properties.some((prop) => this.#originalData[prop] !== data[prop]);
+		const toCompare = { ...this.#registry.values };
+
+		return properties.some(prop => {
+			if (prop === 'id') return false;
+			return toCompare[prop] !== data[prop];
+		});
 	}
 
 	async load(params: any = {}) {
@@ -115,7 +119,7 @@ class LocalProvider extends ReactiveModel<IProvider> {
 	 * @param id id of the record
 	 * @returns
 	 */
-	#getRegistry = async (id) => {
+	#getRegistry = async id => {
 		const registry = await this.#records.load(this.#storeName, id);
 		if (!registry) return console.warn('NO RECORD FOUND');
 
@@ -164,12 +168,12 @@ class LocalProvider extends ReactiveModel<IProvider> {
 	async validateUniqueFields(data) {
 		if (!this.#getProperty('unique').length) return [];
 
-		const checkPromises = this.#getProperty('unique').map((field) =>
+		const checkPromises = this.#getProperty('unique').map(field =>
 			this.#store
 				.where(field)
 				.equals(data[field])
 				.count()
-				.then((count) => {
+				.then(count => {
 					if (count) {
 						return field;
 					}
@@ -177,7 +181,7 @@ class LocalProvider extends ReactiveModel<IProvider> {
 				})
 		);
 
-		const duplicateFields = (await Promise.all(checkPromises)).filter((field) => field !== null);
+		const duplicateFields = (await Promise.all(checkPromises)).filter(field => field !== null);
 		return duplicateFields;
 	}
 }

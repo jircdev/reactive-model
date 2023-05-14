@@ -15,7 +15,7 @@ export class ItemSaveManager {
 
 	save = async (data = undefined) => {
 		try {
-			await this.#getProperty('checkReady')();
+			await this.#getProperty("checkReady")();
 			if (data) {
 				this.#parent.set(data);
 			}
@@ -35,11 +35,11 @@ export class ItemSaveManager {
 
 			return { status: true };
 		} catch (e) {
-			console.error('error saving', e);
+			console.error("error saving", e);
 		}
 	};
 
-	#publish = async (properties) => {
+	#publish = async properties => {
 		try {
 			if (!this.#parent.provider || !this.#parent.isOnline) return;
 			const response = await this.#parent.provider.publish(properties);
@@ -51,7 +51,7 @@ export class ItemSaveManager {
 			}
 			return { status: true, data: response };
 		} catch (error) {
-			console.error('ERROR PUBLISHING', error);
+			console.error("ERROR PUBLISHING", error);
 			return { status: false, error };
 		}
 	};
@@ -59,10 +59,10 @@ export class ItemSaveManager {
 	publish = this.save;
 
 	sync = () => {
-		const provider = this.#getProperty('localProvider');
+		const provider = this.#getProperty("localProvider");
 
 		if (!provider.registry.values.offline) {
-			console.warn('registry already synced');
+			console.warn("registry already synced");
 			return;
 		}
 

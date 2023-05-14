@@ -74,6 +74,7 @@ export class CollectionLoadManager {
 
 			const items: any[] = this.processEntries(data.entries);
 
+			console.log(70, items, this.parent.items, this.parent.items.concat(items));
 			let itemsValue = params.update === true ? this.parent.items.concat(items) : items;
 			const properties = {
 				items: itemsValue,
@@ -96,14 +97,14 @@ export class CollectionLoadManager {
 	};
 
 	processEntries = (entries): any[] => {
-		return entries.map((record) => {
+		return entries.map(record => {
 			const item = new this.parent.item();
 			item.set(record, true);
 			return item;
 		});
 	};
 
-	remoteLoad = async (params) => {
+	remoteLoad = async params => {
 		const response = await this.#provider.load(params);
 
 		if (!response.status) throw 'ERROR_DATA_QUERY';
