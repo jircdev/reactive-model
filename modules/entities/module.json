@@ -1,7 +1,7 @@
 {
 	"name": "entities",
 	"description": "Collection and Item abstract models",
-	"platforms": ["web", "android", "ios"],
+	"platforms": ["web", "backend", "android", "ios"],
 	"ts": {
 		"path": "ts",
 		"files": ["*"]

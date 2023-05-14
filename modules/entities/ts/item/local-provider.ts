@@ -6,7 +6,7 @@ import Dexie from 'dexie';
 import { FactoryRecords } from '../registry/factory';
 import type { Registry } from '../registry';
 export /*bundle*/
-class LocalProvider extends ReactiveModel<IProvider> {
+class LocalProvider extends ReactiveModel<any> {
 	#isOnline = globalThis.navigator.onLine;
 	#store!: Dexie.Table<any, any>;
 	get store() {
@@ -102,7 +102,7 @@ class LocalProvider extends ReactiveModel<IProvider> {
 
 		try {
 			if (!id) throw 'ID IS REQUIRED';
-			await this.#getRegistry(id);
+			const values = await this.#getRegistry(id);
 			this.#parent.loaded = true;
 			this.#parent.set(this.#registry.values);
 			return { status: true, data: this.#registry.values };

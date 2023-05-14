@@ -1,4 +1,4 @@
-import type { LocalProvider } from "../item/local-provider";
+import type { LocalProvider } from '../item/local-provider';
 
 export class CollectionSaveManager {
 	#parent;
@@ -21,14 +21,14 @@ export class CollectionSaveManager {
 		this.#parent.publish = this.publish;
 		this.#parent.toSync = this.toSync;
 
-		this.#localdb = this.#bridge.get("localdb");
+		this.#localdb = this.#bridge.get('localdb');
 		if (this.#localdb) {
-			this.#localProvider = this.#bridge.get("localProvider");
+			this.#localProvider = this.#bridge.get('localProvider');
 		} else {
-			console.warn("la colleccion no usa indexeddb");
+			console.warn('la colleccion no usa indexeddb');
 		}
 
-		this.#provider = this.#bridge.get("provider");
+		this.#provider = this.#bridge.get('provider');
 	}
 
 	save = async (data = []): Promise<any> => {
@@ -41,7 +41,7 @@ export class CollectionSaveManager {
 	publish = async (data = []): Promise<any> => {
 		try {
 			await this.save(data);
-			if (!this.#provider || this.#bridge.get("isOffline")) return;
+			if (!this.#provider || this.#bridge.get('isOffline')) return;
 
 			const response = await this.#provider.bulkSave(data);
 			if (!response.status) throw response.error;
@@ -57,7 +57,6 @@ export class CollectionSaveManager {
 	sendChunk = async (chunk, index, retries = 0) => {
 		try {
 			const response = await this.#provider.bulkSave(chunk);
-
 			if (response.status) {
 				const data = response.data.entries.map(item => ({ ...item, offline: 0, instanceId: undefined }));
 
@@ -87,10 +86,9 @@ export class CollectionSaveManager {
 	sync = async () => {
 		try {
 			await this.#localProvider.init();
-			const data = await this.#parent.localProvider.store.where("offline").equals(1).toArray();
+			const data = await this.#parent.localProvider.store.where('offline').equals(1).toArray();
 
 			const chunks = this.splitDataIntoChunks(data);
-
 			const failedChunks = [];
 
 			for (const [index, chunk] of chunks.entries()) {
@@ -100,10 +98,10 @@ export class CollectionSaveManager {
 					failedChunks.push(result);
 				}
 			}
-			this.#bridge.set("items", []);
+			this.#bridge.set('items', []);
 			await this.#parent.load();
 			if (failedChunks.length) {
-				const message = failedChunks.length === chunks.length ? "FAILED_SYNC" : "INCOMPLETE_SYNC";
+				const message = failedChunks.length === chunks.length ? 'FAILED_SYNC' : 'INCOMPLETE_SYNC';
 				return { status: false, message, data: failedChunks };
 			}
 
@@ -117,7 +115,7 @@ export class CollectionSaveManager {
 		try {
 			await this.#localProvider.init();
 
-			return this.#localProvider.store.where("offline").equals(1).toArray();
+			return this.#localProvider.store.where('offline').equals(1).toArray();
 		} catch (e) {
 			console.error(e);
 		}

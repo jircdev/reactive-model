@@ -98,7 +98,6 @@ export class Registry extends ReactiveModel<IRegistry> {
 		});
 
 		this.#values = newValues;
-
 		this.triggerEvent();
 		return updated;
 	};
@@ -119,9 +118,8 @@ export class Registry extends ReactiveModel<IRegistry> {
 
 	update = async (data: any, backend) => {
 		const updated = this.setValues(data, backend);
-
 		if (updated) {
-			const response = await this.#store.put(this.#values);
+			await this.#store.put(this.#values);
 			this.triggerEvent('change');
 		}
 	};
