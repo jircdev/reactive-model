@@ -1,12 +1,19 @@
 import type { Collection } from '.';
 import { PendingPromise } from '@beyond-js/kernel/core';
+import type { CollectionLocalProvider } from './local-provider';
+interface ILoadResponse {
+	localLoaded: true;
+	fetching: false;
+	total: number;
+	next?: boolean | number | string;
+}
 export class CollectionLoadManager {
 	#parent: Collection;
 	get parent() {
 		return this.#parent;
 	}
 
-	#localProvider;
+	#localProvider: CollectionLocalProvider;
 	#provider;
 	#getProperty;
 	#parentBridge;
@@ -50,22 +57,44 @@ export class CollectionLoadManager {
 	 * load({status:1})
 	 */
 
+	#localData = [];
+	#page = 1;
+	#remoteElements = [];
 	load = async (params: any = {}) => {
 		try {
 			this.parent.fetching = true;
-			let { start = 1, update } = params;
+			let { start = 0, update } = params;
 
+			params.limit = params.limit ?? 30;
 			const { next } = this.parent;
-			start = start ?? (update === true && next ? next : 0);
+			if (update) this.#page++;
+			start = update === true && next ? next : start;
+			if (update) {
+				params.start = start;
+			}
 
-			if (params.local === false || (await this.#parentBridge.get('localProvider'))) {
+			if (await this.#parentBridge.get('localProvider')) {
 				const localData = (await this.#localProvider.load(params)) ?? { data: [] };
-				const items = this.processEntries(localData.data);
 
-				this.#parentBridge.set('items', items);
+				const newItems = this.processEntries(localData.data);
+
+				let items = params.update === true ? this.parent.items.concat(newItems) : newItems;
+
+				// this.#parentBridge.set('items', items);
 				if (!this.#localProvider.isOnline || !this.#provider) {
+					this.parent.set({ localLoaded: true, fetching: false, total: localData.total });
 					return { status: true, data: items };
 				}
+
+				const properties: ILoadResponse = {
+					localLoaded: true,
+					fetching: false,
+					total: localData.total ?? 0,
+					next: !!localData.next,
+				};
+				if (localData.next) properties.next = localData.next;
+
+				this.parent.set(properties);
 			}
 
 			const remoteData = await this.#provider.list(params);
@@ -73,20 +102,22 @@ export class CollectionLoadManager {
 			if (!status) throw error ?? 'ERROR_LIST_QUERY';
 
 			const items: any[] = this.processEntries(data.entries);
+			if (this.#localProvider) this.#localProvider.save(data.entries);
 
-			console.log(70, items, this.parent.items, this.parent.items.concat(items));
-			let itemsValue = params.update === true ? this.parent.items.concat(items) : items;
+			// let itemsValue = params.update === true ? this.#remoteElements.concat(items) : items;
+			this.#remoteElements = this.#remoteElements.concat(items);
+
 			const properties = {
-				items: itemsValue,
+				items: this.#remoteElements,
 				next: data.next,
 				loaded: true,
 				fetching: false,
 				total: data.total ?? 0,
 			};
+
 			this.parent.set(properties);
 			this.parent.triggerEvent();
 
-			if (this.#localProvider) this.#localProvider.save(data.entries);
 			return { status: true, data: items };
 		} catch (exc) {
 			console.error('ERROR LOAD', exc);
@@ -96,10 +127,18 @@ export class CollectionLoadManager {
 		}
 	};
 
-	processEntries = (entries): any[] => {
+	processRemoteEntries(entries): any[] {
 		return entries.map(record => {
 			const item = new this.parent.item();
 			item.set(record, true);
+			return item;
+		});
+	}
+
+	processEntries = (entries): any[] => {
+		return entries.map(record => {
+			const item = new this.parent.item();
+			item.set(record);
 			return item;
 		});
 	};

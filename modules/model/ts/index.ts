@@ -107,6 +107,7 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 			this[prop] = properties[prop];
 			updated = true;
 		});
+
 		if (updated) this.triggerEvent();
 	}
 

@@ -102,7 +102,9 @@ class LocalProvider extends ReactiveModel<any> {
 
 		try {
 			if (!id) throw 'ID IS REQUIRED';
+
 			const values = await this.#getRegistry(id);
+
 			this.#parent.loaded = true;
 			this.#parent.set(this.#registry.values);
 			return { status: true, data: this.#registry.values };
@@ -120,6 +122,7 @@ class LocalProvider extends ReactiveModel<any> {
 	 * @returns
 	 */
 	#getRegistry = async id => {
+		console.log('getRegistry', id);
 		const registry = await this.#records.load(this.#storeName, id);
 		if (!registry) return console.warn('NO RECORD FOUND');
 

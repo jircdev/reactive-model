@@ -1,8 +1,9 @@
-import type { Item } from ".";
+import type { Item } from '.';
+import { LocalProvider } from './local-provider';
 export class ItemLoadManager {
 	#parent: Item<any>;
 
-	#localProvider;
+	#localProvider: LocalProvider;
 	#provider;
 	#getProperty;
 	constructor(parent, getProperty) {
@@ -13,8 +14,8 @@ export class ItemLoadManager {
 	}
 
 	init = async () => {
-		this.#localProvider = this.#getProperty("localProvider");
-		this.#provider = this.#getProperty("provider");
+		this.#localProvider = this.#getProperty('localProvider');
+		this.#provider = this.#getProperty('provider');
 
 		this.#parent.load = this.load;
 	};
@@ -26,16 +27,17 @@ export class ItemLoadManager {
 	 */
 	load = async (params: any) => {
 		try {
-			await this.#getProperty("checkReady")();
-			const localdb = await this.#getProperty("localdb");
-			if (localdb && !this.#localProvider.isOnline) {
+			await this.#getProperty('checkReady')();
+			const localdb = await this.#getProperty('localdb');
+			if (localdb && this.#localProvider) {
 				const localData = await this.#localProvider.load(params);
+
 				if (localData?.status) this.#parent.set(localData.data, true);
 			}
 
 			// if (this.#localProvider && !this.#localProvider.isOnline) return { status: true };
 
-			if (!this.#provider) return console.warn("No provider");
+			if (!this.#provider) return;
 
 			const remoteData = await this.remoteLoad(params);
 			if (!remoteData) this.#parent.found = false;
@@ -52,7 +54,7 @@ export class ItemLoadManager {
 			this.#parent.found = true;
 			return { status: true };
 		} catch (exc) {
-			console.error("ERROR LOAD", exc.message);
+			console.error('ERROR LOAD', exc.message);
 			return { status: false, error: exc };
 		} finally {
 			this.#parent.fetching = false;
@@ -63,7 +65,7 @@ export class ItemLoadManager {
 		// TODO: CHANGE TO LOAD
 		if (!this.#parent.isOnline) return;
 		const response = await this.#provider.data(params);
-		if (!response.status) throw "ERROR_DATA_QUERY";
+		if (!response.status) throw 'ERROR_DATA_QUERY';
 		return response.data;
 	};
 }

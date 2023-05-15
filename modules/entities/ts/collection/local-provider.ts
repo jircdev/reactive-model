@@ -35,10 +35,13 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 		return this.#isOnline && !this.#offline && !localStorage.getItem('reactive.offline');
 	}
 	#parent;
-	constructor(parent, bridge) {
+	#bridge;
+	constructor(parent, bridge: { get: (value: string) => any; set: (value: any) => any }) {
 		super();
 		const { db, storeName } = parent;
+		window.l = this;
 		this.#parent = parent;
+		this.#bridge = bridge;
 		this.#records = FactoryRecords.get(db);
 
 		if (!db || !storeName) throw new Error('database and store are required');
@@ -82,6 +85,9 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 	#isUnpublished(data) {}
 	#promiseLoad: PendingPromise<any>;
 	#params;
+
+	#total;
+	#page = 0;
 	async load(params) {
 		if (this.#promiseLoad) return this.#promiseLoad;
 		if (JSON.stringify(this.#params) === JSON.stringify(params)) {
@@ -92,25 +98,41 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 		const conditions = Object.keys(params);
 
 		const controls = ['and', 'or'];
-		conditions.forEach((condition) => {
+		conditions.forEach(condition => {
 			if (controls.includes(condition)) {
 				this.#processControl(condition, params[condition]);
 			}
 		});
 
 		try {
-			const live = liveQuery(() => this.#store.toArray());
+			if (!this.#total) this.#total = await this.#store.count();
+			let limit = params.limit ?? 30;
+			const totalPages = Math.ceil(this.#total / limit);
+			if (totalPages <= this.#page) return;
+			let first = true;
+			const live = liveQuery(() => {
+				let query = this.#store;
+				this.#page++;
+				const offset = (this.#page - 1) * limit;
+				return query.orderBy('instanceId').offset(offset).limit(limit).toArray();
+			});
 			live.subscribe({
-				next: (items) => {
+				next: async items => {
 					if (this.#promiseLoad) {
-						this.#promiseLoad.resolve({ status: true, data: items });
+						if (!first) this.#total = await this.#store.count();
+						first = false;
+						const response = { status: true, data: items, total: this.#total, next: true };
+						if (this.#page + 1 >= totalPages) delete response.next;
+
+						this.#promiseLoad.resolve(response);
 						this.#promiseLoad = null;
 					}
 
-					this.#items = items;
+					this.#items = this.#items.concat(items);
+
 					this.trigger('items.changed');
 				},
-				error: (err) => {
+				error: err => {
 					console.error(err);
 				},
 			});
@@ -123,7 +145,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 	}
 
 	async save(data): Promise<any> {
-		if (!this.isOnline) data = data.map((item) => ({ ...item, offline: 1 }));
+		if (!this.isOnline) data = data.map(item => ({ ...item, offline: 1 }));
 
 		await this.#records.init();
 		await this.#records.saveAll(data, this.#storeName);
@@ -135,7 +157,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 	async upsert(data: IItemValues[], originalData: any[]): Promise<void> {
 		return this.#database.db.transaction('rw', this.store, async () => {
 			const instanceIdToIdMap = new Map<string, number>();
-			data.forEach((item) => {
+			data.forEach(item => {
 				instanceIdToIdMap.set(item.instanceId, item.id);
 			});
 			await this.store.bulkPut(data);

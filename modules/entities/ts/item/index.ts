@@ -1,10 +1,10 @@
-import Dexie from "dexie";
-import { ReactiveModel, reactiveProps } from "@beyond-js/reactive-2/model";
-import { IProvider } from "../interfaces/provider";
-import { LocalProvider } from "./local-provider";
-import { ItemSaveManager } from "./save";
-import { ItemLoadManager } from "./load";
-import { PendingPromise } from "@beyond-js/kernel/core";
+import Dexie from 'dexie';
+import { ReactiveModel, reactiveProps } from '@beyond-js/reactive-2/model';
+import { IProvider } from '../interfaces/provider';
+import { LocalProvider } from './local-provider';
+import { ItemSaveManager } from './save';
+import { ItemLoadManager } from './load';
+import { PendingPromise } from '@beyond-js/kernel/core';
 
 export interface IITem {
 	provider: any;
@@ -51,7 +51,7 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 	}
 
 	get isOnline() {
-		return this.localProvider.isOnline && !localStorage.getItem("reactive.offline");
+		return this.localProvider.isOnline && !localStorage.getItem('reactive.offline');
 	}
 
 	#found;
@@ -75,7 +75,7 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 
 	constructor() {
 		super();
-		this.on("object.loaded", this.checkReady);
+		this.on('object.loaded', this.checkReady);
 	}
 
 	protected async init(config: { id?: string | number } = {}) {
@@ -90,19 +90,18 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 			this.#loadManager = new ItemLoadManager(this, getProperty);
 
 			if (!id) {
-				this.trigger("object.loaded");
-				id = "new";
+				this.trigger('object.loaded');
 			}
 
-			await this.localProvider.init(id);
+			if (id) await this.localProvider.init(id);
 			if (this.#skeleton && this.#skeleton.length > 0) {
 				this.properties = this.#skeleton;
 			}
 			this.#ready = true;
 
-			this.trigger("object.loaded");
+			this.trigger('object.loaded');
 		} catch (e) {
-			console.error("error initializing", e);
+			console.error('error initializing', e);
 		}
 	}
 
@@ -119,7 +118,7 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 			this.#promiseReady.resolve(this.#objectReady);
 			this.#promiseReady = undefined;
 		};
-		this.on("object.loaded", onReady);
+		this.on('object.loaded', onReady);
 		return this.#promiseReady;
 	};
 
