@@ -104,8 +104,7 @@ export class CollectionLoadManager {
       const items: any[] = this.processRemoteEntries(data.entries);
       if (this.#localProvider) await this.#localProvider.save(data.entries);
 
-      // let itemsValue = params.update === true ? this.#remoteElements.concat(items) : items;
-      this.#remoteElements = this.#remoteElements.concat(items);
+      this.#remoteElements = params.update === true ? this.#remoteElements.concat(items) : items;
 
       const properties = {
         items: this.#remoteElements,
