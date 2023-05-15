@@ -36,10 +36,9 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 	}
 	#parent;
 	#bridge;
-	constructor(parent, bridge: { get: (value: string) => any; set: (value: any) => any }) {
+	constructor(parent, bridge: any) {
 		super();
 		const { db, storeName } = parent;
-		window.l = this;
 		this.#parent = parent;
 		this.#bridge = bridge;
 		this.#records = FactoryRecords.get(db);
