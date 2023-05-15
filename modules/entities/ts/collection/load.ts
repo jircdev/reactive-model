@@ -61,7 +61,6 @@ export class CollectionLoadManager {
 		const localData = (await this.#localProvider.load(params)) ?? { data: [] };
 
 		const newItems = this.processEntries(localData.data);
-
 		let items = params.update === true ? this.parent.items.concat(newItems) : newItems;
 
 		const properties: ILoadResponse = {
@@ -93,7 +92,7 @@ export class CollectionLoadManager {
 			}
 
 			if (await this.#parentBridge.get('localProvider')) {
-				const localItems = this.#localLoad(params);
+				const localItems = await this.#localLoad(params);
 				if (!this.#localProvider.isOnline || !this.#provider) {
 					return { status: true, data: localItems };
 				}
@@ -104,7 +103,7 @@ export class CollectionLoadManager {
 			if (!status) throw error ?? 'ERROR_LIST_QUERY';
 
 			const items: any[] = this.processRemoteEntries(data.entries);
-			if (this.#localProvider) await this.#localProvider.save(data.entries);
+			if (this.#localProvider) await this.#localProvider.save(items);
 
 			this.#remoteElements = params.update === true ? this.#remoteElements.concat(items) : items;
 
