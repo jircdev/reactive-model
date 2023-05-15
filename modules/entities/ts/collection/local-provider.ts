@@ -119,7 +119,6 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 			live.subscribe({
 				next: async items => {
 					if (this.#promiseLoad) {
-						if (!first) this.#total = await this.#store.count();
 						first = false;
 						const response = { status: true, data: items, total: this.#total, next: true };
 						if (this.#page + 1 >= totalPages) delete response.next;

@@ -93,7 +93,7 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 				this.trigger('object.loaded');
 			}
 
-			if (id) await this.localProvider.init(id);
+			await this.localProvider.init(id);
 			if (this.#skeleton && this.#skeleton.length > 0) {
 				this.properties = this.#skeleton;
 			}
