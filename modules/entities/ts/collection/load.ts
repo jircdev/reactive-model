@@ -6,6 +6,7 @@ interface ILoadResponse {
 	fetching: false;
 	total: number;
 	next?: boolean | number | string;
+	items?: any[];
 }
 export class CollectionLoadManager {
 	#parent: Collection;
@@ -59,9 +60,6 @@ export class CollectionLoadManager {
 	 * load({status:1})
 	 */
 
-	filter() {
-		return this.#localProvider.store;
-	}
 	#localLoad = async params => {
 		const localData = (await this.#localProvider.load(params)) ?? { data: [] };
 
@@ -73,6 +71,7 @@ export class CollectionLoadManager {
 			fetching: false,
 			total: localData.total ?? 0,
 			next: !!localData.next,
+			items,
 		};
 		if (localData.next) properties.next = localData.next;
 

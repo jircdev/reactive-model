@@ -89,18 +89,13 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 	#page = 0;
 
 	#customWhere;
-	#defaultWhere = (store, offset, limit) => {
-		console.log(100, store, offset, limit);
-		return store.orderBy('id');
-	};
+	#defaultWhere = (store, offset, limit) => store.orderBy('id');
 
 	where = limit => {
 		return () => {
 			let store = this.#store;
 			this.#page++;
 			const offset = (this.#page - 1) * limit;
-			console.log(this.#defaultWhere);
-			console.log(this.#customWhere);
 			const filter = this.#customWhere ?? this.#defaultWhere;
 			return filter(store, offset, limit).offset(offset).limit(limit).toArray();
 		};
@@ -143,7 +138,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 						this.#promiseLoad.resolve(response);
 						this.#promiseLoad = null;
 					}
-					console.log('update');
+
 					this.#items = this.#items.concat(items);
 
 					this.trigger('items.changed');
