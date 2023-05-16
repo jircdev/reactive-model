@@ -94,7 +94,6 @@ export class CollectionSaveManager {
 
       for (const [index, chunk] of chunks.entries()) {
         const result = await this.sendChunk(chunk, index);
-
         if (!result.success) {
           failedChunks.push(result);
         } else successChunks.push(result);
@@ -103,10 +102,10 @@ export class CollectionSaveManager {
       await this.#parent.load();
       if (failedChunks.length) {
         const message = failedChunks.length === chunks.length ? "FAILED_SYNC" : "INCOMPLETE_SYNC";
-        return { status: false, message, data: failedChunks };
+        return { status: false, message, data: { failed: failedChunks, success: successChunks } };
       }
 
-      return data;
+      return { status: true, data: successChunks };
     } catch (e) {
       console.error(e);
     }
