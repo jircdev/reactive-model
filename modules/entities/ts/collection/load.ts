@@ -30,6 +30,8 @@ export class CollectionLoadManager {
 		this.#localProvider = this.#parentBridge.get('localProvider');
 		this.#provider = this.#parentBridge.get('provider');
 		this.#parent.load = this.load;
+		this.#parent.filter = this.filter;
+		this.#parent.customFilter = this.#localProvider.customFilter;
 	};
 
 	/**
@@ -57,6 +59,9 @@ export class CollectionLoadManager {
 	 * load({status:1})
 	 */
 
+	filter() {
+		return this.#localProvider.store;
+	}
 	#localLoad = async params => {
 		const localData = (await this.#localProvider.load(params)) ?? { data: [] };
 
