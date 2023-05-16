@@ -40,7 +40,7 @@ export class Registry extends ReactiveModel<IRegistry> {
 		if (this.#id) this.#values.id = this.#id;
 	}
 
-	#promise;
+	#promise: PendingPromise<this>;
 	async get() {
 		if (this.#promise) {
 			return this.#promise;
@@ -52,7 +52,7 @@ export class Registry extends ReactiveModel<IRegistry> {
 			this.#promise.resolve(this);
 			this.#promise = undefined;
 		} else {
-			this.#store.get(this.#id).then((item) => {
+			this.#store.get(this.#id).then(item => {
 				if (!item) {
 					this.#promise.resolve(false);
 					this.#landed = false;
@@ -91,7 +91,7 @@ export class Registry extends ReactiveModel<IRegistry> {
 		}
 
 		const newValues = { ...this.#values };
-		props.forEach((property) => {
+		props.forEach(property => {
 			if (data[property] === newValues[property]) return;
 			newValues[property] = data[property];
 			updated = true;
@@ -105,7 +105,7 @@ export class Registry extends ReactiveModel<IRegistry> {
 	getValues() {
 		const values = { ...this.#values };
 		if (this.#instanceId) values.instanceId = this.#instanceId;
-		if (this.offline) values.offline = this.offline;
+		//		if (this.offline) values.offline = this.offline; // this line may be removed, the offline value must be set by the localProvider
 		return values;
 	}
 	static generateUUID() {
