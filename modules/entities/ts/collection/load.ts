@@ -11,6 +11,7 @@ interface ILoadResponse {
 }
 export class CollectionLoadManager {
 	#parent: Collection;
+	filter: any;
 	get parent() {
 		return this.#parent;
 	}
@@ -32,6 +33,8 @@ export class CollectionLoadManager {
 		this.#localProvider = this.#parentBridge.get('localProvider');
 		this.#provider = this.#parentBridge.get('provider');
 		this.#parent.load = this.load;
+		this.#parent.filter = this.filter;
+		this.#parent.customFilter = this.#localProvider.customFilter;
 	};
 
 	/**
