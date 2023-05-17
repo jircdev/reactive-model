@@ -1,11 +1,10 @@
-import { UserStore } from "@beyond-js/reactive-2/tests/backend/database";
-import type { Server, Socket } from "socket.io";
+import { UserStore } from '@beyond-js/reactive-2/tests/backend/database';
+import type { Server, Socket } from 'socket.io';
 
 export /*actions*/ /*bundle*/ class UserProvider {
 	socket: Server;
 	constructor(socket: Server) {
 		this.socket = socket;
-		console.log(10, this.socket);
 	}
 	async publish(data) {
 		try {
@@ -20,7 +19,7 @@ export /*actions*/ /*bundle*/ class UserProvider {
 	async load(id) {
 		try {
 			if (!id) {
-				return { status: false, error: true, message: "id is required" };
+				return { status: false, error: true, message: 'id is required' };
 			}
 			const user = new UserStore();
 			const data = await user.loadUser(id);
