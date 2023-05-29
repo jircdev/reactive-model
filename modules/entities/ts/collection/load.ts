@@ -96,8 +96,10 @@ export class CollectionLoadManager {
 			if (update) {
 				params.start = start;
 			}
+
+			const isOffline = !this.#parent.isOnline;
 			const hasLocalProvider = await this.#parentBridge.get('localProvider');
-			const useLocal = hasLocalProvider && (!this.#localProvider.isOnline || !this.#provider);
+			const useLocal = isOffline && hasLocalProvider && (!this.#localProvider.isOnline || !this.#provider);
 
 			if (useLocal) {
 				const localItems = await this.#localLoad(params);
