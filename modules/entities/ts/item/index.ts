@@ -83,9 +83,12 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 			let id;
 			if (config.id) id = config.id;
 
-			const getProperty = property => this.__get(property);
+			const getProperty = (property) => this.__get(property);
 
-			this.localProvider = new LocalProvider(this, getProperty);
+			if (this.localdb) {
+				this.localProvider = new LocalProvider(this, getProperty);
+			}
+
 			this.#saveManager = new ItemSaveManager(this, getProperty);
 			this.#loadManager = new ItemLoadManager(this, getProperty);
 
@@ -122,7 +125,7 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 		return this.#promiseReady;
 	};
 
-	setOffline = value => this.localProvider.setOffline(value);
+	setOffline = (value) => this.localProvider.setOffline(value);
 
 	addLocalProvider(db: string, table: string) {
 		if (this.localProvider) return;
@@ -136,7 +139,7 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 		}
 
 		// If a property is in the properties array, define it as a public property
-		this.properties.forEach(property => {
+		this.properties.forEach((property) => {
 			if (data.hasOwnProperty(property)) {
 				this[property] = data[property];
 			}
@@ -153,7 +156,7 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 		const values = {};
 		const toIterate = this.skeleton.length ? this.skeleton : this.properties;
 
-		toIterate.forEach(field => {
+		toIterate.forEach((field) => {
 			if (this.hasOwnProperty(field)) values[field] = this[field];
 		});
 		return values;
