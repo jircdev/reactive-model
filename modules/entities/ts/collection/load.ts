@@ -34,7 +34,7 @@ export class CollectionLoadManager {
 		this.#provider = this.#parentBridge.get('provider');
 		this.#parent.load = this.load;
 		this.#parent.filter = this.filter;
-		this.#parent.customFilter = this.#localProvider.customFilter;
+		if (this.#localProvider) this.#parent.customFilter = this.#localProvider?.customFilter;
 	};
 
 	/**
