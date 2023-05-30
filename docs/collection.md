@@ -1,16 +1,5 @@
-La clase `Collection` extiende de `ReactiveModel` y representa una colección de objetos reactivos. Está diseñada para manejar la carga, almacenamiento y sincronización de un conjunto de elementos, tanto en una base de datos local como en un servidor remoto.
+The `Collection` class extends `ReactiveModel` and represents a collection of reactive objects. It is designed to handle the loading, storing, and synchronization of a set of items, both in a local database and on a remote server.
 
-`Collection` utiliza una serie de clases y métodos auxiliares, como `CollectionLocalProvider`, `CollectionSaveManager`, `CollectionLoadManager` y una interfaz `ICollectionProvider`. Estas clases y métodos manejan diferentes aspectos de las operaciones de carga, almacenamiento y sincronización de datos.
-
-La clase `CollectionLocalProvider` se encarga de interactuar con la base de datos local, usando `Dexie` para las operaciones con IndexedDB. La clase `CollectionSaveManager` maneja el guardado de los datos tanto local como en el servidor remoto, mientras que `CollectionLoadManager` se encarga de cargar los datos desde la base de datos local y el servidor remoto.
-
-Aquí tienes un resumen de cómo funcionan las clases y métodos auxiliares:
-
-1. `CollectionLocalProvider`: Interactúa con la base de datos local, maneja eventos de conexión y guarda datos localmente.
-2. `CollectionSaveManager`: Guarda datos localmente usando `CollectionLocalProvider`, publica datos en el servidor remoto y sincroniza datos no sincronizados.
-3. `CollectionLoadManager`: Carga datos desde la base de datos local y el servidor remoto, y procesa las entradas devueltas.
-
-Un ejemplo de cómo se podría utilizar la clase `Collection` sería creando una clase `UserCollection` que extienda de `Collection`:
 
 ```typescript
 import { ReactiveModel } from '@beyond-js/reactive-2/model';
@@ -32,7 +21,7 @@ export /*bundle*/ class Users extends Collection {
 }
 ```
 
-En este ejemplo, se crea la clase `UserCollection` que hereda de `Collection`. Se especifica que los elementos de esta colección serán objetos de la clase `User`. Para utilizar esta clase, simplemente se instanciaría un objeto `UserCollection` y se utilizarían los métodos heredados como `load`, `save`, `sync`, etc., para interactuar con la base de datos local y remota.
+In this example, the `UserCollection` class is created, which inherits from `Collection`. It is specified that the elements of this collection will be objects of the `User` class. To use this class, you would simply instantiate a `UserCollection` object and use inherited methods like `load`, `save`, `sync`, etc., to interact with the local and remote database.
 
 ## Methods
 
@@ -50,8 +39,13 @@ Here's a summary of the main methods in the `Collection` object:
 
 5. `sync()`: Syncs unsynchronized data between the local database and the remote server. This method is part of the `CollectionSaveManager` class as well.
 
+6. `toSync()`: Returns an array of elements to be sync.
+
 6. `set(properties)`: Updates the properties of the `Collection` object with the given properties.
 
 7. `triggerEvent()`: Triggers an event to notify other parts of the application about changes in the collection.
+
+8. `setOffline()`: Let's you toggle the offline mode in the current collection.
+
 
 These methods provide an interface to work with the data in the collection, allowing developers to easily load, save, publish, and sync data with local and remote sources while taking advantage of the reactive nature of the `Collection` object.

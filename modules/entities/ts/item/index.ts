@@ -124,10 +124,6 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 
 	setOffline = value => this.localProvider.setOffline(value);
 
-	addLocalProvider(db: string, table: string) {
-		if (this.localProvider) return;
-	}
-
 	set(data, init = false) {
 		// If init is true, store the data in localData Map
 		if (init) {

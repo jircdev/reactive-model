@@ -1,12 +1,12 @@
 ## Item
 
-La clase Item es una clase abstracta que extiende de ReactiveModel. Esta clase representa un objeto "reactivo" en el sentido de que puede manejar cambios en sus propiedades y actualizar automáticamente otras partes del código, gracias a la herencia de ReactiveModel.
+The `Item` class is an abstract class that extends `ReactiveModel`. This class represents a "reactive" object in the sense that it can handle changes in its properties and automatically update other parts of the code, thanks to the inheritance from `ReactiveModel`.
 
-Item tiene un proveedor local (LocalProvider) y un proveedor remoto (provider). El proveedor local maneja las operaciones de carga y almacenamiento en la base de datos local (como IndexedDB) mientras que el proveedor remoto interactúa con un servidor externo.
+`Item` has a local provider (`LocalProvider`) and a remote provider (`provider`). The local provider handles the loading and storing operations in the local database (such as IndexedDB), while the remote provider interacts with an external server.
 
-La clase Item también incluye instancias de ItemSaveManager y ItemLoadManager para manejar las operaciones de guardado y carga, respectivamente. Estos administradores trabajan en conjunto con los proveedores locales y remotos para sincronizar los datos.
+The `Item` class also includes instances of `ItemSaveManager` and `ItemLoadManager` to handle save and load operations, respectively. These managers work in conjunction with the local and remote providers to synchronize the data.
 
-El siguiente ejemplo de uso crea una clase User que extiende de Item:
+The following usage example creates a `User` class that extends `Item`:
 
 ```
 import { ReactiveModel } from "@beyond-js/reactive-2/model";
@@ -32,12 +32,37 @@ export /*bundle */ class User extends Item<IUser> {
 	}
 
 	example() {
-		//    this.name = "algo";
+		//    this.name = "something";
 	}
 }
-
 ```
 
-En este ejemplo, se define la clase User que hereda de Item. La clase User tiene propiedades como id, name y lastname, y utiliza un proveedor de usuario UserProvider para interactuar con un servidor externo. También define el nombre de la tienda local (storeName) y el nombre de la base de datos local (db).
+In this example, the `User` class is defined, which inherits from `Item`. The `User` class has properties such as `id`, `name`, and `lastname`, and it uses a `UserProvider` user provider to interact with an external server. It also defines the name of the local store (`storeName`) and the name of the local database (`db`).
 
-Para usar esta clase, simplemente instancie un objeto User y utilice sus métodos heredados como save, load, sync, etc., para interactuar con la base de datos local y remota.
+To use this class, simply instantiate a `User` object and use its inherited methods like `save`, `load`, `sync`, etc., to interact with the local and remote database.
+
+
+## Properties
+- `isUnpublished: boolean `
+Returns a boolean value indicating whether the item is unpublished, meaning its data has not been published to the remote server.
+- `skeleton: Array<string>`
+ An array of strings representing the skeleton properties of the item. These properties are used when retrieving or saving data.
+
+- `unique: Array<string>`
+ An array of strings representing the unique properties of the item. These properties are used to determine the uniqueness of the item.
+ 
+## Public Methods
+- ` save(data?: any): Promise<{ status: boolean }>`
+ Saves the item's data to the local database and publishes it to the remote server if it is unpublished. If data is provided, it sets the item's properties with the given data before saving. Returns a promise that resolves to an object with a status property indicating the success of the operation.
+
+- `publish(): Promise<{ status: boolean, data?: any, error?: any }>`  
+	Publishes the item's data to the remote server. If the item has a local provider and is online, it saves the published data to the local database. Returns a promise that resolves to an object with a status property indicating the success of the operation. If successful, the data property contains the published data.
+
+- `sync()`
+	Syncs the item's data between the local database and the remote server. It publishes any unpublished data to the server and retrieves any new data from the server. This method is typically used to synchronize data when transitioning from an offline to an online state.
+
+- `load(params: any): Promise<{ status: boolean, data?: any, error?: any }>`
+	
+	Loads the item's data from the local database and, if online, retrieves the latest data from the remote server. If params is provided, it can be used to specify additional parameters for loading the data. Returns a promise that resolves to an object with a status property indicating the success of the operation. If successful, the data property contains the loaded data.
+
+
