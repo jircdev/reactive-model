@@ -1,6 +1,7 @@
 import type { Collection } from '.';
 import { PendingPromise } from '@beyond-js/kernel/core';
 import type { CollectionLocalProvider } from './local-provider';
+import { CollectionSaveManager } from './publish';
 interface ILoadResponse {
 	localLoaded: true;
 	fetching: false;
@@ -10,6 +11,7 @@ interface ILoadResponse {
 }
 export class CollectionLoadManager {
 	#parent: Collection;
+	filter: any;
 	get parent() {
 		return this.#parent;
 	}
@@ -32,7 +34,7 @@ export class CollectionLoadManager {
 		this.#provider = this.#parentBridge.get('provider');
 		this.#parent.load = this.load;
 		this.#parent.filter = this.filter;
-		this.#parent.customFilter = this.#localProvider.customFilter;
+		if (this.#localProvider) this.#parent.customFilter = this.#localProvider?.customFilter;
 	};
 
 	/**
@@ -60,7 +62,7 @@ export class CollectionLoadManager {
 	 * load({status:1})
 	 */
 
-	#localLoad = async params => {
+	#localLoad = async (params) => {
 		const localData = (await this.#localProvider.load(params)) ?? { data: [] };
 
 		const newItems = this.processEntries(localData.data);
@@ -95,11 +97,13 @@ export class CollectionLoadManager {
 				params.start = start;
 			}
 
-			if (await this.#parentBridge.get('localProvider')) {
+			const isOffline = !this.#parent.isOnline;
+			const hasLocalProvider = await this.#parentBridge.get('localProvider');
+			const useLocal = isOffline && hasLocalProvider && (!this.#localProvider.isOnline || !this.#provider);
+
+			if (useLocal) {
 				const localItems = await this.#localLoad(params);
-				if (!this.#localProvider.isOnline || !this.#provider) {
-					return { status: true, data: localItems };
-				}
+				return { status: true, data: localItems };
 			}
 
 			const remoteData = await this.#provider.list(params);
@@ -121,7 +125,6 @@ export class CollectionLoadManager {
 
 			this.parent.set(properties);
 			this.parent.triggerEvent();
-
 			return { status: true, data: items };
 		} catch (exc) {
 			console.error('ERROR LOAD', exc);
@@ -132,7 +135,7 @@ export class CollectionLoadManager {
 	};
 
 	processRemoteEntries(entries): any[] {
-		return entries.map(record => {
+		return entries.map((record) => {
 			const item = new this.parent.item();
 			item.set(record, true);
 			return item;
@@ -140,14 +143,14 @@ export class CollectionLoadManager {
 	}
 
 	processEntries = (entries): any[] => {
-		return entries.map(record => {
+		return entries.map((record) => {
 			const item = new this.parent.item();
 			item.set(record);
 			return item;
 		});
 	};
 
-	remoteLoad = async params => {
+	remoteLoad = async (params) => {
 		const response = await this.#provider.load(params);
 
 		if (!response.status) throw 'ERROR_DATA_QUERY';
