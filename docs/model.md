@@ -19,7 +19,7 @@ npm install @beyond-js/reactive
 
 To create a new `ReactiveModel`, simply instantiate the class with the desired properties:
 
-```
+```ts
 import { ReactiveModel } from "@beyond-js/reactive/model";
 
 interface Person {
@@ -42,7 +42,7 @@ console.log(person.get("name")); // "Bob"
 
 You can also use the `@reactiveProps` decorator to automatically create reactive properties:
 
-```
+```ts
 import { ReactiveModel, reactiveProps } from "reactive";
 
 interface Person {

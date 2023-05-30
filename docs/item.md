@@ -1,4 +1,4 @@
-## Item
+# Item
 
 The `Item` class is an abstract class that extends `ReactiveModel`. This class represents a "reactive" object in the sense that it can handle changes in its properties and automatically update other parts of the code, thanks to the inheritance from `ReactiveModel`.
 
@@ -8,7 +8,7 @@ The `Item` class also includes instances of `ItemSaveManager` and `ItemLoadManag
 
 The following usage example creates a `User` class that extends `Item`:
 
-```
+```ts
 import { ReactiveModel } from "@beyond-js/reactive-2/model";
 import { Item } from "@beyond-js/reactive-2/entities";
 import { UserProvider } from "@beyond-js/reactive-2/tests/backend/provider";
@@ -50,7 +50,7 @@ Returns a boolean value indicating whether the item is unpublished, meaning its 
 
 - `unique: Array<string>`
  An array of strings representing the unique properties of the item. These properties are used to determine the uniqueness of the item.
- 
+
 ## Public Methods
 - ` save(data?: any): Promise<{ status: boolean }>`
  Saves the item's data to the local database and publishes it to the remote server if it is unpublished. If data is provided, it sets the item's properties with the given data before saving. Returns a promise that resolves to an object with a status property indicating the success of the operation.

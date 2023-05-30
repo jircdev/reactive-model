@@ -1,3 +1,5 @@
+# Collection
+
 The `Collection` class extends `ReactiveModel` and represents a collection of reactive objects. It is designed to handle the loading, storing, and synchronization of a set of items, both in a local database and on a remote server.
 
 
