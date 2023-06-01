@@ -5,7 +5,7 @@
 		"is": "page",
 		"route": "/home-reactive",
 		"element": {
-			"name": "home-page"
+			"name": "home-page-reactive"
 		},
 		"sass": {
 			"path": "sass",
