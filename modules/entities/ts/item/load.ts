@@ -29,11 +29,11 @@ export class ItemLoadManager {
 		try {
 			await this.#getProperty('checkReady')();
 			const localdb = await this.#getProperty('localdb');
-			if (localdb && this.#localProvider) {
-				const localData = await this.#localProvider.load(params);
+			// if (localdb && this.#localProvider) {
+			// 	const localData = await this.#localProvider.load(params);
 
-				if (localData?.status) this.#parent.set(localData.data, true);
-			}
+			// 	if (localData?.status) this.#parent.set(localData.data, true);
+			// }
 
 			// if (this.#localProvider && !this.#localProvider.isOnline) return { status: true };
 
@@ -48,7 +48,7 @@ export class ItemLoadManager {
 					let original = this.#localProvider.registry.values;
 					if (original[key] !== remoteData[key]) same = false;
 				});
-				if (!same) await this.#localProvider.save(remoteData);
+				//if (!same) await this.#localProvider.save(remoteData);
 			}
 
 			this.#parent.found = true;
