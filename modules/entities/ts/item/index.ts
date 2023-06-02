@@ -96,7 +96,7 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 				this.trigger('object.loaded');
 			}
 
-		//	await this.localProvider.init(id);
+			await this.localProvider.init(id);
 			if (this.#skeleton && this.#skeleton.length > 0) {
 				this.properties = this.#skeleton;
 			}
@@ -128,11 +128,11 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 	setOffline = (value) => this.localProvider.setOffline(value);
 
 	set(data, init = false) {
-		// If init is true, store the data in localData Map
-		// if (init) {
-		// 	this.#localData = new Map(Object.entries(data));
-		// 	this.localProvider.save(data, true);
-		// }
+	//	If init is true, store the data in localData Map
+		if (init) {
+			this.#localData = new Map(Object.entries(data));
+			this.localProvider.save(data, true);
+		}
 
 		// If a property is in the properties array, define it as a public property
 		this.properties.forEach((property) => {

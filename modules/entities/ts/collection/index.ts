@@ -11,7 +11,7 @@ interface IColleciton {
 	provider: object;
 }
 
-interface ISpecs {}
+interface ISpecs { }
 interface ICollectionProvider {
 	load: Function;
 	publish: Function;
@@ -74,11 +74,11 @@ export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> 
 
 		const bridge = { get: getProperty, set: setProperty };
 
-		// if (this.localDB) {
-		// 	this.#localProvider = new CollectionLocalProvider(this, bridge);
-		// 	this.#localProvider.on('items.changed', this.#listenItems);
-		// 	this.localProvider.init();
-		// }
+		if (this.localDB) {
+			this.#localProvider = new CollectionLocalProvider(this, bridge);
+			this.#localProvider.on('items.changed', this.#listenItems);
+			this.localProvider.init();
+		}
 
 		this.#saveManager = new CollectionSaveManager(this, bridge);
 		this.#loadManager = new CollectionLoadManager(this, bridge);
@@ -87,8 +87,8 @@ export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> 
 	#listenItems = () => {
 		if (!this.localdb) return;
 
-		// this.#items = this.#loadManager.processEntries(this.#localProvider.items);
-		// this.trigger('change');
+		this.#items = this.#loadManager.processEntries(this.#localProvider.items);
+		this.trigger('change');
 	};
 
 	setOffline = (value) => this.localProvider.setOffline(value);

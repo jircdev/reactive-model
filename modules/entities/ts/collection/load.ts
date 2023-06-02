@@ -111,7 +111,7 @@ export class CollectionLoadManager {
 			if (!status) throw error ?? 'ERROR_LIST_QUERY';
 
 			const items: any[] = this.processRemoteEntries(data.entries);
-			//if (this.#localProvider) await this.#localProvider.save(items);
+			if (this.#localProvider) await this.#localProvider.save(items);
 
 			this.#remoteElements = params.update === true ? this.#remoteElements.concat(items) : items;
 
