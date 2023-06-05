@@ -11,7 +11,7 @@ interface IColleciton {
 	provider: object;
 }
 
-interface ISpecs { }
+interface ISpecs {}
 interface ICollectionProvider {
 	load: Function;
 	publish: Function;
@@ -43,7 +43,6 @@ export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> 
 	 */
 	total: number = 0;
 
-	provider: any;
 	next: number | undefined;
 
 	#localProvider: CollectionLocalProvider;
@@ -69,7 +68,10 @@ export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> 
 	protected async init(specs: ISpecs = {}) {
 		this.#initSpecs = specs;
 
-		const getProperty = property => this[property];
+		const getProperty = property => {
+			console.log(0.1, property, this[property], this.#provider);
+			return this[property];
+		};
 		const setProperty = (property, value) => (this[property] = value);
 
 		const bridge = { get: getProperty, set: setProperty };

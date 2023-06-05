@@ -28,7 +28,7 @@ export class CollectionSaveManager {
 			console.warn('la colleccion no usa indexeddb');
 		}
 
-		this.#provider = this.#bridge.get('provider');
+		this.#provider = this.#bridge.get('#provider');
 	}
 
 	save = async (data = []): Promise<any> => {

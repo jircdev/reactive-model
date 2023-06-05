@@ -31,7 +31,7 @@ export class CollectionLoadManager {
 	init = async () => {
 		this.#localdb = this.#parentBridge.get('localdb');
 		this.#localProvider = this.#parentBridge.get('localProvider');
-		this.#provider = this.#parentBridge.get('provider');
+		this.#provider = this.#parentBridge.get('#provider');
 		this.#parent.load = this.load;
 		this.#parent.filter = this.filter;
 		if (this.#localProvider) this.#parent.customFilter = this.#localProvider?.customFilter;
@@ -97,11 +97,9 @@ export class CollectionLoadManager {
 				params.start = start;
 			}
 
-			const isOffline = !this.#parent.isOnline;
-			const hasLocalProvider = await this.#parentBridge.get('#localProvider');
-			const useLocal = isOffline && hasLocalProvider && (!this.#localProvider.isOnline || !this.#provider);
+			const { isOnline } = this.#parent;
 
-			if (useLocal) {
+			if (!isOnline || !this.#provider) {
 				const localItems = await this.#localLoad(params);
 				return { status: true, data: localItems };
 			}
