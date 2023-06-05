@@ -20,10 +20,6 @@ class LocalProvider extends ReactiveModel<any> {
 	#originalData: {};
 	#exists = false;
 
-	get landed() {
-		return this.#registry?.landed;
-	}
-
 	get originalData() {
 		return this.#originalData;
 	}

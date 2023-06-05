@@ -79,7 +79,7 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 
 	#loadManager: ItemLoadManager;
 	#objectReady = false;
-	#ready = false;
+
 	#promiseReady: PendingPromise<boolean>;
 	#initPromise: PendingPromise<boolean>;
 	constructor(config: IItemConfig = {}) {
@@ -128,7 +128,7 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 			if (this.#skeleton && this.#skeleton.length > 0) {
 				this.properties = this.#skeleton;
 			}
-			this.#ready = true;
+			this.ready = true;
 			this.#initPromise.resolve(true);
 			this.trigger('object.loaded');
 		} catch (e) {
@@ -145,8 +145,8 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 	 * @returns {Promise<boolean>} A promise that resolves when the object is ready
 	 */
 	protected checkReady = () => {
-		if (this.#ready) {
-			return this.#ready;
+		if (this.ready) {
+			return this.ready;
 		}
 		if (this.#promiseReady) return this.#promiseReady;
 
@@ -169,7 +169,7 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 	 * @param init If true, the data will be stored in the local database
 	 */
 	set(data, init = false) {
-	//	If init is true, store the data in localData Map
+		//	If init is true, store the data in localData Map
 		if (init) {
 			this.#localData = new Map(Object.entries(data));
 			this.localProvider.save(data, true);

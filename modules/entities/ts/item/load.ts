@@ -18,6 +18,7 @@ export class ItemLoadManager {
 		this.#provider = this.#getProperty('provider');
 
 		this.#parent.load = this.load;
+		this.ready = true;
 	};
 
 	/**
