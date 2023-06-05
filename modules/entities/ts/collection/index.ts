@@ -69,7 +69,6 @@ export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> 
 		this.#initSpecs = specs;
 
 		const getProperty = property => {
-			console.log(0.1, property, this[property], this.#provider);
 			return this[property];
 		};
 		const setProperty = (property, value) => (this[property] = value);
