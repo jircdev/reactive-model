@@ -13,7 +13,7 @@ export class ItemLoadManager {
 		this.init();
 	}
 
-	init = async () => {
+	init = () => {
 		this.#localProvider = this.#getProperty('localProvider');
 		this.#provider = this.#getProperty('provider');
 

@@ -1,5 +1,5 @@
-import * as sqlite3 from "sqlite3";
-import { open, Database } from "sqlite";
+import * as sqlite3 from 'sqlite3';
+import { open, Database } from 'sqlite';
 
 export /*bundle*/ class DatabaseConnection {
 	private db: Database;
@@ -11,7 +11,7 @@ export /*bundle*/ class DatabaseConnection {
 	async connect() {
 		if (!this.db) {
 			this.db = await open({
-				filename: "reactive.db",
+				filename: 'reactive.db',
 				driver: sqlite3.Database,
 			});
 		}
@@ -19,6 +19,7 @@ export /*bundle*/ class DatabaseConnection {
 
 	async disconnect() {
 		if (this.db) {
+			console.log(0.9, 'disconnect');
 			await this.db.close();
 			this.db = null;
 		}

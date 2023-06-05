@@ -12,6 +12,7 @@ export /*actions*/ /*bundle*/ class UserProvider {
 			const response = await user.storeUser(data);
 			return { status: true, data: response };
 		} catch (e) {
+			console.error(e);
 			return { error: true, message: e.message };
 		}
 	}

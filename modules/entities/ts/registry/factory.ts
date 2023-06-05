@@ -29,7 +29,7 @@ export class /*bundle*/ FactoryRecords extends ReactiveModel<IRecords> {
 		this.ready = true;
 	}
 
-	async load(storeName: string, id = 'new') {
+	async load(storeName: string, id = undefined) {
 		const store = this.#database.db[storeName];
 		if (!store) throw new Error(`Store ${storeName} does not exists`);
 		// if the store map does not exists, create it
@@ -39,10 +39,6 @@ export class /*bundle*/ FactoryRecords extends ReactiveModel<IRecords> {
 			const registry = this.#stores.get(storeName).get(id);
 			return registry.get();
 		}
-
-		/**
-		 * the local parameter defines if the registry is being creating as new local item in local or not
-		 */
 
 		const registry = new Registry(store, { id });
 		await registry.get();
@@ -64,7 +60,7 @@ export class /*bundle*/ FactoryRecords extends ReactiveModel<IRecords> {
 	 */
 
 	async saveAll(items, storeName) {
-		const elements = items.map((item) => {
+		const elements = items.map(item => {
 			const registry = new Registry(storeName);
 			registry.setValues(item);
 			return registry;
@@ -75,14 +71,14 @@ export class /*bundle*/ FactoryRecords extends ReactiveModel<IRecords> {
 		const chunks = [];
 		while (elements.length > 0) {
 			const batch = elements.splice(0, this.#batches);
-			const data = batch.map((item) => item.getValues());
+			const data = batch.map(item => item.getValues());
 			chunks.push(data);
 			promises.push(store.bulkPut(data));
 		}
 		try {
 			const results = await Promise.allSettled(promises);
 			const mappedFn = (result, index) => ({ ...result, index, data: chunks[index] });
-			const failed = results.map(mappedFn).filter((result) => result.status === 'rejected');
+			const failed = results.map(mappedFn).filter(result => result.status === 'rejected');
 			if (!failed.length) return { status: true };
 			else {
 				return { status: false, failed };

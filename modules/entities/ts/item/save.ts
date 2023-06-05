@@ -29,7 +29,7 @@ export class ItemSaveManager {
 			if (this.#parent.localProvider) {
 				await this.#parent.localProvider.save(properties);
 			}
-
+			return;
 			await this.#publish(properties);
 			this.#parent.triggerEvent();
 

@@ -62,7 +62,7 @@ export class CollectionLoadManager {
 	 * load({status:1})
 	 */
 
-	#localLoad = async (params) => {
+	#localLoad = async params => {
 		const localData = (await this.#localProvider.load(params)) ?? { data: [] };
 
 		const newItems = this.processEntries(localData.data);
@@ -98,7 +98,7 @@ export class CollectionLoadManager {
 			}
 
 			const isOffline = !this.#parent.isOnline;
-			const hasLocalProvider = await this.#parentBridge.get('localProvider');
+			const hasLocalProvider = await this.#parentBridge.get('#localProvider');
 			const useLocal = isOffline && hasLocalProvider && (!this.#localProvider.isOnline || !this.#provider);
 
 			if (useLocal) {
@@ -110,8 +110,8 @@ export class CollectionLoadManager {
 			const { status, data, error } = remoteData;
 			if (!status) throw error ?? 'ERROR_LIST_QUERY';
 
-			const items: any[] = this.processRemoteEntries(data.entries);
-			if (this.#localProvider) await this.#localProvider.save(items);
+			const items: any[] = await this.processRemoteEntries(data.entries);
+			// if (this.#localProvider) await this.#localProvider.save(items);
 
 			this.#remoteElements = params.update === true ? this.#remoteElements.concat(items) : items;
 
@@ -134,23 +134,25 @@ export class CollectionLoadManager {
 		}
 	};
 
-	processRemoteEntries(entries): any[] {
-		return entries.map((record) => {
+	async processRemoteEntries(entries): Promise<any[]> {
+		await this.#localProvider.save(entries);
+		return entries.map(record => {
 			const item = new this.parent.item();
-			item.set(record, true);
+
+			item.set(record);
 			return item;
 		});
 	}
 
 	processEntries = (entries): any[] => {
-		return entries.map((record) => {
+		return entries.map(record => {
 			const item = new this.parent.item();
 			item.set(record);
 			return item;
 		});
 	};
 
-	remoteLoad = async (params) => {
+	remoteLoad = async params => {
 		const response = await this.#provider.load(params);
 
 		if (!response.status) throw 'ERROR_DATA_QUERY';

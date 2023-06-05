@@ -69,12 +69,12 @@ export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> 
 	protected async init(specs: ISpecs = {}) {
 		this.#initSpecs = specs;
 
-		const getProperty = (property) => this[property];
+		const getProperty = property => this[property];
 		const setProperty = (property, value) => (this[property] = value);
 
 		const bridge = { get: getProperty, set: setProperty };
 
-		if (this.localDB) {
+		if (this.localdb) {
 			this.#localProvider = new CollectionLocalProvider(this, bridge);
 			this.#localProvider.on('items.changed', this.#listenItems);
 			this.localProvider.init();
@@ -91,7 +91,7 @@ export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> 
 		// this.trigger('change');
 	};
 
-	setOffline = (value) => this.localProvider.setOffline(value);
+	setOffline = value => this.localProvider.setOffline(value);
 
 	async store() {
 		await this.#localProvider.init();

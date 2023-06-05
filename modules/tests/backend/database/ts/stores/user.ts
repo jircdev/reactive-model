@@ -19,10 +19,9 @@ export /*bundle*/ class UserStore {
 	}
 
 	async loadUser(id: number): Promise<User> {
-		await this.conn.connect();
 		const db = this.conn.connection;
 		const user = await db.get('SELECT * FROM users WHERE id = ?', id);
-		await this.conn.disconnect();
+
 		return user as User;
 	}
 
@@ -38,11 +37,13 @@ export /*bundle*/ class UserStore {
 			data = await db.run('UPDATE users SET name = ?, lastnames = ? WHERE id = ?', name, lastnames, user.id);
 		} else {
 			const { id, name, lastnames } = user;
+
 			data = await db.run('INSERT INTO users (id, name, lastnames) VALUES (?, ?, ?)', id, name, lastnames);
 			recordId = data.lastID;
 		}
 		const response = await this.loadUser(recordId);
 		await this.conn.disconnect();
+		console.log(1, response);
 		return response;
 	}
 

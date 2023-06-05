@@ -31,6 +31,7 @@ class LocalProvider extends ReactiveModel<any> {
 	#db: Dexie;
 
 	get isOnline() {
+		console.log(2, this.#isOnline && !this.#offline && !localStorage.getItem('reactive.offline'));
 		return this.#isOnline && !this.#offline && !localStorage.getItem('reactive.offline');
 	}
 
@@ -76,11 +77,9 @@ class LocalProvider extends ReactiveModel<any> {
 			this.#database = database;
 			this.#store = database.db[this.#storeName];
 
-			if (id) {
-				await this.load({ id });
-			} else {
-				await this.#getRegistry(id);
-			}
+			await this.#getRegistry(id);
+			if (id) await this.load({ id });
+
 			return;
 		} catch (e) {
 			console.error(e);
@@ -149,8 +148,7 @@ class LocalProvider extends ReactiveModel<any> {
 	async save(data, backend = false) {
 		try {
 			if (!this.isUnpublished) return;
-			data.offline = this.isOnline ? 1 : 0;
-			if (!this.#registry) await this.#getRegistry('new');
+			data.offline = this.isOnline ? 0 : 1;
 
 			// Add validation for unique fields
 			const duplicated = await this.validateUniqueFields(data);
