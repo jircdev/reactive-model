@@ -11,7 +11,7 @@ interface IColleciton {
 	provider: object;
 }
 
-interface ISpecs {}
+interface ISpecs { }
 interface ICollectionProvider {
 	load: Function;
 	publish: Function;
@@ -87,8 +87,8 @@ export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> 
 	#listenItems = () => {
 		if (!this.localdb) return;
 
-		// this.#items = this.#loadManager.processEntries(this.#localProvider.items);
-		// this.trigger('change');
+		this.#items = this.#loadManager.processEntries(this.#localProvider.items);
+		this.trigger('change');
 	};
 
 	setOffline = value => this.localProvider.setOffline(value);

@@ -169,7 +169,7 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 	 * @param init If true, the data will be stored in the local database
 	 */
 	set(data, init = false) {
-		// If init is true, store the data in localData Map
+	//	If init is true, store the data in localData Map
 		if (init) {
 			this.#localData = new Map(Object.entries(data));
 			this.localProvider.save(data, true);

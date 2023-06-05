@@ -35,7 +35,7 @@ export class ItemLoadManager {
 				if (localData?.status) this.#parent.set(localData.data, true);
 			}
 
-			// if (this.#localProvider && !this.#localProvider.isOnline) return { status: true };
+			if (this.#localProvider && !this.#localProvider.isOnline) return { status: true };
 
 			if (!this.#provider) return;
 
