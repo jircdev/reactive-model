@@ -66,7 +66,6 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 			this.#store = database.db[this.#storeName];
 			this.ready = true;
 			this.#promiseInit.resolve();
-			this.#promiseInit = undefined;
 		} catch (e) {
 			console.error(e);
 		}
@@ -110,8 +109,8 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 		if (JSON.stringify(this.#params) === JSON.stringify(params)) {
 			return this.#promiseLoad;
 		}
-
 		this.#promiseLoad = new PendingPromise();
+		await this.init();
 		const conditions = Object.keys(params);
 		const controls = ['and', 'or'];
 		conditions.forEach(condition => {
