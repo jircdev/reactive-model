@@ -72,13 +72,13 @@ export class ItemLoadManager {
 		/**
 		 * The data method is validated to support old providers.
 		 */
-		let loadMethod = this.#provider.data ?? this.#provider.load;
+		// let loadMethod =  ?? this.#provider.load;
 
-		if (loadMethod !== 'function') {
-			console.error('The provider object is not defined correctly. It must have a data method');
-			return;
-		}
-		const response = await loadMethod(params);
+		// if (loadMethod !== 'function') {
+		// 	console.error('The provider object is not defined correctly. It must have a data method');
+		// 	return;
+		// }
+		const response = await this.#provider.data(params);
 		if (!response.status) throw 'ERROR_DATA_QUERY';
 		return response.data;
 	};
