@@ -6,9 +6,11 @@ export class ItemLoadManager {
 	#localProvider: LocalProvider;
 	#provider;
 	#getProperty;
-	constructor(parent, getProperty) {
+	#bridge;
+	constructor(parent, bridge) {
 		this.#parent = parent;
-		this.#getProperty = getProperty;
+		this.#getProperty = bridge.get;
+		this.#bridge = bridge;
 
 		this.init();
 	}

@@ -21,6 +21,7 @@ export interface IItemConfig {
 	storeName?: string;
 	db?: string;
 	id?: string | number;
+	provider?: IProvider;
 }
 
 export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
@@ -88,12 +89,14 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 		const { db, storeName } = config;
 		if (db) this.db = db;
 		if (storeName) this.storeName = storeName;
+		if (config.provider) this.provider = config.provider;
 		this.on('object.loaded', this.checkReady);
 
 		const getProperty = property => this.__get(property);
-
+		const setProperty = (property, value) => (this[property] = value);
+		const bridge = { get: getProperty, set: setProperty };
 		this.#saveManager = new ItemSaveManager(this, getProperty);
-		this.#loadManager = new ItemLoadManager(this, getProperty);
+		this.#loadManager = new ItemLoadManager(this, bridge);
 
 		if (this.db && this.storeName) {
 			if (this.localdb) {
