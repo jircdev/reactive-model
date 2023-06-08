@@ -94,7 +94,6 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 				throw new Error('Provider must be an object');
 			}
 			this.provider = new config.provider();
-			console.log(1, this.provider);
 		}
 		this.on('object.loaded', this.checkReady);
 
@@ -155,6 +154,7 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 	 * @returns {Promise<boolean>} A promise that resolves when the object is ready
 	 */
 	protected checkReady = () => {
+		console.log(0.1, this.ready, this.#promiseReady);
 		if (this.ready) {
 			return this.ready;
 		}
@@ -165,6 +165,7 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 		if (this.objectReady) this.#promiseReady.resolve(this.#objectReady);
 
 		const onReady = () => {
+			console.log(0.5);
 			this.#objectReady = true;
 			this.#promiseReady.resolve(this.#objectReady);
 		};
