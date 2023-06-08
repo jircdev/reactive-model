@@ -89,7 +89,12 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 		const { db, storeName } = config;
 		if (db) this.db = db;
 		if (storeName) this.storeName = storeName;
-		if (config.provider) this.provider = config.provider;
+		if (config.provider) {
+			if (typeof config.provider !== 'object') {
+				throw new Error('Provider must be an object');
+			}
+			this.provider = new config.provider();
+		}
 		this.on('object.loaded', this.checkReady);
 
 		const getProperty = property => this.__get(property);
