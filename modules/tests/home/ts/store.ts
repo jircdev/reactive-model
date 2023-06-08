@@ -26,7 +26,7 @@ export class Store extends ReactiveModel<Store> {
 			this.#ready = true;
 			this.#list = list;
 		} catch (e) {
-			console.log(e);
+			console.error(e);
 		}
 	};
 }

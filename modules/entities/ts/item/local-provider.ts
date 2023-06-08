@@ -27,7 +27,6 @@ class LocalProvider extends ReactiveModel<any> {
 	#db: Dexie;
 
 	get isOnline() {
-		console.log(2, this.#isOnline && !this.#offline && !localStorage.getItem('reactive.offline'));
 		return this.#isOnline && !this.#offline && !localStorage.getItem('reactive.offline');
 	}
 

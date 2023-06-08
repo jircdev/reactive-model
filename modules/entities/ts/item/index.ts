@@ -91,7 +91,7 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 		if (storeName) this.storeName = storeName;
 		if (config.provider) {
 			if (typeof config.provider !== 'function') {
-				throw new Error('Provider must be an object');
+				throw new Error('Provider must be an function');
 			}
 			this.provider = new config.provider();
 		}
