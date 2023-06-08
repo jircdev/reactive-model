@@ -16,6 +16,7 @@ export class ItemSaveManager {
 	save = async (data = undefined) => {
 		try {
 			await this.#getProperty('checkReady')();
+
 			if (data) {
 				this.#parent.set(data);
 			}

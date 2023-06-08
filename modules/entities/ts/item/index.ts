@@ -91,7 +91,7 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 		if (storeName) this.storeName = storeName;
 		if (config.provider) {
 			if (typeof config.provider !== 'function') {
-				throw new Error('Provider must be an object');
+				throw new Error('Provider must be an function');
 			}
 			this.provider = new config.provider();
 		}
@@ -110,6 +110,7 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 				 */
 				this.localProvider = new LocalProvider(this, getProperty);
 			}
+
 			this.init(config);
 		}
 	}
@@ -159,7 +160,9 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 		if (this.#promiseReady) return this.#promiseReady;
 
 		this.#promiseReady = new PendingPromise();
+
 		if (this.objectReady) this.#promiseReady.resolve(this.#objectReady);
+
 		const onReady = () => {
 			this.#objectReady = true;
 			this.#promiseReady.resolve(this.#objectReady);
