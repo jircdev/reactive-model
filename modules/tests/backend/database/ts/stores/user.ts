@@ -43,7 +43,6 @@ export /*bundle*/ class UserStore {
 		}
 		const response = await this.loadUser(recordId);
 		await this.conn.disconnect();
-		console.log(1, response);
 		return response;
 	}
 

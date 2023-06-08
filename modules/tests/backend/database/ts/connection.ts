@@ -19,7 +19,6 @@ export /*bundle*/ class DatabaseConnection {
 
 	async disconnect() {
 		if (this.db) {
-			console.log(0.9, 'disconnect');
 			await this.db.close();
 			this.db = null;
 		}

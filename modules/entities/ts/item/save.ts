@@ -29,7 +29,7 @@ export class ItemSaveManager {
 			if (this.#parent.localProvider) {
 				await this.#parent.localProvider.save(properties);
 			}
-			return;
+
 			await this.#publish(properties);
 			this.#parent.triggerEvent();
 
@@ -38,6 +38,9 @@ export class ItemSaveManager {
 			console.error('error saving', e);
 		}
 	};
+
+	publish = this.save;
+
 
 	#publish = async properties => {
 		try {
@@ -56,7 +59,6 @@ export class ItemSaveManager {
 		}
 	};
 
-	publish = this.save;
 
 	sync = () => {
 		const provider = this.#getProperty('localProvider');

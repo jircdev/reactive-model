@@ -36,7 +36,7 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 	protected db: string;
 	#ignoredFields: Array<string> = [];
 	#skeleton: Array<string> = [];
-	protected localProvider: LocalProvider;
+	 localProvider: LocalProvider;
 
 	protected unique: Array<string> = [];
 

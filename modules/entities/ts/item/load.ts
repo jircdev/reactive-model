@@ -32,15 +32,17 @@ export class ItemLoadManager {
 		try {
 			await this.#getProperty('checkReady')();
 			const localdb = await this.#getProperty('localdb');
-			if (localdb && this.#localProvider) {
-				const localData = await this.#localProvider.load(params);
+			const localProvider = this.#getProperty('localProvider');
+
+			if (localdb && localProvider) {
+				const localData = await localProvider.load(params);
 
 				if (localData?.status) this.#parent.set(localData.data, true);
 			}
 
-			if (this.#localProvider && !this.#localProvider.isOnline) return { status: true };
-
+			if (localProvider && !localProvider.isOnline) return { status: true };
 			if (!this.#provider) return;
+
 
 			const remoteData = await this.remoteLoad(params);
 			if (!remoteData) this.#parent.found = false;
@@ -48,10 +50,10 @@ export class ItemLoadManager {
 			if (remoteData) {
 				let same = true;
 				Object.keys(remoteData).forEach(key => {
-					let original = this.#localProvider.registry.values;
+					let original = localProvider.registry.values;
 					if (original[key] !== remoteData[key]) same = false;
 				});
-				if (!same) await this.#localProvider.save(remoteData);
+				if (!same) await localProvider.save(remoteData);
 			}
 
 			this.#parent.found = true;
