@@ -21,7 +21,7 @@ export interface IItemConfig {
 	storeName?: string;
 	db?: string;
 	id?: string | number;
-	provider?: IProvider;
+	provider?: new () => IProvider;
 }
 
 export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
@@ -90,7 +90,7 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 		if (db) this.db = db;
 		if (storeName) this.storeName = storeName;
 		if (config.provider) {
-			if (typeof config.provider !== 'object') {
+			if (typeof config.provider !== 'function') {
 				throw new Error('Provider must be an object');
 			}
 			this.provider = new config.provider();
