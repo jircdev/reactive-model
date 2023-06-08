@@ -72,7 +72,7 @@ export class ItemLoadManager {
 		 */
 		let loadMethod = this.#provider.data ?? this.#provider.load;
 
-		if (loadMethod !== 'function') {
+		if (typeof loadMethod !== 'function') {
 			console.error('The provider object is not defined correctly. It must have a data method');
 			return;
 		}
