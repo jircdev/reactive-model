@@ -94,6 +94,7 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 				throw new Error('Provider must be an object');
 			}
 			this.provider = new config.provider();
+			console.log(1, this.provider);
 		}
 		this.on('object.loaded', this.checkReady);
 
