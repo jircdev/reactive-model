@@ -81,7 +81,10 @@ export class ItemLoadManager {
 
 		const response = await loadMethod(params);
 
-		if (!response.status) throw 'ERROR_DATA_QUERY';
+		if (!response.status) {
+			console.error(response);
+			throw 'ERROR_DATA_QUERY';
+		}
 		return response.data;
 	};
 }
