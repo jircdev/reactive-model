@@ -100,8 +100,6 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 		const getProperty = property => this.__get(property);
 		const setProperty = (property, value) => (this[property] = value);
 		const bridge = { get: getProperty, set: setProperty };
-		this.#saveManager = new ItemSaveManager(this, getProperty);
-		this.#loadManager = new ItemLoadManager(this, bridge);
 
 		if (this.db && this.storeName) {
 			if (this.localdb) {
@@ -110,9 +108,12 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 				 */
 				this.localProvider = new LocalProvider(this, getProperty);
 			}
-
-			this.init(config);
 		}
+
+		this.#saveManager = new ItemSaveManager(this, getProperty);
+		this.#loadManager = new ItemLoadManager(this, bridge);
+
+		if (this.db && this.storeName) this.init(config);
 	}
 
 	protected async init(config: { id?: string | number } = {}) {

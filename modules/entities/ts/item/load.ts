@@ -17,6 +17,7 @@ export class ItemLoadManager {
 
 	init = () => {
 		this.#localProvider = this.#getProperty('localProvider');
+
 		this.#provider = this.#getProperty('provider');
 
 		this.#parent.load = this.load;
@@ -24,6 +25,11 @@ export class ItemLoadManager {
 	};
 
 	/**
+	 * Load the data from the provider and save it in the local database
+	 *
+	 * The method returns the data from the provider, if the provider is not set, it returns undefined, if
+	 * the provider method returns more data than the properties defined in the object, the data will be
+	 * available in the response.data object returned by the method.
 	 *
 	 * @param id
 	 * @returns
@@ -55,7 +61,7 @@ export class ItemLoadManager {
 			}
 
 			this.#parent.found = true;
-			return { status: true };
+			return { status: true, data: remoteData };
 		} catch (exc) {
 			console.error('ERROR LOAD', exc);
 			return { status: false, error: exc };
