@@ -57,15 +57,23 @@ export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> 
 	protected sortBy: string = 'id';
 	protected sortDirection: 'asc' | 'desc' = 'asc';
 
-	constructor() {
+	constructor(specs) {
 		super();
+
+		const { provider, storeName, db, localdb } = specs;
+		if (provider) this.#provider = provider;
+		if (storeName) this.storeName = storeName;
+		if (db) this.db = db;
+		if (localdb) this.localdb = localdb;
+
 		this.reactiveProps<IColleciton>(['item', 'next', 'provider']);
+		this.init();
 	}
 
 	protected setItems(values) {
 		this.#items = values;
 	}
-	protected async init(specs: ISpecs = {}) {
+	protected init(specs: ISpecs = {}) {
 		this.#initSpecs = specs;
 
 		const getProperty = property => {
