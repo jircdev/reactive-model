@@ -142,7 +142,7 @@ class LocalProvider extends ReactiveModel<any> {
 
 	async save(data, backend = false) {
 		try {
-			if (!this.isUnpublished) return;
+			if (!this.isUnpublished(data)) return;
 			data.offline = this.isOnline ? 0 : 1;
 
 			// Add validation for unique fields

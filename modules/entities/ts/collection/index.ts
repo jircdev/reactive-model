@@ -52,7 +52,7 @@ export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> 
 
 	#saveManager: CollectionSaveManager;
 	#loadManager: CollectionLoadManager;
-	#provider: ICollectionProvider;
+	protected provider: ICollectionProvider;
 	#initSpecs: ISpecs = {};
 	protected sortBy: string = 'id';
 	protected sortDirection: 'asc' | 'desc' = 'asc';
@@ -61,10 +61,16 @@ export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> 
 		super();
 
 		const { provider, storeName, db, localdb } = specs;
-		if (provider) this.#provider = provider;
+
 		if (storeName) this.storeName = storeName;
 		if (db) this.db = db;
 		if (localdb) this.localdb = localdb;
+		if (provider) {
+			if (typeof provider !== 'function') {
+				throw new Error('Provider must be a class object');
+			}
+			this.provider = new provider();
+		}
 
 		this.reactiveProps<IColleciton>(['item', 'next', 'provider']);
 		this.init();

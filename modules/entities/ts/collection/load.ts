@@ -22,6 +22,14 @@ export class CollectionLoadManager {
 	#parentBridge;
 	#localdb;
 
+	/**
+	 * Original data obtained in provider.load
+	 *
+	 * This property lets the developer access to the original data obtained from the provider in the children object.
+	 * Only contains the data from the last load.
+	 *
+	 */
+	protected remoteData = [];
 	constructor(parent, parentBridge) {
 		this.#parent = parent;
 		this.#parentBridge = parentBridge;
@@ -31,7 +39,7 @@ export class CollectionLoadManager {
 	init = async () => {
 		this.#localdb = this.#parentBridge.get('localdb');
 		this.#localProvider = this.#parentBridge.get('localProvider');
-		this.#provider = this.#parentBridge.get('#provider');
+		this.#provider = this.#parentBridge.get('provider');
 		this.#parent.load = this.load;
 		this.#parent.filter = this.filter;
 		if (this.#localProvider) this.#parent.customFilter = this.#localProvider?.customFilter;
@@ -99,12 +107,15 @@ export class CollectionLoadManager {
 
 			const { isOnline } = this.#parent;
 
-			if (!isOnline || !this.#provider) {
+			if (this.#localProvider) {
 				const localItems = await this.#localLoad(params);
-				return { status: true, data: localItems };
+				if (!isOnline || !this.#provider) {
+					return { status: true, data: localItems };
+				}
 			}
 
 			const remoteData = await this.#provider.list(params);
+			this.remoteData = remoteData;
 			const { status, data, error } = remoteData;
 			if (!status) throw error ?? 'ERROR_LIST_QUERY';
 
@@ -152,7 +163,7 @@ export class CollectionLoadManager {
 
 	remoteLoad = async params => {
 		const response = await this.#provider.load(params);
-
+		console.log(0.1, response);
 		if (!response.status) throw 'ERROR_DATA_QUERY';
 		return response.data;
 	};
