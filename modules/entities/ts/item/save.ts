@@ -1,5 +1,7 @@
+import type { Item } from './index';
+
 export class ItemSaveManager {
-	#parent;
+	#parent: Item<any>;
 	#getProperty;
 	constructor(parent, getProperty) {
 		this.#parent = parent;
@@ -16,15 +18,15 @@ export class ItemSaveManager {
 	save = async (data = undefined) => {
 		try {
 			await this.#getProperty('checkReady')();
-
+			console.log(50, data);
 			if (data) {
 				this.#parent.set(data);
 			}
-
+			console.log(51, this.#parent.isUnpublished);
 			if (!this.#parent.isUnpublished) {
 				return;
 			}
-
+			console.log(51);
 			const properties = this.#parent.getProperties();
 
 			if (this.#parent.localProvider) {
@@ -45,8 +47,11 @@ export class ItemSaveManager {
 
 	#publish = async properties => {
 		try {
+			console.log(7, this.#parent.provider, this.#parent.isOnline);
 			if (!this.#parent.provider || !this.#parent.isOnline) return;
+			console.log(8);
 			const response = await this.#parent.provider.publish(properties);
+			console.log(9, response);
 			if (!response?.status) throw response.error;
 
 			if (this.#parent.localProvider) {

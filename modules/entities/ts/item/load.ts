@@ -59,7 +59,7 @@ export class ItemLoadManager {
 			this.#parent.found = true;
 			return { status: true };
 		} catch (exc) {
-			console.error('ERROR LOAD', exc.message);
+			console.error('ERROR LOAD', exc);
 			return { status: false, error: exc };
 		} finally {
 			this.#parent.fetching = false;
@@ -72,13 +72,17 @@ export class ItemLoadManager {
 		/**
 		 * The data method is validated to support old providers.
 		 */
-		// let loadMethod =  ?? this.#provider.load;
+		let loadMethod = this.#provider.data
+			? this.#provider.data.bind(this.#provider)
+			: this.#provider.load.bind(this.#provider);
 
-		// if (loadMethod !== 'function') {
-		// 	console.error('The provider object is not defined correctly. It must have a data method');
-		// 	return;
-		// }
-		const response = await this.#provider.data(params);
+		if (typeof loadMethod !== 'function') {
+			console.error('The provider object is not defined correctly. It must have a data method');
+			return;
+		}
+
+		const response = await loadMethod(params);
+
 		if (!response.status) throw 'ERROR_DATA_QUERY';
 		return response.data;
 	};
