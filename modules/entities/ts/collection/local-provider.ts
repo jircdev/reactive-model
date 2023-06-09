@@ -29,7 +29,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 	}
 	#exists = false;
 	#found = false;
-
+	#ids = new Set();
 	#db: Dexie;
 	get isOnline() {
 		return this.#isOnline && !this.#offline && !localStorage.getItem('reactive.offline');
@@ -93,9 +93,9 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 	where = limit => {
 		return () => {
 			let store = this.#store;
-			this.#page++;
 			const offset = (this.#page - 1) * limit;
 			const filter = this.#customWhere ?? this.#defaultWhere;
+
 			return filter(store, offset, limit).offset(offset).limit(limit).toArray();
 		};
 	};
@@ -126,7 +126,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 			if (totalPages <= this.#page) return;
 			let first = true;
 			const live = liveQuery(this.where(limit));
-
+			this.#page++;
 			live.subscribe({
 				next: async items => {
 					if (this.#promiseLoad) {
@@ -138,8 +138,8 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 						this.#promiseLoad = null;
 					}
 
-					this.#items = this.#items.concat(items);
-
+					this.#items = this.#items.concat(items.filter(item => !this.#ids.has(item.id)));
+					items.forEach(item => this.#ids.add(item.id));
 					this.trigger('items.changed');
 				},
 				error: err => {

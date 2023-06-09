@@ -1,7 +1,5 @@
 import type { Collection } from '.';
-import { PendingPromise } from '@beyond-js/kernel/core';
 import type { CollectionLocalProvider } from './local-provider';
-import { CollectionSaveManager } from './publish';
 interface ILoadResponse {
 	localLoaded: true;
 	fetching: false;
@@ -22,6 +20,14 @@ export class CollectionLoadManager {
 	#parentBridge;
 	#localdb;
 
+	/**
+	 * Original data obtained in provider.load
+	 *
+	 * This property lets the developer access to the original data obtained from the provider in the children object.
+	 * Only contains the data from the last load.
+	 *
+	 */
+	protected remoteData = [];
 	constructor(parent, parentBridge) {
 		this.#parent = parent;
 		this.#parentBridge = parentBridge;
@@ -102,14 +108,16 @@ export class CollectionLoadManager {
 			const { isOnline } = this.parent;
 			console.log(.5, !isOnline || !this.#provider, {p: this.#provider})
 
-			if (!isOnline || !this.#provider) {
+			if (this.#localProvider) {
 				const localItems = await this.#localLoad(params);
-				return { status: true, data: localItems };
+				if (!isOnline || !this.#provider) {
+					return { status: true, data: localItems };
+				}
 			}
 
 			console.log(1)
 			const remoteData = await this.#provider.list(params);
-			console.log(2, remoteData)
+			this.remoteData = remoteData;
 			const { status, data, error } = remoteData;
 			if (!status) throw error ?? 'ERROR_LIST_QUERY';
 
@@ -157,7 +165,7 @@ export class CollectionLoadManager {
 
 	remoteLoad = async params => {
 		const response = await this.#provider.load(params);
-
+		console.log(0.1, response);
 		if (!response.status) throw 'ERROR_DATA_QUERY';
 		return response.data;
 	};
