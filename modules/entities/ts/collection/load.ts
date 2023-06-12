@@ -146,7 +146,7 @@ export class CollectionLoadManager {
 	async processRemoteEntries(entries): Promise<any[]> {
 		await this.#localProvider.save(entries);
 		return entries.map(record => {
-			const item = new this.parent.item();
+			const item = new this.parent.item({ id: record.id });
 
 			item.set(record);
 			return item;
@@ -155,7 +155,7 @@ export class CollectionLoadManager {
 
 	processEntries = (entries): any[] => {
 		return entries.map(record => {
-			const item = new this.parent.item();
+			const item = new this.parent.item({ id: record.id });
 			item.set(record);
 			return item;
 		});
@@ -163,7 +163,6 @@ export class CollectionLoadManager {
 
 	remoteLoad = async params => {
 		const response = await this.#provider.load(params);
-		console.log(0.1, response);
 		if (!response.status) throw 'ERROR_DATA_QUERY';
 		return response.data;
 	};
