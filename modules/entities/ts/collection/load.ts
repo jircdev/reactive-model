@@ -108,6 +108,7 @@ export class CollectionLoadManager {
 
 			if (this.#localProvider) {
 				const localItems = await this.#localLoad(params);
+				console.log('ITEMS => ', localItems)
 				if (!isOnline || !this.#provider) {
 					return { status: true, data: localItems };
 				}
@@ -144,17 +145,19 @@ export class CollectionLoadManager {
 
 	async processRemoteEntries(entries): Promise<any[]> {
 		await this.#localProvider.save(entries);
-		return entries.map(record => {
-			const item = new this.parent.item();
+		return entries.map((record, index) => {
+			const item = new this.parent.item({id: record.id});
 
 			item.set(record);
+			index === 0 && console.log({first: entries[0].id, used: record.id, item: item.id, value: item})
+
 			return item;
 		});
 	}
 
 	processEntries = (entries): any[] => {
 		return entries.map(record => {
-			const item = new this.parent.item();
+			const item = new this.parent.item({id: record.id});
 			item.set(record);
 			return item;
 		});

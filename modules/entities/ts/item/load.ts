@@ -42,7 +42,6 @@ export class ItemLoadManager {
 
 			if (localdb && localProvider) {
 				const localData = await localProvider.load(params);
-
 				if (localData?.status) this.#parent.set(localData.data, true);
 			}
 
