@@ -1,6 +1,5 @@
 import { PendingPromise } from '@beyond-js/kernel/core';
 import { ReactiveModel } from '@beyond-js/reactive-2/model';
-import { DBManager, DatabaseManager } from '@beyond-js/reactive-2/database';
 import { v4 as uuidv4 } from 'uuid';
 interface IRegistry {
 	values?: object;
@@ -56,7 +55,7 @@ export class Registry extends ReactiveModel<IRegistry> {
 		} else {
 			this.#store.get(this.#id).then(item => {
 				if (!item) {
-					this.#promise.resolve(false);
+					this.#promise.resolve(this);
 					this.#landed = false;
 
 					this.setValues({ id: this.#id });

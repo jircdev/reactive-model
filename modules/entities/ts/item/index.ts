@@ -1,4 +1,3 @@
-import Dexie from 'dexie';
 import { ReactiveModel, reactiveProps } from '@beyond-js/reactive-2/model';
 import { IProvider } from '../interfaces/provider';
 import { LocalProvider } from './local-provider';
@@ -78,9 +77,12 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 		return this.localProvider?.landed;
 	}
 
+	get isReady() {
+		return this.checkReady();
+	}
+
 	#loadManager: ItemLoadManager;
 	#objectReady = false;
-
 	#promiseReady: PendingPromise<boolean>;
 	#initPromise: PendingPromise<boolean>;
 	constructor(config: IItemConfig = {}) {
@@ -110,7 +112,7 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 			}
 		}
 
-		this.#saveManager = new ItemSaveManager(this, getProperty);
+		this.#saveManager = new ItemSaveManager(this, bridge);
 		this.#loadManager = new ItemLoadManager(this, bridge);
 
 		if (this.db && this.storeName) this.init(config);
