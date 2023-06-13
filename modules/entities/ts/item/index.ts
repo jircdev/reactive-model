@@ -78,6 +78,10 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 		return this.localProvider?.landed;
 	}
 
+	get isReady() {
+		return this.checkReady();
+	}
+
 	#loadManager: ItemLoadManager;
 	#objectReady = false;
 
@@ -110,7 +114,7 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 			}
 		}
 
-		this.#saveManager = new ItemSaveManager(this, getProperty);
+		this.#saveManager = new ItemSaveManager(this, bridge);
 		this.#loadManager = new ItemLoadManager(this, bridge);
 
 		if (this.db && this.storeName) this.init(config);

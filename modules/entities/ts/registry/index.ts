@@ -56,7 +56,7 @@ export class Registry extends ReactiveModel<IRegistry> {
 		} else {
 			this.#store.get(this.#id).then(item => {
 				if (!item) {
-					this.#promise.resolve(false);
+					this.#promise.resolve(this);
 					this.#landed = false;
 
 					this.setValues({ id: this.#id });
@@ -73,16 +73,17 @@ export class Registry extends ReactiveModel<IRegistry> {
 		return this.#promise;
 	}
 
-	setValues = (data, backend = false) => {
+	/**
+	 *
+	 * @param data
+	 * @param backend
+	 * @returns
+	 */
+	setValues = data => {
 		const props = Object.keys(data);
 
 		let updated = false;
-		// specify if the item was generated locally
-		if (backend) {
-			this.#isNew = false;
-			this.#instanceId = undefined;
-			delete this.#values.instanceId;
-		}
+
 		if (!data.id) {
 			data.id = this.#id;
 		}
@@ -110,8 +111,8 @@ export class Registry extends ReactiveModel<IRegistry> {
 		return values;
 	}
 
-	update = async (data: any, backend) => {
-		const updated = this.setValues(data, backend);
+	update = async (data: any) => {
+		const updated = this.setValues(data);
 		if (updated) {
 			await this.#store.put(this.#values);
 			this.triggerEvent('change');
