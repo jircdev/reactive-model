@@ -55,7 +55,7 @@ export class Registry extends ReactiveModel<IRegistry> {
 		} else {
 			this.#store.get(this.#id).then(item => {
 				if (!item) {
-					this.#promise.resolve(false);
+					this.#promise.resolve(this);
 					this.#landed = false;
 
 					this.setValues({ id: this.#id });

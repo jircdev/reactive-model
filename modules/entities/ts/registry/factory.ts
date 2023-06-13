@@ -44,7 +44,7 @@ export class /*bundle*/ FactoryRecords extends ReactiveModel<IRecords> {
 		await registry.get();
 
 		this.#stores.get(storeName).set(registry.instanceId, registry);
-
+		console.log(11, registry);
 		return registry;
 	}
 
