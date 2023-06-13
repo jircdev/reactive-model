@@ -3,7 +3,7 @@
   "widget": {
     "is": "layout",
     "element": {
-      "name": "main-layout"
+      "name": "main-layout-reactive"
     },
     "sass": {
       "path": "sass",

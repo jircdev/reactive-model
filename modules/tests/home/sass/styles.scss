@@ -1,0 +1,24 @@
+.page__container {
+	padding: 20px;
+	max-width: 1024px;
+	margin: 20px auto;
+	flex-direction: row;
+	background: var(--surface);
+
+	.beyond {
+		color: #ff8056;
+	}
+
+	button {
+		background-color: var(--primary);
+		padding: 1rem;
+		border-radius: 8px;
+		border: 1px solid var(--primary);
+		color: var(--text-on-primary);
+		cursor: pointer;
+		transition: all 300ms ease-in-out;
+		&:hover {
+			background-color: var(--primary-dark);
+		}
+	}
+}

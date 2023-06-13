@@ -1,0 +1,23 @@
+{
+	"name": "home",
+	"platforms": ["web", "android", "ios"],
+	"widget": {
+		"is": "page",
+		"route": "/home-reactive",
+		"element": {
+			"name": "home-page-reactive"
+		},
+		"sass": {
+			"path": "sass",
+			"files": [
+				"*"
+			]
+		},
+		"ts": {
+			"path": "ts",
+			"files": [
+				"*"
+			]
+		}
+	}
+}

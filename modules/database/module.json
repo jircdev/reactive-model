@@ -1,0 +1,9 @@
+{
+	"name": "database",
+	"description": "IndexedDB database using dexiejs",
+	"platforms": ["web", "android", "ios", "backend"],
+	"ts": {
+		"path": "ts",
+		"files": ["*"]
+	}
+}

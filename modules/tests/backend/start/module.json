@@ -1,0 +1,11 @@
+{
+	"name": "tests/backend/start",
+	"description": "start backend",
+	"platforms": ["backend"],
+	"start": {
+		"ts": {
+			"path": "/start/ts",
+			"files": ["*"]
+		}
+	}
+}

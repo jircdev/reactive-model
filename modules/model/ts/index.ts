@@ -1,5 +1,5 @@
-import { Events } from "@beyond-js/events/events";
-import { reactiveProps } from "./property";
+import { Events } from '@beyond-js/events/events';
+import { reactiveProps } from './property';
 
 interface ReactiveModelPublic<T> {
 	ready: boolean | undefined;
@@ -27,19 +27,59 @@ interface IProps {
  * @template T - The type of the properties that can be defined in the model.
  * @extends Events
  */
-export /*bundle*/
-class ReactiveModel<T> extends Events {
+
+export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 	protected schema: unknown;
+	#isReactive: boolean = true;
+	get isReactive() {
+		return this.#isReactive;
+	}
+
 	[key: string]: any;
 
-	@reactiveProps<IProps>(["fetching", "fetched", "processing", "processed", "loaded", "ready"])
 	fetching!: boolean;
 	fetched: boolean = false;
 	processing: boolean = false;
 	ready: boolean = false;
 	processed: boolean = false;
+	protected localdb = false;
 	protected properties: string[];
 	loaded: boolean = false;
+
+	constructor() {
+		super();
+		this.reactiveProps<IProps>(['fetching', 'fetched', 'processing', 'processed', 'loaded', 'ready']);
+	}
+
+	protected reactiveProps<T>(props: Array<keyof T>): void {
+		for (const propKey of props) {
+			const descriptor = Object.getOwnPropertyDescriptor(this, propKey);
+			const initialValue = descriptor ? descriptor.value : undefined;
+
+			this.defineReactiveProp(propKey, initialValue);
+		}
+	}
+
+	protected defineReactiveProp<T>(propKey: keyof T, initialValue: T[keyof T]): void {
+		const privatePropKey = `__${String(propKey)}`;
+
+		Object.defineProperty(this, propKey, {
+			get(): T[keyof T] {
+				if (!this.hasOwnProperty(privatePropKey)) {
+					this[privatePropKey] = initialValue;
+				}
+				return this[privatePropKey];
+			},
+			set(newVal: T[keyof T]): void {
+				if (newVal === this[privatePropKey]) return;
+
+				this[privatePropKey] = newVal;
+				this.triggerEvent();
+			},
+			enumerable: true,
+			configurable: true,
+		});
+	}
 
 	/**
 	 * The `triggerEvent` method triggers a change event on the model, which can be used to notify
@@ -48,7 +88,7 @@ class ReactiveModel<T> extends Events {
 	 * @param {string} event - The name of the event to trigger.
 	 * @returns {void}
 	 */
-	triggerEvent = (event: string = "change"): void => this.trigger(event);
+	triggerEvent = (event: string = 'change'): void => this.trigger(event);
 	/**
 	 * The `set` method sets one or more properties on the model.
 	 *
@@ -56,41 +96,27 @@ class ReactiveModel<T> extends Events {
 	 * @param {*} value - The value to set the property to.
 	 * @returns {void}
 	 */
-	set(property: keyof ReactiveModelPublic<T>, value: any): void {
-		let props: Partial<ReactiveModelPublic<T>> = {};
-		if (property && value !== undefined) {
-			props[property] = value;
-		} else if (typeof property === "object" && property !== null) {
-			props = property;
-		}
+	set(properties: Partial<ReactiveModelPublic<T>>): void {
+		let props: Partial<ReactiveModelPublic<T>> = Object.keys(properties);
 		let updated = false;
+		Object.keys(properties).forEach(prop => {
+			const sameObject =
+				typeof properties[prop] === 'object' && JSON.stringify(properties[prop]) === JSON.stringify(this[prop]);
+			if (this[prop] === properties[prop] || sameObject) return;
 
-		for (const prop in props) {
-			const key = `#${prop}`;
-			if (!Object.prototype.hasOwnProperty.call(this, key)) continue;
-
-			if (this[key] === props[prop]) continue;
-			this[key] = props[prop];
+			this[prop] = properties[prop];
 			updated = true;
-		}
+		});
 
 		if (updated) this.triggerEvent();
 	}
 
-	/**
-	 * The `set` method sets one or more properties on the model.
-	 *
-	 * @param {keyof ReactiveModelPublic<T>} property - The name of the property to set.
-	 * @param {*} value - The value to set the property to.
-	 * @returns {void}
-	 */
-
 	getProperties(): Record<string, any> {
 		const props: Record<string, any> = {};
-		Object.keys(this).forEach(property => {
-			if (property.startsWith("#")) {
-				props[property.replace("#", "")] = this[property];
-			}
+		const properties = this.properties || this.skeleton;
+
+		properties.forEach(property => {
+			props[property] = this[property];
 		});
 		return props;
 	}
