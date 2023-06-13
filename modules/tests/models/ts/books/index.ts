@@ -1,5 +1,5 @@
-import { Item } from "@beyond-js/reactive-2/entities";
-import { UserProvider } from "@beyond-js/reactive-2/tests/backend/provider";
+import { Item } from "@beyond-js/reactive/entities";
+import { UserProvider } from "@beyond-js/reactive/tests/backend/provider";
 interface IBook {
 	name?: string;
 	password: string;

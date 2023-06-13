@@ -1,7 +1,7 @@
-import { ReactiveModel } from '@beyond-js/reactive-2/model';
+import { ReactiveModel } from '@beyond-js/reactive/model';
 import { IProvider } from '../interfaces/provider';
 import { PendingPromise } from '@beyond-js/kernel/core';
-import { DBManager, DatabaseManager } from '@beyond-js/reactive-2/database';
+import { DBManager, DatabaseManager } from '@beyond-js/reactive/database';
 import Dexie from 'dexie';
 import { FactoryRecords } from '../registry/factory';
 import type { Registry } from '../registry';
