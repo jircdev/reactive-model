@@ -1,6 +1,5 @@
 import { PendingPromise } from '@beyond-js/kernel/core';
 import { ReactiveModel } from '@beyond-js/reactive-2/model';
-import { DBManager, DatabaseManager } from '@beyond-js/reactive-2/database';
 import { v4 as uuidv4 } from 'uuid';
 interface IRegistry {
 	values?: object;
@@ -56,7 +55,7 @@ export class Registry extends ReactiveModel<IRegistry> {
 		} else {
 			this.#store.get(this.#id).then(item => {
 				if (!item) {
-					this.#promise.resolve(this);
+					this.#promise.resolve(false);
 					this.#landed = false;
 
 					this.setValues({ id: this.#id });
@@ -73,17 +72,16 @@ export class Registry extends ReactiveModel<IRegistry> {
 		return this.#promise;
 	}
 
-	/**
-	 *
-	 * @param data
-	 * @param backend
-	 * @returns
-	 */
-	setValues = data => {
+	setValues = (data, backend = false) => {
 		const props = Object.keys(data);
 
 		let updated = false;
-
+		// specify if the item was generated locally
+		if (backend) {
+			this.#isNew = false;
+			this.#instanceId = undefined;
+			delete this.#values.instanceId;
+		}
 		if (!data.id) {
 			data.id = this.#id;
 		}
@@ -111,8 +109,8 @@ export class Registry extends ReactiveModel<IRegistry> {
 		return values;
 	}
 
-	update = async (data: any) => {
-		const updated = this.setValues(data);
+	update = async (data: any, backend) => {
+		const updated = this.setValues(data, backend);
 		if (updated) {
 			await this.#store.put(this.#values);
 			this.triggerEvent('change');

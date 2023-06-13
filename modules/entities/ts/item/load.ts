@@ -7,6 +7,8 @@ export class ItemLoadManager {
 	#provider;
 	#getProperty;
 	#bridge;
+	ready: boolean;
+
 	constructor(parent, bridge) {
 		this.#parent = parent;
 		this.#getProperty = bridge.get;
@@ -77,8 +79,8 @@ export class ItemLoadManager {
 		 * The data method is validated to support old providers.
 		 */
 		let loadMethod = this.#provider.data
-			? this.#provider.data?.bind(this.#provider)
-			: this.#provider.load?.bind(this.#provider);
+			? this.#provider.data.bind(this.#provider)
+			: this.#provider.load.bind(this.#provider);
 
 		if (typeof loadMethod !== 'function') {
 			console.error('The provider object is not defined correctly. It must have a data method');
