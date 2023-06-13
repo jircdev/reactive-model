@@ -1,5 +1,5 @@
-import { ReactiveModel } from '@beyond-js/reactive-2/model';
-import { Users } from '@beyond-js/reactive-2/examples/models';
+import { ReactiveModel } from '@beyond-js/reactive/model';
+import { Users } from '@beyond-js/reactive/examples/models';
 export class Store extends ReactiveModel<Store> {
 	#users: Users = new Users();
 
