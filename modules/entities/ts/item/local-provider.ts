@@ -122,7 +122,7 @@ class LocalProvider extends ReactiveModel<any> {
 	 */
 	#getRegistry = async id => {
 		const registry = await this.#records.load(this.#storeName, id);
-		console.log(12, registry, id);
+
 		if (!registry) {
 			this.found = false;
 			return;
