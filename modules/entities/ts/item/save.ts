@@ -43,20 +43,11 @@ export class ItemSaveManager {
             await this.#publish(properties);
             this.#parent.triggerEvent();
 
-<<<<<<< HEAD
-	publish = this.save;
-
-
-	#publish = async properties => {
-		try {
-			if (!this.#parent.provider || !this.#parent.isOnline) return;
-=======
             return { status: true };
         } catch (e) {
             console.error('error saving', e);
         }
     };
->>>>>>> dev
 
     #publish = async properties => {
         try {
@@ -66,8 +57,6 @@ export class ItemSaveManager {
 
             if (!response?.status) throw response.error;
 
-<<<<<<< HEAD
-=======
             if (this.#localProvider) {
                 this.#localProvider.save(response.data, true);
                 this.#localProvider.triggerEvent();
@@ -78,7 +67,6 @@ export class ItemSaveManager {
             return { status: false, error };
         }
     };
->>>>>>> dev
 
     publish = this.save;
 
