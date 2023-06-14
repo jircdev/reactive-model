@@ -39,6 +39,9 @@ export class ItemLoadManager {
 	load = async (params: any) => {
 		try {
 			await this.#getProperty('checkReady')();
+			if (!params) {
+				params = { id: this.#parent.id };
+			}
 			const localdb = await this.#getProperty('localdb');
 			const localProvider = this.#getProperty('localProvider');
 
@@ -49,7 +52,6 @@ export class ItemLoadManager {
 
 			if (localProvider && !localProvider.isOnline) return { status: true };
 			if (!this.#provider) return;
-
 
 			const remoteData = await this.remoteLoad(params);
 			if (!remoteData) this.#parent.found = false;
