@@ -7,6 +7,8 @@ export class ItemLoadManager {
 	#provider;
 	#getProperty;
 	#bridge;
+	ready: boolean;
+
 	constructor(parent, bridge) {
 		this.#parent = parent;
 		this.#getProperty = bridge.get;

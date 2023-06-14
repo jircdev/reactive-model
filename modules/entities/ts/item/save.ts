@@ -1,80 +1,96 @@
 import type { Item } from './index';
 
 export class ItemSaveManager {
-	#parent: Item<any>;
-	#getProperty;
-	constructor(parent, getProperty) {
-		this.#parent = parent;
-		this.#getProperty = getProperty;
-		this.init();
-	}
+    #parent: Item<any>;
+    #getProperty;
+    #bridge;
+    #provider;
+    #localProvider;
 
-	init() {
-		this.#parent.save = this.save;
-		this.#parent.publish = this.publish;
-		this.#parent.sync = this.sync;
-	}
+    constructor(parent: Item<any>, bridge) {
+        this.#parent = parent;
+        this.#getProperty = bridge.get;
+        this.#bridge = bridge;
+        this.init();
+    }
 
-	save = async (data = undefined) => {
-		try {
-			await this.#getProperty('checkReady')();
+    init() {
+        this.#parent.save = this.save;
+        this.#parent.publish = this.publish;
+        this.#localProvider = this.#getProperty('localProvider');
+        this.#provider = this.#getProperty('provider');
+        this.#parent.sync = this.sync;
+    }
 
-			if (data) {
-				this.#parent.set(data);
-			}
+    save = async (data = undefined) => {
+        try {
+            await this.#getProperty('checkReady')();
 
-			if (!this.#parent.isUnpublished) {
-				return;
-			}
+            if (data) {
+                this.#parent.set(data);
+            }
 
-			const properties = this.#parent.getProperties();
+            if (!this.#parent.isUnpublished) {
+                return;
+            }
 
-			if (this.#parent.localProvider) {
-				await this.#parent.localProvider.save(properties);
-			}
+            const properties = this.#parent.getProperties();
 
-			await this.#publish(properties);
-			this.#parent.triggerEvent();
+            if (this.#localProvider) {
+                await this.#localProvider.save(properties);
+            }
 
-			return { status: true };
-		} catch (e) {
-			console.error('error saving', e);
-		}
-	};
+            await this.#publish(properties);
+            this.#parent.triggerEvent();
 
+<<<<<<< HEAD
 	publish = this.save;
 
 
 	#publish = async properties => {
 		try {
 			if (!this.#parent.provider || !this.#parent.isOnline) return;
+=======
+            return { status: true };
+        } catch (e) {
+            console.error('error saving', e);
+        }
+    };
+>>>>>>> dev
 
-			const response = await this.#parent.provider.publish(properties);
+    #publish = async properties => {
+        try {
+            if (!this.#provider || !this.#bridge.get('isOnline')) return;
 
-			if (!response?.status) throw response.error;
+            const response = await this.#provider.publish(properties);
 
-			if (this.#parent.localProvider) {
-				this.#parent.localProvider.save(response.data, true);
-				this.#parent.localProvider.triggerEvent();
-			}
-			return { status: true, data: response };
-		} catch (error) {
-			console.error('ERROR PUBLISHING', error);
-			return { status: false, error };
-		}
-	};
+            if (!response?.status) throw response.error;
 
+<<<<<<< HEAD
+=======
+            if (this.#localProvider) {
+                this.#localProvider.save(response.data, true);
+                this.#localProvider.triggerEvent();
+            }
+            return { status: true, data: response };
+        } catch (error) {
+            console.error('ERROR PUBLISHING', error);
+            return { status: false, error };
+        }
+    };
+>>>>>>> dev
 
-	sync = () => {
-		const provider = this.#getProperty('localProvider');
+    publish = this.save;
 
-		if (!provider.registry.values.offline) {
-			console.warn('registry already synced');
-			return;
-		}
+    sync = () => {
+        const provider = this.#getProperty('localProvider');
 
-		this.#publish(provider.registry.values);
+        if (!provider.registry.values.offline) {
+            console.warn('registry already synced');
+            return;
+        }
 
-		//const data = this.#getProperty("localProvider").store.where("offline").equals(true).toArray();
-	};
+        this.#publish(provider.registry.values);
+        //const data = this.#getProperty("localProvider").store.where("offline").equals(true).toArray();
+    };
 }
