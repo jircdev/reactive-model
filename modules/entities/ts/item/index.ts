@@ -63,15 +63,6 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 	get instanceId() {
 		return this.localProvider.instanceId;
 	}
-	#found;
-	get found() {
-		return this.#found;
-	}
-	set found(v: boolean) {
-		if (v !== this.#found) return;
-		this.#found = v;
-		this.triggerEvent();
-	}
 
 	get landed() {
 		return this.localProvider?.landed;
@@ -98,7 +89,7 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 			this.provider = new config.provider();
 		}
 		this.on('object.loaded', this.checkReady);
-
+		this.reactiveProps(['found']);
 		const getProperty = property => this.__get(property);
 		const setProperty = (property, value) => (this[property] = value);
 		const bridge = { get: getProperty, set: setProperty };
