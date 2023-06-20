@@ -14,6 +14,7 @@ class LocalProvider extends ReactiveModel<any> {
 	}
 
 	#offline: boolean;
+	#isNew: boolean = false;
 	#database!: DatabaseManager;
 	#storeName!: string;
 	#databaseName!: string;
@@ -72,8 +73,10 @@ class LocalProvider extends ReactiveModel<any> {
 			this.#database = database;
 			this.#store = database.db[this.#storeName];
 
+			console.log('id init local provider', id, this.#databaseName, this.#storeName);
 			await this.#getRegistry(id);
 			if (id) await this.load({ id });
+			else this.#isNew = true;
 
 			return;
 		} catch (e) {
@@ -130,6 +133,7 @@ class LocalProvider extends ReactiveModel<any> {
 
 		this.#parent.set(registry.values);
 		this.#registry = registry;
+		this.#isNew = registry?.values?.isNew ? true : false;
 
 		registry.on('change', this.#listenRegistry);
 		return registry;
@@ -148,6 +152,7 @@ class LocalProvider extends ReactiveModel<any> {
 		try {
 			if (!this.isUnpublished(data)) return;
 			data.offline = this.isOnline ? 0 : 1;
+			data.isNew = !this.#isNew ? 0 : 1;
 
 			// Add validation for unique fields
 			const duplicated = await this.validateUniqueFields(data);
