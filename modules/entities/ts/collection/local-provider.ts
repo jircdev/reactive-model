@@ -18,6 +18,13 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 	get store() {
 		return this.#store;
 	}
+	/**
+	 * Defines if the collection is using a local database or not.
+	 */
+	#active;
+	get active() {
+		return this.#active;
+	}
 	#offline: boolean;
 	#database!: DatabaseManager;
 	#storeName!: string;
@@ -41,9 +48,10 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 		const { db, storeName } = parent;
 		this.#parent = parent;
 		this.#bridge = bridge;
-		this.#records = FactoryRecords.get(db);
+		if (db) {
+			this.#records = FactoryRecords.get(db);
+		}
 
-		if (!db || !storeName) throw new Error('database and store are required');
 		this.#databaseName = db;
 		this.#storeName = storeName;
 
@@ -60,6 +68,12 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 		try {
 			if (this.#promiseInit) return this.#promiseInit;
 			this.#promiseInit = new PendingPromise();
+
+			if (!this.#databaseName || this.#storeName) {
+				this.#active = false;
+				this.#promiseInit.resolve();
+				return;
+			}
 
 			const database: DatabaseManager = await DBManager.get(this.#databaseName);
 			this.#database = database;
