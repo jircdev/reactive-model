@@ -1,4 +1,4 @@
-import { ReactiveModel, reactiveProps } from '@beyond-js/reactive-2/model';
+import { ReactiveModel, reactiveProps } from '@beyond-js/reactive/model';
 import type { Item, IITem } from '../item';
 import { CollectionLocalProvider } from './local-provider';
 import { CollectionSaveManager } from './publish';
@@ -57,7 +57,7 @@ export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> 
 	protected sortBy: string = 'id';
 	protected sortDirection: 'asc' | 'desc' = 'asc';
 
-	constructor(specs) {
+	constructor(specs = {}) {
 		super();
 
 		const { provider, storeName, db, localdb } = specs;

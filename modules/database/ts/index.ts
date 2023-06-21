@@ -1,7 +1,7 @@
-import Dexie from "dexie";
-import { Events } from "@beyond-js/events/events";
-import { PendingPromise } from "@beyond-js/kernel/core";
-import { Database } from "./database";
+import Dexie from 'dexie';
+import { Events } from '@beyond-js/events/events';
+import { PendingPromise } from '@beyond-js/kernel/core';
+import { Database } from './database';
 
 export /*bundle */ class DatabaseManager extends Events {
 	#promise;
@@ -18,18 +18,18 @@ export /*bundle */ class DatabaseManager extends Events {
 	constructor() {
 		super();
 
-		const db = new Dexie("ReactiveDatabase");
+		const db = new Dexie('ReactiveDatabase');
 		this.#db = db;
-		db.version(1).stores({ schemas: "name, table, fields" });
+		db.version(1).stores({ schemas: 'name, table, fields' });
 		db.open().then(this.#onFinished).catch(this.#onError);
 	}
 
 	#onFinished = () => {
-		this.trigger("loaded.reactive.database");
+		this.trigger('loaded.reactive.database');
 		if (this.#promise) this.#promise.resolve();
 	};
 	#onError = err => {
-		this.trigger("error");
+		this.trigger('error');
 		console.error(err);
 	};
 
@@ -42,15 +42,18 @@ export /*bundle */ class DatabaseManager extends Events {
 			this.#promise.resolve();
 			this.#promise = undefined;
 		};
-		this.on("finished", onFinished);
-		this.on("error", () => {
+		this.on('finished', onFinished);
+		this.on('error', () => {
 			this.#promise.reject();
 			this.#promise = undefined;
 		});
 	}
 
 	async open(identifier) {
-		let [name, version = 1] = identifier.split("@");
+		if (!identifier) {
+			throw new Error(`Identifier ${identifier} was not defined correctly`);
+		}
+		let [name, version = 1] = identifier.split('@');
 
 		if (!this.#databases.has(name)) {
 			const schema = new Database(name, version);

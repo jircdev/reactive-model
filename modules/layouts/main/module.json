@@ -1,21 +1,17 @@
 {
-  "name": "layout/main",
-  "widget": {
-    "is": "layout",
-    "element": {
-      "name": "main-layout-reactive"
-    },
-    "sass": {
-      "path": "sass",
-      "files": [
-        "*"
-      ]
-    },
-    "ts": {
-      "path": "ts",
-      "files": [
-        "*"
-      ]
-    }
-  }
+	"name": "reactive-layout",
+	"widget": {
+		"is": "layout",
+		"element": {
+			"name": "reactive-layout"
+		},
+		"scss": {
+			"path": "sass",
+			"files": ["*"]
+		},
+		"ts": {
+			"path": "ts",
+			"files": ["*"]
+		}
+	}
 }
