@@ -112,4 +112,13 @@ export /*bundle*/ class UserStore {
 
 		await this.conn.disconnect();
 	}
+
+	async deleteItems(ids: number[]): Promise<void> {
+		await this.conn.connect();
+		const db = this.conn.connection;
+		const placeholders = ids.map(id => '?').join(', ');
+		const query = `DELETE FROM users WHERE id IN (${placeholders})`;
+		await db.run(query, ids);
+		await this.conn.disconnect();
+	}
 }
