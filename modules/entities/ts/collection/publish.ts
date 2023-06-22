@@ -28,7 +28,7 @@ export class CollectionSaveManager {
 			console.warn('la colleccion no usa indexeddb');
 		}
 
-		this.#provider = this.#bridge.get('#provider');
+		this.#provider = this.#bridge.get('provider');
 	}
 
 	save = async (data = []): Promise<any> => {
@@ -87,7 +87,7 @@ export class CollectionSaveManager {
 		try {
 			await this.#localProvider.init();
 			if (!data) data = await this.#parent.localProvider.store.where('offline').equals(1).toArray();
-
+			
 			const chunks = this.splitDataIntoChunks(data);
 			const failedChunks = [];
 			const successChunks = [];
@@ -98,6 +98,7 @@ export class CollectionSaveManager {
 					failedChunks.push(result);
 				} else successChunks.push(result);
 			}
+
 			this.#bridge.set('items', []);
 			await this.#parent.load();
 			if (failedChunks.length) {
@@ -108,13 +109,13 @@ export class CollectionSaveManager {
 			return { status: true, data: successChunks };
 		} catch (e) {
 			console.error(e);
+			return {status: false, error: 'CANT_SYNC'};
 		}
 	};
 
 	toSync = async () => {
 		try {
 			await this.#localProvider.init();
-
 			return this.#localProvider.store.where('offline').equals(1).toArray();
 		} catch (e) {
 			console.error(e);

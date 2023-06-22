@@ -73,7 +73,6 @@ class LocalProvider extends ReactiveModel<any> {
 			this.#database = database;
 			this.#store = database.db[this.#storeName];
 
-			console.log('id init local provider', id, this.#databaseName, this.#storeName);
 			await this.#getRegistry(id);
 			if (id) await this.load({ id });
 			else this.#isNew = true;

@@ -108,7 +108,6 @@ export class CollectionLoadManager {
 
 			if (this.#localProvider) {
 				const localItems = await this.#localLoad(params);
-				console.log('ITEMS => ', localItems)
 				if (!isOnline || !this.#provider) {
 					return { status: true, data: localItems };
 				}
