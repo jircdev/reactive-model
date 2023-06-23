@@ -165,7 +165,6 @@ class LocalProvider extends ReactiveModel<any> {
 		try {
 			if (!this.isUnpublished) return;
 			await this.#store.update(data.id, data);
-			// recordsFactory.update(this.#storeName, data.id, data);
 		} catch (e) {}
 	}
 
@@ -187,5 +186,11 @@ class LocalProvider extends ReactiveModel<any> {
 
 		const duplicateFields = (await Promise.all(checkPromises)).filter(field => field !== null);
 		return duplicateFields;
+	}
+
+	async delete() {
+		const response = await this.registry.update({ isDeleted: 1 });
+
+		return response;
 	}
 }

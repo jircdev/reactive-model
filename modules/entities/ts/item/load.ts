@@ -40,6 +40,11 @@ export class ItemLoadManager {
 		try {
 			await this.#getProperty('checkReady')();
 			const localdb = await this.#getProperty('localdb');
+
+			if (!params && this.#parent.id) {
+				console.log('tenemos id', this.#parent.id);
+				params = { id: this.#parent.id };
+			}
 			if (localdb && this.#localProvider) {
 				const localData = await this.#localProvider.load(params);
 
@@ -49,8 +54,9 @@ export class ItemLoadManager {
 			if (this.#localProvider && !this.#localProvider.isOnline) return { status: true };
 
 			if (!this.#provider) return;
-
+			console.log(0.1);
 			const remoteData = await this.remoteLoad(params);
+			console.log(0.2, remoteData);
 
 			if (!remoteData) {
 				this.#parent.found = false;
@@ -60,6 +66,7 @@ export class ItemLoadManager {
 					let original = this.#localProvider.registry.values;
 					if (original[key] !== remoteData[key]) same = false;
 				});
+
 				if (!same) await this.#localProvider.save(remoteData);
 				this.#parent.found = true;
 			}

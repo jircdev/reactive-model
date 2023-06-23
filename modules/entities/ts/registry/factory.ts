@@ -62,6 +62,9 @@ export class /*bundle*/ FactoryRecords extends ReactiveModel<IRecords> {
 	async saveAll(items, storeName) {
 		const elements = items.map(item => {
 			const registry = new Registry(storeName);
+			if (item.deleted) {
+				registry.isDeleted = true;
+			}
 			registry.setValues(item);
 			return registry;
 		});

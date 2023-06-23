@@ -40,7 +40,7 @@ export class Database extends Events {
 		this.#promise.resolve();
 		this.#promise = undefined;
 	};
-	#onError = (error) => {
+	#onError = error => {
 		this.#promise.resolve();
 		this.#promise = undefined;
 		throw new Error(error);
@@ -50,12 +50,14 @@ export class Database extends Events {
 		return this.#version;
 	}
 
-	register = async (data) => {
-		Object.keys(data).forEach((store) => {
+	register = async data => {
+		Object.keys(data).forEach(store => {
 			const items = data[store].split(',');
 			const filter = new Set(items);
 			filter.add('offline');
 			filter.add('instanceId');
+			filter.add('isDeleted');
+			filter.add('isNew');
 			data[store] = Array.from(filter).join(',');
 		});
 

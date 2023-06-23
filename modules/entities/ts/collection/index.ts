@@ -91,6 +91,7 @@ export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> 
 
 		if (this.localdb) {
 			this.#localProvider = new CollectionLocalProvider(this, bridge);
+
 			this.#localProvider.on('items.changed', this.#listenItems);
 			this.localProvider.init();
 		}
@@ -111,5 +112,16 @@ export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> 
 	async store() {
 		await this.#localProvider.init();
 		return this.#localProvider.store;
+	}
+
+	async delete(ids) {
+		try {
+			if (this.#localProvider) await this.#localProvider.softDelete(ids);
+			if (this.provider) {
+				await this.provider.deleteItems(ids);
+			}
+		} catch (e) {
+			console.error(e);
+		}
 	}
 }

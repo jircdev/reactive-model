@@ -17,6 +17,16 @@ export class Registry extends ReactiveModel<IRegistry> {
 	#instanceId;
 	#keyId;
 
+	#isDeleted;
+	get isDeleted() {
+		return this.#isDeleted;
+	}
+	set isDeleted(value) {
+		if (value === this.#isDeleted) return;
+
+		this.#isDeleted = value;
+		this.triggerEvent();
+	}
 	#landed;
 	get landed() {
 		return this.#landed;
@@ -65,6 +75,7 @@ export class Registry extends ReactiveModel<IRegistry> {
 
 				this.#landed = true;
 				this.setValues(item);
+
 				this.#promise.resolve(this);
 			});
 		}
@@ -76,12 +87,12 @@ export class Registry extends ReactiveModel<IRegistry> {
 		const props = Object.keys(data);
 
 		let updated = false;
-		// specify if the item was generated locally
-		if (backend) {
-			this.#isNew = false;
-			this.#instanceId = undefined;
-			delete this.#values.instanceId;
-		}
+		// // specify if the item was generated locally
+		// if (backend) {
+		// 	this.#isNew = false;
+		// 	this.#instanceId = undefined;
+		// 	delete this.#values.instanceId;
+		// }
 		if (!data.id) {
 			data.id = this.#id;
 		}
@@ -97,8 +108,11 @@ export class Registry extends ReactiveModel<IRegistry> {
 			updated = true;
 		});
 
+		newValues.isDeleleted = this.isDeleted === 1 ?? 0;
+
 		this.#values = newValues;
 		this.triggerEvent();
+
 		return updated;
 	};
 
@@ -111,9 +125,11 @@ export class Registry extends ReactiveModel<IRegistry> {
 
 	update = async (data: any, backend) => {
 		const updated = this.setValues(data, backend);
+
 		if (updated) {
 			await this.#store.put(this.#values);
 			this.triggerEvent('change');
+			return true;
 		}
 	};
 }

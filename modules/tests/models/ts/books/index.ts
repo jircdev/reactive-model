@@ -1,5 +1,5 @@
-import { Item } from "@beyond-js/reactive/entities";
-import { UserProvider } from "@beyond-js/reactive/tests/backend/provider";
+import { Item } from '@beyond-js/reactive/entities';
+import { UserProvider } from '@beyond-js/reactive/tests/backend/provider';
 interface IBook {
 	name?: string;
 	password: string;
@@ -8,14 +8,9 @@ interface IBook {
 
 export /*bundle */
 class Book extends Item<IBook> {
-	protected properties = ["id", "title", "author", "year"];
-
-	protected storeName = "book";
-	protected db = "test";
+	protected properties = ['id', 'title', 'author', 'year'];
 
 	constructor({ id = undefined } = {}) {
-		super();
-
-		this.init({ id });
+		super({ id, storeName: 'book', db: 'test' });
 	}
 }

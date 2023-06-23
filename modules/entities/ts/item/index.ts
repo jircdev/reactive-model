@@ -52,6 +52,11 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 		return this[property];
 	}
 
+	#isDeleted = 0;
+	get isDeleted() {
+		return !!this.#isDeleted;
+	}
+
 	get store() {
 		return this.localProvider.store;
 	}
@@ -206,5 +211,19 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 
 	getPropertyNames() {
 		return this.properties;
+	}
+
+	async delete() {
+		try {
+			this.#isDeleted = 1;
+
+			if (this.localProvider) await this.localProvider.delete();
+			// if (this.provider) await this.provider.delete(this.id);
+			this.triggerEvent();
+			console.log(100, 'terminamos');
+			return true;
+		} catch (e) {
+			console.error('error', e);
+		}
 	}
 }

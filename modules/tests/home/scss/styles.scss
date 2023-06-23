@@ -11,14 +11,38 @@
 
 	button {
 		background-color: var(--primary);
-		padding: 1rem;
+
 		border-radius: 8px;
 		border: 1px solid var(--primary);
 		color: var(--text-on-primary);
 		cursor: pointer;
 		transition: all 300ms ease-in-out;
-		&:hover {
+		&:hover:not(:disabled) {
 			background-color: var(--primary-dark);
+		}
+		&:disabled {
+			opacity: 0.5;
+			cursor: not-allowed;
+		}
+	}
+
+	ul {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		flex-flow: column;
+		width: 300px;
+		li {
+			display: flex;
+			padding: 0.5rem 1rem;
+			flex-grow: 1;
+			justify-content: space-between;
+			cursor: pointer;
+			transition: all 100ms ease-in;
+			&:hover {
+				background: rgba(0, 0, 0, 0.3);
+			}
 		}
 	}
 }

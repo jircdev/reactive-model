@@ -107,7 +107,7 @@ export class CollectionLoadManager {
 
 			const { isOnline } = this.#parent;
 
-			if (this.#localProvider.active) {
+			if (this.#localProvider) {
 				const localItems = await this.#localLoad(params);
 				if (!isOnline || !this.#provider) {
 					return { status: true, data: localItems };
@@ -115,11 +115,12 @@ export class CollectionLoadManager {
 			}
 
 			const remoteData = await this.#provider.list(params);
+
 			this.remoteData = remoteData;
 			const { status, data, error } = remoteData;
 			if (!status) throw error ?? 'ERROR_LIST_QUERY';
 
-			const items: any[] = await this.processRemoteEntries(data.entries);
+			const items: any[] = await this.processRemoteEntries(data);
 			// if (this.#localProvider) await this.#localProvider.save(items);
 
 			this.#remoteElements = params.update === true ? this.#remoteElements.concat(items) : items;
@@ -143,9 +144,16 @@ export class CollectionLoadManager {
 		}
 	};
 
-	async processRemoteEntries(entries): Promise<any[]> {
-		await this.#localProvider.save(entries);
-		return entries.map(record => {
+	async processRemoteEntries(data): Promise<any[]> {
+		if (!data.entries) {
+			throw new Error('The list method must return an object with an entries property');
+		}
+		if (data.deletedEntries) {
+			// todo: unify it in recordsFactory
+			this.#localProvider.softDelete(data.deletedEntries);
+		}
+		await this.#localProvider.save(data.entries);
+		return data.entries.map(record => {
 			const item = new this.parent.item({ id: record.id });
 
 			item.set(record);
