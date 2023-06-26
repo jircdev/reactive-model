@@ -28,7 +28,7 @@ export class ItemSaveManager {
 
 			if (data) this.#parent.set(data);
 
-			if (!this.#parent.isUnpublished) return;
+			if (!this.#parent.isUnpublished) return {status: true};
 
 			const properties = this.#parent.getProperties();
 
@@ -40,6 +40,8 @@ export class ItemSaveManager {
 			return { status: true };
 		} catch (e) {
 			console.error('error saving', e);
+			return {status: false, error: e}
+
 		}
 	};
 

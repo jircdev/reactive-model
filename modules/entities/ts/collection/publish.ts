@@ -57,6 +57,7 @@ export class CollectionSaveManager {
 	sendChunk = async (chunk, index, retries = 0) => {
 		try {
 			const response = await this.#provider.bulkSave(chunk);
+			
 			if (response.status) {
 				const data = response.data.entries.map(item => ({ ...item, offline: 0, instanceId: undefined }));
 

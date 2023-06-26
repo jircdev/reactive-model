@@ -1,4 +1,4 @@
-import { Collection } from "@beyond-js/reactive/entities";
+import { Collection } from "@beyond-js/reactive-2/entities";
 import { Book } from "./index";
 
 interface IUsers {
