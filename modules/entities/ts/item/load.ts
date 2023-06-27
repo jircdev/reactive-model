@@ -51,18 +51,19 @@ export class ItemLoadManager {
 			if (!this.#provider) return;
 
 			const remoteData = await this.remoteLoad(params);
-			if (!remoteData) this.#parent.found = false;
 
-			if (remoteData) {
+			if (!remoteData) {
+				this.#parent.found = false;
+			} else if (remoteData) {
 				let same = true;
 				Object.keys(remoteData).forEach(key => {
 					let original = this.#localProvider.registry.values;
 					if (original[key] !== remoteData[key]) same = false;
 				});
 				if (!same) await this.#localProvider.save(remoteData);
+				this.#parent.found = true;
 			}
 
-			this.#parent.found = true;
 			return { status: true, data: remoteData };
 		} catch (exc) {
 			console.error('ERROR LOAD', exc);
