@@ -56,7 +56,11 @@ export class CollectionSaveManager {
 	// Send chunks with retries
 	sendChunk = async (chunk, index, retries = 0) => {
 		try {
+			console.log('PRE-REACTIVE.SENDCHUNK => ', {chunk, bulkSave: this.#provider.bulkSave, provider: this.#provider});
 			const response = await this.#provider.bulkSave(chunk);
+			
+			// Esto es lo que aveces no se ejecuta (el metodo bulkSave del provider tampoco)
+			console.log('POS-REACTIVE.SENDCHUNK => ', { response, chunk });
 			
 			if (response.status) {
 				const data = response.data.entries.map(item => ({ ...item, offline: 0, instanceId: undefined }));
@@ -65,7 +69,7 @@ export class CollectionSaveManager {
 				return { success: true, chunk, response };
 			}
 			if (retries < this.MAX_RETRIES) {
-				return await this.sendChunk(chunk, retries + 1);
+				return this.sendChunk(chunk, retries + 1);
 			}
 
 			return { success: false, chunk, response };
