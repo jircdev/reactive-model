@@ -92,7 +92,6 @@ export class CollectionLoadManager {
 	#remoteElements = [];
 	load = async (params: any = {}) => {
 		try {
-			console.log('1 LOAD', params)
 			this.parent.fetching = true;
 			let { start = 0, update } = params;
 
@@ -104,7 +103,6 @@ export class CollectionLoadManager {
 				params.start = start;
 			}
 			const { isOnline } = this.parent;
-			console.log('1.1 LOAD => ', params, {localProvider: this.#localProvider, intOnline: !isOnline, provider: !this.#provider})
 
 
 			if (this.#localProvider) {
@@ -114,9 +112,7 @@ export class CollectionLoadManager {
 				}
 			}
 
-			console.log('2 LOAD', params)
 			const remoteData = await this.#provider.list(params);
-			console.log('3 LOAD', remoteData, params)
 			this.remoteData = remoteData;
 			const { status, data, error } = remoteData;
 			if (!status) throw error ?? 'ERROR_LIST_QUERY';
