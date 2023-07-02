@@ -12,5 +12,11 @@ class User extends Item<IUser> {
 
 	constructor({ id = undefined } = {}) {
 		super({ storeName: 'user', db: 'test', id, provider: UserProvider });
+		this.test();
+	}
+
+	test() {
+		this.checkReady();
+		console.log(this.provider);
 	}
 }
