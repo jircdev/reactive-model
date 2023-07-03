@@ -54,9 +54,8 @@ export class ItemLoadManager {
 			if (this.#localProvider && !this.#localProvider.isOnline) return { status: true };
 
 			if (!this.#provider) return;
-			console.log(0.1);
+
 			const remoteData = await this.remoteLoad(params);
-			console.log(0.2, remoteData);
 
 			if (!remoteData) {
 				this.#parent.found = false;
