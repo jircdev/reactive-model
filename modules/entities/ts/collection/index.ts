@@ -3,6 +3,8 @@ import type { Item, IITem } from '../item';
 import { CollectionLocalProvider } from './local-provider';
 import { CollectionSaveManager } from './publish';
 import { CollectionLoadManager } from './load';
+import { IProvider, IProviderConstructor } from '../interfaces/provider';
+import type { CollectionProvider } from '../providers/collection';
 
 interface IColleciton {
 	items: object[];
@@ -11,11 +13,11 @@ interface IColleciton {
 	provider: object;
 }
 
-interface ISpecs {}
-interface ICollectionProvider {
-	load: Function;
-	publish: Function;
-	delete: Function;
+interface ISpecs {
+	provider: IProviderConstructor;
+	storeName: string;
+	db: string;
+	localdb: boolean;
 }
 
 export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> {
@@ -52,12 +54,12 @@ export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> 
 
 	#saveManager: CollectionSaveManager;
 	#loadManager: CollectionLoadManager;
-	protected provider: ICollectionProvider;
-	#initSpecs: ISpecs = {};
+	protected provider: IProvider;
+	#initSpecs: ISpecs;
 	protected sortBy: string = 'id';
 	protected sortDirection: 'asc' | 'desc' = 'asc';
 
-	constructor(specs = {}) {
+	constructor(specs: ISpecs) {
 		super();
 
 		const { provider, storeName, db, localdb } = specs;
@@ -76,12 +78,7 @@ export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> 
 		this.init();
 	}
 
-	protected setItems(values) {
-		this.#items = values;
-	}
-	protected init(specs: ISpecs = {}) {
-		this.#initSpecs = specs;
-
+	protected init() {
 		const getProperty = property => {
 			return this[property];
 		};
@@ -108,6 +105,10 @@ export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> 
 	};
 
 	setOffline = value => this.localProvider.setOffline(value);
+
+	protected setItems(values) {
+		this.#items = values;
+	}
 
 	async store() {
 		await this.#localProvider.init();

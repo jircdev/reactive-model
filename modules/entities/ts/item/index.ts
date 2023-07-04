@@ -1,29 +1,13 @@
 import { ReactiveModel, reactiveProps } from '@beyond-js/reactive/model';
-import { IProvider } from '../interfaces/provider';
+
 import { LocalProvider } from './local-provider';
 import { ItemSaveManager } from './save';
 import { ItemLoadManager } from './load';
 import { PendingPromise } from '@beyond-js/kernel/core';
+import { IITem } from './interfaces/item';
+import { IItemConfig } from './interfaces/config';
 
-export interface IITem {
-	provider: any;
-	skeleton: Array<string>;
-	isUnpublished: boolean;
-	save: Function;
-	load: Function;
-	publish: Function;
-	unique: Array<string>;
-	sync: Function;
-}
-
-export interface IItemConfig {
-	storeName?: string;
-	db?: string;
-	id?: string | number;
-	provider?: new () => IProvider;
-}
-
-export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
+export /*bundle*/ abstract class Item<IITem> extends ReactiveModel<IITem> {
 	#info = new Map();
 	/**
 	 * Represent the data that is stored in the local database
@@ -81,6 +65,11 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 	#objectReady = false;
 	#promiseReady: PendingPromise<boolean>;
 	#initPromise: PendingPromise<boolean>;
+
+	/**
+	 * Defines if the item was found in the local database
+	 */
+	declare found: boolean;
 	constructor(config: IItemConfig = {}) {
 		super();
 
@@ -93,21 +82,13 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 			}
 			this.provider = new config.provider();
 		}
+
 		this.on('object.loaded', this.checkReady);
 		this.reactiveProps(['found']);
 		const getProperty = property => this.__get(property);
 		const setProperty = (property, value) => (this[property] = value);
 		const bridge = { get: getProperty, set: setProperty };
-
-		if (this.db && this.storeName) {
-			if (this.localdb) {
-				/**
-				 * @todo: Julio: probably this should be a singleton
-				 */
-				this.localProvider = new LocalProvider(this, getProperty);
-			}
-		}
-
+		this.localProvider = new LocalProvider(this, bridge);
 		this.#saveManager = new ItemSaveManager(this, bridge);
 		this.#loadManager = new ItemLoadManager(this, bridge);
 
@@ -119,16 +100,6 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<IITem> {
 			let id;
 			if (this.#initPromise) return this.#initPromise;
 
-			if (this.localdb && !this.localProvider) {
-				/**
-				 * This code is to keep compatibility with the old version of the library
-				 * where the init must be called after the super call in Children objects.
-				 * @param property
-				 * @returns
-				 */
-				const getProperty = property => this.__get(property);
-				this.localProvider = new LocalProvider(this, getProperty);
-			}
 			this.#initPromise = new PendingPromise();
 			if (config.id) id = config.id;
 

@@ -5,7 +5,7 @@ import { liveQuery } from 'dexie';
 import { PendingPromise } from '@beyond-js/kernel/core';
 import { DBManager, DatabaseManager } from '@beyond-js/reactive/database';
 import Dexie from 'dexie';
-import { FactoryRecords } from '../registry/factory';
+import { RegistryFactory } from '../registry/factory';
 
 interface IItemValues {
 	[key: string]: any;
@@ -31,7 +31,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 	#databaseName!: string;
 	#listItems = new Map();
 	#items = [];
-	#records: FactoryRecords;
+	#registryFactory: RegistryFactory;
 	get items() {
 		return this.#items;
 	}
@@ -50,7 +50,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 		this.#parent = parent;
 		this.#bridge = bridge;
 		if (db) {
-			this.#records = FactoryRecords.get(db);
+			this.#registryFactory = RegistryFactory.get(db);
 		}
 
 		this.#databaseName = db;
@@ -212,8 +212,8 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 
 		data = process(data, this.isOnline ? 0 : 1);
 
-		await this.#records.init();
-		await this.#records.saveAll(data, this.#storeName);
+		await this.#registryFactory.init();
+		await this.#registryFactory.saveAll(data, this.#storeName);
 	}
 	#processControl(control, conditions) {
 		this.#store[control];

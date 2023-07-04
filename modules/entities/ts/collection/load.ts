@@ -2,6 +2,7 @@ import type { Collection } from '.';
 import { PendingPromise } from '@beyond-js/kernel/core';
 import type { CollectionLocalProvider } from './local-provider';
 import { CollectionSaveManager } from './publish';
+import { RegistryFactory } from '../registry/factory';
 interface ILoadResponse {
 	localLoaded: true;
 	fetching: false;
@@ -10,18 +11,17 @@ interface ILoadResponse {
 	items?: any[];
 }
 export class CollectionLoadManager {
-	#parent: Collection;
 	filter: any;
-	get parent() {
-		return this.#parent;
-	}
-
 	#localProvider: CollectionLocalProvider;
 	#provider;
 	#getProperty;
 	#parentBridge;
 	#localdb;
-
+	#parent: Collection;
+	#registry: RegistryFactory;
+	get parent() {
+		return this.#parent;
+	}
 	/**
 	 * Original data obtained in provider.load
 	 *
@@ -33,17 +33,20 @@ export class CollectionLoadManager {
 	constructor(parent, parentBridge) {
 		this.#parent = parent;
 		this.#parentBridge = parentBridge;
+
 		this.init();
 	}
 
-	init = async () => {
+	init() {
 		this.#localdb = this.#parentBridge.get('localdb');
 		this.#localProvider = this.#parentBridge.get('localProvider');
 		this.#provider = this.#parentBridge.get('provider');
 		this.#parent.load = this.load;
 		this.#parent.filter = this.filter;
+
+		this.#registry = RegistryFactory.get(this.#parentBridge.get('storeName'));
 		if (this.#localProvider) this.#parent.customFilter = this.#localProvider?.customFilter;
-	};
+	}
 
 	/**
 	 * metodo general para las consultas de tipo lista para las colecciones
@@ -162,6 +165,7 @@ export class CollectionLoadManager {
 	}
 
 	processEntries = (entries): any[] => {
+		this.#registry.registerList(this.#parentBridge.get('storeName'), entries);
 		return entries.map(record => {
 			const item = new this.parent.item({ id: record.id });
 			item.set(record);

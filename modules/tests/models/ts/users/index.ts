@@ -17,6 +17,5 @@ class User extends Item<IUser> {
 
 	test() {
 		this.checkReady();
-		console.log(this.provider);
 	}
 }
