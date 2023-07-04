@@ -84,4 +84,8 @@ export /*actions*/ /*bundle*/ class UserProvider {
 			return { error: true, message: e.message };
 		}
 	}
+
+	prueba() {
+		return { data: 'prueba' };
+	}
 }

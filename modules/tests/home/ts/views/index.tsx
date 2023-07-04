@@ -42,12 +42,12 @@ function Page({ store }): JSX.Element {
 		store.deleteItems(Array.from(selected));
 	};
 	const props = { disabled: selected.size === 0 };
-	console.log(12, props);
+
 	return (
 		<TestContext.Provider
 			value={{ total: store.users.items?.length, totalSelected: selected.size, selected, onCheck, store }}
 		>
-			<div className="page__container">
+			<div className='page__container'>
 				<header>
 					<h1>Página de prueba</h1>
 				</header>
