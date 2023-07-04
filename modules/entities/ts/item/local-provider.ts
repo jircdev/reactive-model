@@ -127,9 +127,9 @@ class LocalProvider extends ReactiveModel<any> {
 	 */
 	#getRegistry = async id => {
 		if (this.#factoryRegistry.hasItem(this.#storeName, id)) {
-			this.#parent.found = true;
-			this.#parent.localLoaded = true;
-			return this.#factoryRegistry.getItem(this.#storeName, id);
+			const item = this.#factoryRegistry.getItem(this.#storeName, id);
+			this.#parent.localLoaded = this.#parent.found = item.values.found;
+			return item;
 		}
 
 		const getRegistry = data => {
@@ -145,7 +145,7 @@ class LocalProvider extends ReactiveModel<any> {
 		const promise = new PendingPromise();
 
 		this.#store.get(id).then(data => {
-			const specs = data ?? {};
+			const specs = data ?? { id };
 			specs.found = !!data;
 			getRegistry(specs);
 			promise.resolve(this.#registry.values);

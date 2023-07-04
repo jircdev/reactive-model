@@ -26,6 +26,9 @@ export /*actions*/ /*bundle*/ class UserProvider {
 
 			const user = new UserStore();
 			const data = await user.loadUser(id);
+			if (!data) {
+				return { status: true, data: false };
+			}
 			//@ts-ignore
 			data.isDeleted = data.deleted;
 			//@ts-ignore
