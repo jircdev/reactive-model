@@ -128,6 +128,7 @@ class LocalProvider extends ReactiveModel<any> {
 	#getRegistry = async id => {
 		if (this.#factoryRegistry.hasItem(this.#storeName, id)) {
 			const item = this.#factoryRegistry.getItem(this.#storeName, id);
+			this.#registry = item;
 			this.#parent.localLoaded = this.#parent.found = item.values.found;
 			return item;
 		}
@@ -220,7 +221,7 @@ class LocalProvider extends ReactiveModel<any> {
 	async #update(data) {
 		const updated = this.#registry.setValues(data);
 		if (!updated) return;
-		console.log(12, this.#store);
+
 		await this.#store.put(this.#registry.values);
 		this.triggerEvent();
 		return true;
