@@ -42,7 +42,6 @@ export class ItemLoadManager {
 			const localdb = await this.#getProperty('localdb');
 
 			if (!params && this.#parent.id) {
-				console.log('tenemos id', this.#parent.id);
 				params = { id: this.#parent.id };
 			}
 			if (localdb && this.#localProvider) {
@@ -100,6 +99,7 @@ export class ItemLoadManager {
 			console.error(response);
 			throw 'ERROR_DATA_QUERY';
 		}
+
 		return response.data;
 	};
 }

@@ -74,6 +74,7 @@ export /*bundle*/ abstract class Item<IITem> extends ReactiveModel<IITem> {
 		super();
 
 		const { db, storeName } = config;
+
 		if (db) this.db = db;
 		if (storeName) this.storeName = storeName;
 		if (config.provider) {

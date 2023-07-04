@@ -134,7 +134,7 @@ export class /*bundle*/ RegistryFactory extends ReactiveModel<IRecords> {
 	}
 
 	create(storeName, data) {
-		const registry = new Registry(storeName);
+		const registry = new Registry(storeName, data);
 		registry.setValues(data);
 		this.#getStore(storeName).set(registry.values.id, registry);
 		return registry;
