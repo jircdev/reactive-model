@@ -30,7 +30,7 @@ export class ItemSaveManager {
 
 			if (!this.#parent.isUnpublished) return {status: true};
 
-			const properties = this.#parent.getProperties();
+			const properties = data || this.#parent.getProperties();
 
 			if (this.#localProvider) await this.#localProvider.save(properties);
 
@@ -48,7 +48,6 @@ export class ItemSaveManager {
 	#publish = async properties => {
 		try {
 			if (!this.#provider || !this.#bridge.get('isOnline')) return;
-
 			const response = await this.#provider.publish(properties);
 
 			if (!response?.status) throw response.error;
