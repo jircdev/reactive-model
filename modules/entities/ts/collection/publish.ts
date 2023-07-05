@@ -55,7 +55,6 @@ export class CollectionSaveManager {
 
 	// Send chunks with retries
 	sendChunk = async (chunk, index, retries = 0) => {
-		try {
 			const response = await this.#provider.bulkSave(chunk);
 			
 			// Esto es lo que aveces no se ejecuta (el metodo bulkSave del provider tampoco)
@@ -66,15 +65,11 @@ export class CollectionSaveManager {
 				await this.#localProvider.upsert(data, chunk);
 				return { success: true, chunk, response };
 			}
-			if (retries < this.MAX_RETRIES) {
-				return this.sendChunk(chunk, retries + 1);
-			}
+			// if (retries < this.MAX_RETRIES) {
+			// 	return this.sendChunk(chunk, retries + 1);
+			// }
 
 			return { success: false, chunk, response };
-		} catch (e) {
-			console.error(e);
-			return { success: false, chunk, error: e };
-		}
 	};
 
 	// Split large datasets into smaller chunks
@@ -87,7 +82,6 @@ export class CollectionSaveManager {
 	};
 
 	sync = async data => {
-		try {
 			await this.#localProvider.init();
 			if (!data) data = await this.#parent.localProvider.store.where('offline').equals(1).toArray();
 			
@@ -110,10 +104,6 @@ export class CollectionSaveManager {
 			}
 
 			return { status: true, data: successChunks };
-		} catch (e) {
-			console.error(e);
-			return {status: false, error: 'CANT_SYNC'};
-		}
 	};
 
 	toSync = async () => {
