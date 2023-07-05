@@ -51,7 +51,7 @@
 		]
 	},
 	"dependencies": {
-		"@beyond-js/backend": "~0.1.4",
+		"@beyond-js/backend": "~0.1.7",
 		"@beyond-js/events": "^0.0.6",
 		"@beyond-js/kernel": "~0.1.8",
 		"@beyond-js/local": "~0.1.3",
