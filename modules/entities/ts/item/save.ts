@@ -30,7 +30,7 @@ export class ItemSaveManager {
 
 			if (!this.#parent.isUnpublished) return {status: true};
 
-			const properties = data || this.#parent.getProperties();
+			const properties = {...this.#parent.getProperties(), ...data} || this.#parent.getProperties();
 
 			if (this.#localProvider) await this.#localProvider.save(properties);
 
