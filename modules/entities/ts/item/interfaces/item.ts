@@ -2,9 +2,13 @@ export interface IITem {
 	provider: any;
 	skeleton: Array<string>;
 	isUnpublished: boolean;
-	save: Function;
+
 	load: Function;
-	publish: Function;
+
 	unique: Array<string>;
-	sync: Function;
+
+	save(): Promise<{ status: boolean; error?: string }>;
+	publish(): Promise<{ status: boolean; error?: string }>;
+	localUpdate(data: any, broadcastUpdate?: boolean): Promise<{ status: boolean; error?: string }>;
+	sync(): Promise<{ status: boolean; error?: string }>;
 }
