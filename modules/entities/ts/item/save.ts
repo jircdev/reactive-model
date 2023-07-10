@@ -17,6 +17,7 @@ export class ItemSaveManager {
 	init() {
 		this.#parent.save = this.save;
 		this.#parent.publish = this.publish;
+		this.#parent.localUpdate = this.localUpdate;
 		this.#localProvider = this.#getProperty('localProvider');
 		this.#provider = this.#getProperty('provider');
 		this.#parent.sync = this.sync;
@@ -80,5 +81,29 @@ export class ItemSaveManager {
 
 		this.#publish(provider.registry.values);
 		//const data = this.#getProperty("localProvider").store.where("offline").equals(true).toArray();
+	};
+
+	localUpdate = async (data = undefined) => {
+		try {
+			await this.#getProperty('checkReady')();
+
+			if (data) {
+				this.#parent.set(data);
+			}
+
+			const properties = this.#parent.getProperties();
+
+			if (this.#localProvider) {
+				// Update the local data without setting it as 'unpublished'
+				// (thus, it won't be queued for syncing)
+				await this.#localProvider.save(properties, false);
+			}
+
+			this.#parent.triggerEvent();
+
+			return { status: true };
+		} catch (e) {
+			console.error('error updating locally', e);
+		}
 	};
 }
