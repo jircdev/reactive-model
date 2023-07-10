@@ -14,7 +14,10 @@ export /*bundle*/ abstract class Item<IITem> extends ReactiveModel<IITem> {
 	 */
 	#localData = new Map();
 	protected localdb = true;
-	protected provider: any;
+	#provider: any;
+	get provider() {
+		return this.#provider;
+	}
 	protected storeName: string;
 	protected db: string;
 	#ignoredFields: Array<string> = [];
@@ -81,7 +84,7 @@ export /*bundle*/ abstract class Item<IITem> extends ReactiveModel<IITem> {
 			if (typeof config.provider !== 'function') {
 				throw new Error('Provider must be an object');
 			}
-			this.provider = new config.provider();
+			this.#provider = new config.provider();
 		}
 
 		this.on('object.loaded', this.checkReady);

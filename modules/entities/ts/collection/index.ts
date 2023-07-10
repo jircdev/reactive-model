@@ -54,7 +54,10 @@ export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> 
 
 	#saveManager: CollectionSaveManager;
 	#loadManager: CollectionLoadManager;
-	protected provider: IProvider;
+	#provider: IProvider;
+	get provider() {
+		return this.#provider;
+	}
 	#initSpecs: ISpecs;
 	protected sortBy: string = 'id';
 	protected sortDirection: 'asc' | 'desc' = 'asc';
@@ -71,7 +74,7 @@ export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> 
 			if (typeof provider !== 'function') {
 				throw new Error('Provider must be a class object');
 			}
-			this.provider = new provider();
+			this.#provider = new provider();
 		}
 
 		this.reactiveProps<IColleciton>(['item', 'next', 'provider']);
