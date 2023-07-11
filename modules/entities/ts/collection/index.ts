@@ -56,6 +56,7 @@ export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> 
 	#loadManager: CollectionLoadManager;
 	#provider: IProvider;
 	get provider() {
+		console.log(20, this.#provider);
 		return this.#provider;
 	}
 	#initSpecs: ISpecs;
@@ -77,7 +78,7 @@ export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> 
 			this.#provider = new provider();
 		}
 
-		this.reactiveProps<IColleciton>(['item', 'next', 'provider']);
+		this.reactiveProps<IColleciton>(['item', 'next']);
 		this.init();
 	}
 

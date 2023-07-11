@@ -102,7 +102,8 @@ class LocalProvider extends ReactiveModel<any> {
 
 	async load(params: any = {}) {
 		let id = params.id;
-		id = id ?? this.#parent.id;
+		//TODO: review @julio
+		id = id ?? this.registry.values?.id;
 
 		try {
 			if (!id) throw 'ID IS REQUIRED';

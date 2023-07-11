@@ -34,7 +34,6 @@ export class Registry extends ReactiveModel<IRegistry> {
 
 		this.#instanceId = id ?? uuidv4();
 		if (!id) this.#id = this.#instanceId;
-		if (store === 'Classes') console.log(10, this.#id);
 		if (this.#id) this.#values.id = this.#id;
 	}
 
@@ -57,7 +56,7 @@ export class Registry extends ReactiveModel<IRegistry> {
 		newValues.isDeleleted = this.isDeleted === 1 ?? 0;
 
 		this.#values = newValues;
-		if (this.#store === 'Classes') console.log(11, this.#values);
+
 		this.triggerEvent();
 
 		return updated;

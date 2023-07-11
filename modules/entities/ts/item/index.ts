@@ -13,7 +13,7 @@ export /*bundle*/ abstract class Item<IITem> extends ReactiveModel<IITem> {
 	 * Represent the data that is stored in the local database
 	 */
 	#localData = new Map();
-	declare localUpdate: (data) => Promise<Item>;
+	declare localUpdate: (data) => Promise<any>;
 	protected localdb = true;
 	#provider: any;
 	get provider() {
@@ -160,9 +160,8 @@ export /*bundle*/ abstract class Item<IITem> extends ReactiveModel<IITem> {
 			this.#localData = new Map(Object.entries(data));
 			this.localProvider.save(data, true);
 		}
-		if (this.storeName === 'Classes') console.log(77, data);
-		// If a property is in the properties array, define it as a public property
 
+		// If a property is in the properties array, define it as a public property
 		this.properties.forEach(property => {
 			if (data.hasOwnProperty(property)) {
 				this[property] = data[property];
