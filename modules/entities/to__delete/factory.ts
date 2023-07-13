@@ -6,9 +6,6 @@ import { DBManager, DatabaseManager } from '@beyond-js/reactive/database';
 interface IRecords {
 	stores: Map<string, Map<string, Registry>>;
 }
-/**
- *
- */
 export class /*bundle*/ RegistryFactory extends ReactiveModel<IRecords> {
 	#stores = new Map();
 	#database;
@@ -49,21 +46,6 @@ export class /*bundle*/ RegistryFactory extends ReactiveModel<IRecords> {
 		this.#stores.get(storeName).set(registry.instanceId, registry);
 
 		return registry;
-	}
-
-	/**
-	 * Loop a list of items and if they don't exist in memorey, create the registry and add it to the store.
-	 * @param storeName
-	 * @param items
-	 */
-	registerList(storeName, items) {
-		const registries = items.map(item => {
-			if (this.hasItem(storeName, item.id)) {
-				return this.getItem(storeName, item.id);
-			}
-
-			return this.create(storeName, item);
-		});
 	}
 
 	/**
@@ -109,45 +91,8 @@ export class /*bundle*/ RegistryFactory extends ReactiveModel<IRecords> {
 		}
 	}
 
-	/**
-	 * Validates if the specified item exists in the specified store.
-	 *
-	 *  This method is used by the LocalProvider to know if a item was already loaded or not.
-	 *  If the item is not loaded, the LocalProvider will load it from the database and pass the data to the Factory
-	 *  to create the registry in memory
-	 * @param storeName store name
-	 * @param id Id of the item to validate if exists or is loaded
-	 * @returns
-	 */
-	hasItem(storeName, id) {
-		return this.#stores.has(storeName) && this.#stores.get(storeName).has(id);
-	}
-
-	getItem(storeName, id) {
-		if (!this.hasItem(storeName, id)) throw new Error(`Item ${id} does not exists in store ${storeName}`);
-		return this.#stores.get(storeName).get(id);
-	}
-
-	#getStore(store) {
-		if (!this.#stores.has(store)) this.#stores.set(store, new Map());
-		return this.#stores.get(store);
-	}
-
-	create(storeName, data) {
-		const registry = new Registry(storeName, data);
-		registry.setValues(data);
-		this.#getStore(storeName).set(registry.values.id, registry);
-		return registry;
-	}
-
 	static #dbs = new Map();
 
-	/**
-	 * Returns a RegistryFactory instance for the specified database name.
-	 *
-	 * @param dbName IndexedDB database name
-	 * @returns
-	 */
 	static get(dbName) {
 		if (this.#dbs.has(dbName)) return this.#dbs.get(dbName);
 		const db = new RegistryFactory(dbName);

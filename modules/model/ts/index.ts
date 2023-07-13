@@ -72,7 +72,6 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 			},
 			set(newVal: T[keyof T]): void {
 				if (newVal === this[privatePropKey]) return;
-
 				this[privatePropKey] = newVal;
 				this.triggerEvent();
 			},

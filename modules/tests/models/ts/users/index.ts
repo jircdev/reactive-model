@@ -1,5 +1,6 @@
-import { Item } from '@beyond-js/reactive-2/entities';
-import { UserProvider } from '@beyond-js/reactive-2/tests/backend/provider';
+import { Item } from '@beyond-js/reactive/entities';
+import { UserProvider } from '@beyond-js/reactive/tests/backend/provider';
+
 interface IUser {
 	name?: string;
 	password: string;
@@ -11,7 +12,11 @@ class User extends Item<IUser> {
 	protected properties = ['id', 'name', 'lastname'];
 
 	constructor({ id = undefined } = {}) {
-		super({ storeName: 'user', db: 'test', id });
-		this.provider = new UserProvider();
+		super({ storeName: 'user', db: 'test', id, provider: UserProvider });
+		this.test();
+	}
+
+	test() {
+		this.checkReady();
 	}
 }
