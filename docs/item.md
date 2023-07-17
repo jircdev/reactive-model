@@ -9,32 +9,26 @@ The `Item` class also includes instances of `ItemSaveManager` and `ItemLoadManag
 The following usage example creates a `User` class that extends `Item`:
 
 ```ts
-import { ReactiveModel } from "@beyond-js/reactive-2/model";
-import { Item } from "@beyond-js/reactive-2/entities";
-import { UserProvider } from "@beyond-js/reactive-2/tests/backend/provider";
+import { Item, IItem } from '@beyond-js/reactive/entities';
+import { UserProvider } from '@beyond-js/reactive/tests/backend/provider';
 
 interface IUser {
 	name?: string;
 	password: string;
 	lastnames: string;
 }
+interface ISpecs {
+	id?: string;
+}
+export /*bundle */
+class User extends Item<IUser> {
+	protected properties = ['id', 'name', 'lastname'];
 
-export /*bundle */ class User extends Item<IUser> {
-	protected properties = ["id", "name", "lastnames"];
-
-	protected storeName = "user";
-	protected db = "test";
-
-	constructor({ id = undefined } = {}) {
-		super(id);
-		this.provider = new UserProvider();
-		this.init({ id });
-	}
-
-	example() {
-		//    this.name = "something";
+	constructor({ id = undefined }: ISpecs) {
+		super({ storeName: 'user', db: 'test', id, provider: UserProvider });
 	}
 }
+
 ```
 
 In this example, the `User` class is defined, which inherits from `Item`. The `User` class has properties such as `id`, `name`, and `lastname`, and it uses a `UserProvider` user provider to interact with an external server. It also defines the name of the local store (`storeName`) and the name of the local database (`db`).

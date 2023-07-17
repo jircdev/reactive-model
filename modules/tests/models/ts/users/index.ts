@@ -1,4 +1,4 @@
-import { Item } from '@beyond-js/reactive/entities';
+import { Item, IItem } from '@beyond-js/reactive/entities';
 import { UserProvider } from '@beyond-js/reactive/tests/backend/provider';
 
 interface IUser {
@@ -6,17 +6,14 @@ interface IUser {
 	password: string;
 	lastnames: string;
 }
-
+interface ISpecs {
+	id?: string;
+}
 export /*bundle */
 class User extends Item<IUser> {
 	protected properties = ['id', 'name', 'lastname'];
 
-	constructor({ id = undefined } = {}) {
+	constructor({ id = undefined }: ISpecs) {
 		super({ storeName: 'user', db: 'test', id, provider: UserProvider });
-		this.test();
-	}
-
-	test() {
-		this.checkReady();
 	}
 }

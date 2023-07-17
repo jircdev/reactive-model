@@ -2,8 +2,8 @@ import * as React from 'react';
 import type { Store } from '../store';
 
 export interface IContext {
-	selected?: Set<string>;
-	onCheck?: () => void;
+	selected?: Set<any>;
+	onCheck?: (event) => void;
 	store: Store;
 	total: number;
 	totalSelected: number;

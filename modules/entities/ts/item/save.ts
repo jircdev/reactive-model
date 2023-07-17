@@ -15,7 +15,7 @@ export class ItemSaveManager {
 	}
 
 	init() {
-		this.#parent.save =	 this.save;
+		this.#parent.save = this.save;
 		this.#parent.publish = this.publish;
 		this.#parent.localUpdate = this.localUpdate;
 		this.#localProvider = this.#getProperty('localProvider');

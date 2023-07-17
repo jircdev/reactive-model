@@ -1,8 +1,8 @@
-export interface IITem {
-	provider: any;
-	skeleton: Array<string>;
+export /*bundle*/ interface IItem {
+	provider?: any;
+	skeleton?: Array<string>;
 	isUnpublished: boolean;
-
+	properties: string[];
 	load: Function;
 
 	unique: Array<string>;

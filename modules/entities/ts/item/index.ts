@@ -4,10 +4,10 @@ import { LocalProvider } from './local-provider';
 import { ItemSaveManager } from './save';
 import { ItemLoadManager } from './load';
 import { PendingPromise } from '@beyond-js/kernel/core';
-import { IITem } from './interfaces/item';
+import { IItem } from './interfaces/item';
 import { IItemConfig } from './interfaces/config';
 
-export /*bundle*/ abstract class Item<IITem> extends ReactiveModel<IITem> {
+export /*bundle*/ class Item<T extends object> extends ReactiveModel<IItem> {
 	#info = new Map();
 	/**
 	 * Represent the data that is stored in the local database

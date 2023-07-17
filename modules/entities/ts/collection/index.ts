@@ -1,26 +1,30 @@
 import { ReactiveModel, reactiveProps } from '@beyond-js/reactive/model';
-import type { Item, IITem } from '../item';
+import type { Item } from '../item';
 import { CollectionLocalProvider } from './local-provider';
 import { CollectionSaveManager } from './publish';
 import { CollectionLoadManager } from './load';
 import { IProvider, IProviderConstructor } from '../interfaces/provider';
 import type { CollectionProvider } from '../providers/collection';
+import { IItemConfig } from '../item/interfaces/config';
 
-interface IColleciton {
+type ItemConstructor<T extends object = any> = new (args?: { id?: any }) => Item<T>;
+
+interface ICollection {
 	items: object[];
-	item: Item<IITem>;
+	item: ItemConstructor;
 	next: number | undefined;
-	provider: object;
+	provider: ItemConstructor;
 }
 
 interface ISpecs {
 	provider: IProviderConstructor;
 	storeName: string;
 	db: string;
-	localdb: boolean;
+	localdb?: boolean;
+	item: ItemConstructor<any>;
 }
 
-export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> {
+export /*bundle */ class Collection extends ReactiveModel<Collection> {
 	#items: Array<any | undefined> = [];
 	protected localdb = true;
 	get items() {
@@ -58,18 +62,19 @@ export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> 
 	get provider() {
 		return this.#provider;
 	}
-	#initSpecs: ISpecs;
+
 	protected sortBy: string = 'id';
 	protected sortDirection: 'asc' | 'desc' = 'asc';
 
 	constructor(specs: ISpecs) {
 		super();
 
-		const { provider, storeName, db, localdb } = specs;
+		const { provider, storeName, db, localdb, item } = specs;
 
 		if (storeName) this.storeName = storeName;
 		if (db) this.db = db;
 		if (localdb) this.localdb = localdb;
+		if (item) this.item = item;
 		if (provider) {
 			if (typeof provider !== 'function') {
 				throw new Error('Provider must be a class object');
@@ -77,7 +82,7 @@ export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> 
 			this.#provider = new provider();
 		}
 
-		this.reactiveProps<IColleciton>(['item', 'next']);
+		this.reactiveProps<ICollection>(['next']);
 		this.init();
 	}
 
