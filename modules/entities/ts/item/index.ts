@@ -96,10 +96,20 @@ export /*bundle*/ class Item<T extends object> extends ReactiveModel<IItem> {
 		this.localProvider = new LocalProvider(this, bridge);
 		this.#saveManager = new ItemSaveManager(this, bridge);
 		this.#loadManager = new ItemLoadManager(this, bridge);
-
+		this.save = this.save.bind(this);
 		if (this.db && this.storeName) this.init(config);
 	}
 
+	save() {
+		return this.#saveManager.save();
+	}
+
+	publish() {
+		return this.#saveManager.publish();
+	}
+	load(params) {
+		return this.#loadManager.load(params);
+	}
 	protected async init(config: { id?: string | number } = {}) {
 		try {
 			let id;

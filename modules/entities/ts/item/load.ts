@@ -13,16 +13,12 @@ export class ItemLoadManager {
 		this.#parent = parent;
 		this.#getProperty = bridge.get;
 		this.#bridge = bridge;
-
 		this.init();
 	}
 
 	init = () => {
 		this.#localProvider = this.#getProperty('localProvider');
-
 		this.#provider = this.#getProperty('provider');
-
-		this.#parent.load = this.load;
 		this.ready = true;
 	};
 

@@ -55,7 +55,10 @@ class LocalProvider extends ReactiveModel<any> {
 		this.__id = Math.floor(Math.random() * (100000 - 1000 + 1)) + 1000;
 		this.#parent = parent;
 
-		if (!db || !storeName) throw new Error('database and store are required');
+		if (!db || !storeName) {
+			return;
+			throw new Error('database and store are required');
+		}
 		this.#databaseName = db;
 		this.#storeName = storeName;
 		this.#bridge = bridge;
