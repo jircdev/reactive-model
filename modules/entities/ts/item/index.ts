@@ -100,16 +100,6 @@ export /*bundle*/ class Item<T extends object> extends ReactiveModel<IItem> {
 		if (this.db && this.storeName) this.init(config);
 	}
 
-	save() {
-		return this.#saveManager.save();
-	}
-
-	publish() {
-		return this.#saveManager.publish();
-	}
-	load(params) {
-		return this.#loadManager.load(params);
-	}
 	protected async init(config: { id?: string | number } = {}) {
 		try {
 			let id;
@@ -117,7 +107,7 @@ export /*bundle*/ class Item<T extends object> extends ReactiveModel<IItem> {
 
 			this.#initPromise = new PendingPromise();
 			if (config.id) id = config.id;
-
+			console.log(55, id);
 			await this.localProvider.init(id);
 			if (this.#skeleton && this.#skeleton.length > 0) {
 				this.properties = this.#skeleton;
@@ -166,13 +156,24 @@ export /*bundle*/ class Item<T extends object> extends ReactiveModel<IItem> {
 	 */
 	set(data, init = false) {
 		//	If init is true, store the data in localData Map
-		if (init) {
+		if (init && this.localdb) {
 			this.#localData = new Map(Object.entries(data));
 			this.localProvider.save(data, true);
 		}
 
 		// If a property is in the properties array, define it as a public property
-		this.properties.forEach(property => {
+
+		type IProperty = {
+			name: string;
+		};
+		this.properties.forEach((property: string | IProperty) => {
+			if (typeof property === 'object') {
+				if (data.hasOwnProperty(property.name)) {
+					//	console.log(10, property);
+				}
+
+				return;
+			}
 			if (data.hasOwnProperty(property)) {
 				this[property] = data[property];
 			}
@@ -199,6 +200,16 @@ export /*bundle*/ class Item<T extends object> extends ReactiveModel<IItem> {
 		return this.properties;
 	}
 
+	save() {
+		return this.#saveManager.save();
+	}
+
+	publish() {
+		return this.#saveManager.publish();
+	}
+	load(params) {
+		return this.#loadManager.load(params);
+	}
 	async delete() {
 		try {
 			this.#isDeleted = 1;
