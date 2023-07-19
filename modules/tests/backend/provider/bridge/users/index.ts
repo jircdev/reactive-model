@@ -43,7 +43,7 @@ export /*actions*/ /*bundle*/ class UserProvider {
 		try {
 			const user = new UserStore();
 			const { entries, deletedIds } = await user.loadAll();
-			console.log(0.1, entries);
+
 			return { status: true, data: { entries, deletedEntries: deletedIds } };
 		} catch (e) {
 			return { error: true, message: e.message };

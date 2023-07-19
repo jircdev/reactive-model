@@ -107,7 +107,7 @@ export /*bundle*/ class Item<T extends object> extends ReactiveModel<IItem> {
 
 			this.#initPromise = new PendingPromise();
 			if (config.id) id = config.id;
-			console.log(55, id);
+
 			await this.localProvider.init(id);
 			if (this.#skeleton && this.#skeleton.length > 0) {
 				this.properties = this.#skeleton;

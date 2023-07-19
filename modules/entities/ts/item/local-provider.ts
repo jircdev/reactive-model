@@ -76,10 +76,11 @@ class LocalProvider extends ReactiveModel<any> {
 
 	init = async (id: string | number | undefined = undefined) => {
 		try {
-			if (!this.#localdb) return;
-			const database: DatabaseManager = await DBManager.get(this.#databaseName);
-			this.#database = database;
-			this.#store = database.db[this.#storeName];
+			if (this.#localdb) {
+				const database: DatabaseManager = await DBManager.get(this.#databaseName);
+				this.#database = database;
+				this.#store = database.db[this.#storeName];
+			}
 
 			await this.#getRegistry(id);
 
@@ -133,7 +134,8 @@ class LocalProvider extends ReactiveModel<any> {
 			const item = this.#factoryRegistry.getItem(this.#storeName, id);
 			this.#registry = item;
 			this.#parent.localLoaded = this.#parent.found = item.values.found;
-			return item;
+			this.#parent.set(this.#registry.values);
+			return item.values;
 		}
 
 		const getRegistry = data => {
@@ -142,31 +144,28 @@ class LocalProvider extends ReactiveModel<any> {
 			this.#parent.set(this.#registry.values);
 			this.trigger('change');
 		};
-		if (!id) {
-			getRegistry({ found: false });
+		type ISpecs = {
+			id: string | number;
+			found?: boolean;
+			ready?: boolean;
+		};
+		let specs: ISpecs = { id };
+		if (!id || !this.#localdb) {
+			specs.ready = id && !this.#localdb;
+			getRegistry(specs);
 			return this.#registry.values;
 		}
+		// this code is only executed if the localdb is true
 		const promise = new PendingPromise();
 
 		this.#store.get(id).then(data => {
-			const specs = data ?? { id };
+			specs = { ...specs, ...data };
 			specs.found = !!data;
 			getRegistry(specs);
 			promise.resolve(this.#registry.values);
 		});
 
 		return promise;
-
-		// if (!registry) {
-		// 	this.found = false;
-		// 	return;
-		// }
-
-		// this.#parent.set(registry.values);
-		// this.#registry = registry;
-
-		// registry.on('change', this.#listenRegistry);
-		// return registry;
 	};
 
 	/**
