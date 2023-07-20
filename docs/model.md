@@ -45,12 +45,12 @@ You can also use the `@reactiveProps` decorator to automatically create reactive
 ```ts
 import { ReactiveModel, reactiveProps } from "reactive";
 
-interface Person {
+interface IPerson {
   name: string;
   age: number;
 }
 
-class PersonModel extends ReactiveModel<Person> {
+class PersonModel extends ReactiveModel<IPerson> {
   @reactiveProps(["name", "age"])
   name!: string;
 
