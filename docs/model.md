@@ -22,12 +22,12 @@ To create a new `ReactiveModel`, simply instantiate the class with the desired p
 ```ts
 import { ReactiveModel } from "@beyond-js/reactive/model";
 
-interface Person {
+interface IPerson {
   name: string;
   age: number;
 }
 
-const person = new ReactiveModel<Person>({
+const person = new ReactiveModel<IPerson>({
   name: "Alice",
   age: 25,
 });
@@ -43,21 +43,21 @@ console.log(person.get("name")); // "Bob"
 You can also use the `@reactiveProps` decorator to automatically create reactive properties:
 
 ```ts
-import { ReactiveModel, reactiveProps } from "reactive";
+import { ReactiveModel, reactiveProps } from "@beyond-js/reactive/model";
 
-interface Person {
+interface IPerson {
   name: string;
   age: number;
 }
 
-class PersonModel extends ReactiveModel<Person> {
+class Person extends ReactiveModel<IPerson> {
   @reactiveProps(["name", "age"])
   name!: string;
 
   age!: number;
 }
 
-const person = new PersonModel({
+const person = new Person({
   name: "Alice",
   age: 25,
 });
