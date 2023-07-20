@@ -24,7 +24,7 @@ export class Store extends ReactiveModel<Store> {
 		this.ready = true;
 	}
 
-	async deleteUser(id: number) {
+	async deleteUser(id: string) {
 		const user = new User({ id });
 		await user.load();
 		await user.delete();

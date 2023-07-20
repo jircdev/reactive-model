@@ -4,23 +4,20 @@ The `Collection` class extends `ReactiveModel` and represents a collection of re
 
 
 ```typescript
-import { ReactiveModel } from '@beyond-js/reactive/model';
 import { Collection } from '@beyond-js/reactive/entities';
-import { User } from './user';
-import { UserProvider } from '@package/name/bundle';
+import { User } from './index';
+import { UserProvider } from '@beyond-js/reactive/tests/backend/provider';
 interface IUsers {
 	items: User[];
 }
 export /*bundle*/ class Users extends Collection {
 	item = User;
-	protected storeName = 'users';
-	protected db = 'database-name';
+
 	constructor() {
-		super();
-		this.provider = new UserProvider();
-		this.init();
+		super({ storeName: 'user', db: 'test', provider: UserProvider, item: User });
 	}
 }
+
 ```
 
 In this example, the `UserCollection` class is created, which inherits from `Collection`. It is specified that the elements of this collection will be objects of the `User` class. To use this class, you would simply instantiate a `UserCollection` object and use inherited methods like `load`, `save`, `sync`, etc., to interact with the local and remote database.

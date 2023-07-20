@@ -29,10 +29,11 @@ export class Registry extends ReactiveModel<IRegistry> {
 		super();
 
 		const { id } = data;
+
 		this.#store = store;
 		this.#id = id;
-
 		this.#instanceId = id ?? uuidv4();
+
 		if (!id) this.#id = this.#instanceId;
 		if (this.#id) this.#values.id = this.#id;
 	}

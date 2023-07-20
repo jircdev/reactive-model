@@ -44,6 +44,7 @@ export /*bundle*/ class UserStore {
 		}
 		const response = await this.loadUser(recordId);
 		await this.conn.disconnect();
+
 		return response;
 	}
 
@@ -125,7 +126,7 @@ export /*bundle*/ class UserStore {
 		const db = this.conn.connection;
 		const placeholders = ids.map(id => '?').join(', ');
 		const query = `UPDATE users SET deleted = 1 WHERE id IN (${placeholders})`;
-		console.log(12, query);
+
 		await db.run(query, ids);
 		await this.conn.disconnect();
 	}

@@ -55,23 +55,18 @@ export class CollectionSaveManager {
 
 	// Send chunks with retries
 	sendChunk = async (chunk, index, retries = 0) => {
-		try {
-			const response = await this.#provider.bulkSave(chunk);
-			if (response.status) {
-				const data = response.data.entries.map(item => ({ ...item, offline: 0, instanceId: undefined }));
+		const response = await this.#provider.bulkSave(chunk);
+		if (response.status) {
+			const data = response.data.entries.map(item => ({ ...item, offline: 0, instanceId: undefined }));
 
-				await this.#localProvider.upsert(data, chunk);
-				return { success: true, chunk, response };
-			}
-			if (retries < this.MAX_RETRIES) {
-				return await this.sendChunk(chunk, retries + 1);
-			}
-
-			return { success: false, chunk, response };
-		} catch (e) {
-			console.error(e);
-			return { success: false, chunk, error: e };
+			await this.#localProvider.upsert(data, chunk);
+			return { success: true, chunk, response };
 		}
+		if (retries < this.MAX_RETRIES) {
+			return await this.sendChunk(chunk, retries + 1);
+		}
+
+		return { success: false, chunk, response };
 	};
 
 	// Split large datasets into smaller chunks
@@ -107,7 +102,7 @@ export class CollectionSaveManager {
 
 			return { status: true, data: successChunks };
 		} catch (e) {
-			console.error(e);
+			throw Error(e.message);
 		}
 	};
 

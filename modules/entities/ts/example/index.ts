@@ -1,5 +1,7 @@
-import { Item, IItem } from '@beyond-js/reactive/entities';
-import { UserProvider } from '@beyond-js/reactive/tests/backend/provider';
+import { Item } from '../item/index';
+import { IItem } from '../item/interfaces/item';
+
+class UserProvider {}
 interface IBook extends IItem {
 	name?: string;
 	password: string;
