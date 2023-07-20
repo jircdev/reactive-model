@@ -9,9 +9,9 @@ The `Item` class also includes instances of `ItemSaveManager` and `ItemLoadManag
 The following usage example creates a `User` class that extends `Item`:
 
 ```ts
-import { ReactiveModel } from "@beyond-js/reactive-2/model";
-import { Item } from "@beyond-js/reactive-2/entities";
-import { UserProvider } from "@beyond-js/reactive-2/tests/backend/provider";
+import { ReactiveModel } from "@beyond-js/reactive/model";
+import { Item } from "@beyond-js/reactive/entities";
+import { UserProvider } from "@beyond-js/reactive/tests/backend/provider";
 
 interface IUser {
 	name?: string;
