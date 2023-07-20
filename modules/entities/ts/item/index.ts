@@ -207,7 +207,7 @@ export /*bundle*/ class Item<T extends object> extends ReactiveModel<IItem> {
 	publish() {
 		return this.#saveManager.publish();
 	}
-	load(params) {
+	load(params?: any | undefined) {
 		return this.#loadManager.load(params);
 	}
 	async delete() {
