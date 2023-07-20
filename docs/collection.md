@@ -4,8 +4,8 @@ The `Collection` class extends `ReactiveModel` and represents a collection of re
 
 
 ```typescript
-import { ReactiveModel } from '@beyond-js/reactive-2/model';
-import { Collection } from '@beyond-js/reactive-2/entities';
+import { ReactiveModel } from '@beyond-js/reactive/model';
+import { Collection } from '@beyond-js/reactive/entities';
 import { User } from './user';
 import { UserProvider } from '@package/name/bundle';
 interface IUsers {
