@@ -101,6 +101,7 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 		Object.keys(properties).forEach(prop => {
 			const sameObject =
 				typeof properties[prop] === 'object' && JSON.stringify(properties[prop]) === JSON.stringify(this[prop]);
+
 			if (this[prop] === properties[prop] || sameObject) return;
 
 			this[prop] = properties[prop];
@@ -123,6 +124,7 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 				props[property.name] = this[property.name];
 			}
 			let name = property as string;
+
 			props[name] = this[name];
 		});
 		return props;

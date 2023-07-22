@@ -200,14 +200,14 @@ export /*bundle*/ class Item<T extends object> extends ReactiveModel<IItem> {
 		return this.properties;
 	}
 
-	save() {
-		return this.#saveManager.save();
+	save(data?) {
+		return this.#saveManager.save(data);
 	}
 
-	publish() {
-		return this.#saveManager.publish();
+	publish(data?) {
+		return this.#saveManager.publish(data);
 	}
-	load(params) {
+	load(params?) {
 		return this.#loadManager.load(params);
 	}
 	async delete() {
