@@ -1,6 +1,6 @@
-import { Collection } from '@beyond-js/reactive/entities';
+import { Collection } from '@beyond-js/reactive-2/entities';
 import { User } from './index';
-import { UserProvider } from '@beyond-js/reactive/tests/backend/provider';
+import { UserProvider } from '@beyond-js/reactive-2/tests/backend/provider';
 interface IUsers {
 	items: User[];
 }

@@ -1,4 +1,4 @@
-import { DBManager } from "@beyond-js/reactive/database";
+import { DBManager } from "@beyond-js/reactive-2/database";
 async function create() {
 	try {
 		const db = await DBManager.config("test@3", {
