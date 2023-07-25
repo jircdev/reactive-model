@@ -22,12 +22,12 @@ To create a new `ReactiveModel`, simply instantiate the class with the desired p
 ```ts
 import { ReactiveModel } from "@beyond-js/reactive/model";
 
-interface Person {
+interface IPerson {
   name: string;
   age: number;
 }
 
-const person = new ReactiveModel<Person>({
+const person = new ReactiveModel<IPerson>({
   name: "Alice",
   age: 25,
 });
@@ -113,7 +113,3 @@ Triggers an event.
 
 `destroy(): void`
 Destroys the ReactiveModel instance and clears all listeners.
-
-### License
-
-ReactiveModel is licensed under the MIT License. See the LICENSE file for details.

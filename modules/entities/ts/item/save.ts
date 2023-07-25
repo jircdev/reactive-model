@@ -1,11 +1,12 @@
 import type { Item } from './index';
+import type { LocalProvider } from './local-provider';
 
 export class ItemSaveManager {
 	#parent: Item<any>;
 	#getProperty;
 	#bridge;
 	#provider;
-	#localProvider;
+	#localProvider: LocalProvider;
 
 	constructor(parent: Item<any>, bridge) {
 		this.#parent = parent;
@@ -21,7 +22,7 @@ export class ItemSaveManager {
 		this.#parent.sync = this.sync;
 	}
 
-	save = async (data = undefined) => {
+	save = async (data?) => {
 		try {
 			await this.#getProperty('checkReady')();
 
