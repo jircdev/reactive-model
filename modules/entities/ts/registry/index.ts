@@ -1,5 +1,5 @@
 import { PendingPromise } from '@beyond-js/kernel/core';
-import { ReactiveModel } from '@beyond-js/reactive-2/model';
+import { ReactiveModel } from '@beyond-js/reactive/model';
 import { v4 as uuidv4 } from 'uuid';
 interface IRegistry {
 	values?: object;
@@ -11,83 +11,40 @@ export class Registry extends ReactiveModel<IRegistry> {
 		return this.#values;
 	}
 	#id;
-	local = false;
+
 	#store;
-	#isNew;
 	#instanceId;
-	#keyId;
+	#isDeleted;
+	get isDeleted() {
+		return this.#isDeleted;
+	}
+	set isDeleted(value) {
+		if (value === this.#isDeleted) return;
 
-	#landed;
-	get landed() {
-		return this.#landed;
+		this.#isDeleted = value;
+		this.triggerEvent();
 	}
 
-	get instanceId() {
-		return this.#instanceId;
-	}
 	constructor(store, data: IRegistry = { id: undefined }) {
 		super();
 
 		const { id } = data;
+
 		this.#store = store;
-
-		//this.#id = id === 'new' ? this.#instanceId : id;
-		this.#isNew = id === undefined;
 		this.#id = id;
-
 		this.#instanceId = id ?? uuidv4();
-		if (!id) this.#id = this.#instanceId;
-		this.#keyId = this.isNew ? '#instanceId' : '#id';
 
+		if (!id) this.#id = this.#instanceId;
 		if (this.#id) this.#values.id = this.#id;
 	}
 
-	#promise: PendingPromise<this>;
-	async get() {
-		if (this.#promise) {
-			return this.#promise;
-		}
-
-		this.#promise = new PendingPromise();
-
-		if (this.#isNew) {
-			this.#promise.resolve(this);
-		} else {
-			this.#store.get(this.#id).then(item => {
-				if (!item) {
-					this.#promise.resolve(this);
-					this.#landed = false;
-
-					this.setValues({ id: this.#id });
-					this.#promise = undefined;
-					return;
-				}
-
-				this.#landed = true;
-				this.setValues(item);
-				this.#promise.resolve(this);
-			});
-		}
-
-		return this.#promise;
-	}
-
-	setValues = (data, backend = false) => {
+	setValues = data => {
 		const props = Object.keys(data);
 
 		let updated = false;
-		// specify if the item was generated locally
-		if (backend) {
-			this.#isNew = false;
-			this.#instanceId = undefined;
-			delete this.#values.instanceId;
-		}
+
 		if (!data.id) {
 			data.id = this.#id;
-		}
-		this.local = this.local;
-		if (this.#isNew) {
-			this.#values.instanceId = this.#instanceId;
 		}
 
 		const newValues = { ...this.#values };
@@ -97,8 +54,12 @@ export class Registry extends ReactiveModel<IRegistry> {
 			updated = true;
 		});
 
+		newValues.isDeleleted = this.isDeleted === 1 ?? 0;
+
 		this.#values = newValues;
+
 		this.triggerEvent();
+
 		return updated;
 	};
 
@@ -108,12 +69,4 @@ export class Registry extends ReactiveModel<IRegistry> {
 		//		if (this.offline) values.offline = this.offline; // this line may be removed, the offline value must be set by the localProvider
 		return values;
 	}
-
-	update = async (data: any, backend) => {
-		const updated = this.setValues(data, backend);
-		if (updated) {
-			await this.#store.put(this.#values);
-			this.triggerEvent('change');
-		}
-	};
 }

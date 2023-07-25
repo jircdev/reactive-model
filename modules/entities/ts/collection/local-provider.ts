@@ -1,11 +1,11 @@
-import { ReactiveModel } from '@beyond-js/reactive-2/model';
+import { ReactiveModel } from '@beyond-js/reactive/model';
 
 import { IProvider } from '../interfaces/provider';
 import { liveQuery } from 'dexie';
 import { PendingPromise } from '@beyond-js/kernel/core';
-import { DBManager, DatabaseManager } from '@beyond-js/reactive-2/database';
+import { DBManager, DatabaseManager } from '@beyond-js/reactive/database';
 import Dexie from 'dexie';
-import { FactoryRecords } from '../registry/factory';
+import { RegistryFactory } from '../registry/factory';
 
 interface IItemValues {
 	[key: string]: any;
@@ -18,12 +18,20 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 	get store() {
 		return this.#store;
 	}
+	/**
+	 * Defines if the collection is using a local database or not.
+	 */
+	#active;
+	get active() {
+		return this.#active;
+	}
 	#offline: boolean;
 	#database!: DatabaseManager;
 	#storeName!: string;
 	#databaseName!: string;
+	#listItems = new Map();
 	#items = [];
-	#records: FactoryRecords;
+	#registryFactory: RegistryFactory;
 	get items() {
 		return this.#items;
 	}
@@ -41,9 +49,10 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 		const { db, storeName } = parent;
 		this.#parent = parent;
 		this.#bridge = bridge;
-		this.#records = FactoryRecords.get(db);
+		if (db) {
+			this.#registryFactory = RegistryFactory.get(db);
+		}
 
-		if (!db || !storeName) throw new Error('database and store are required');
 		this.#databaseName = db;
 		this.#storeName = storeName;
 
@@ -60,6 +69,12 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 		try {
 			if (this.#promiseInit) return this.#promiseInit;
 			this.#promiseInit = new PendingPromise();
+
+			if (!this.#databaseName || !this.#storeName) {
+				this.#active = false;
+				this.#promiseInit.resolve();
+				return;
+			}
 
 			const database: DatabaseManager = await DBManager.get(this.#databaseName);
 			this.#database = database;
@@ -88,15 +103,26 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 	#page = 0;
 
 	#customWhere;
-	#defaultWhere = (store, offset, limit) => store.orderBy('id');
+	#defaultWhere = store => store.orderBy('id');
 
+	#currentLimit;
+	#currentOffset;
 	where = limit => {
 		return () => {
 			let store = this.#store;
 			const offset = (this.#page - 1) * limit;
 			const filter = this.#customWhere ?? this.#defaultWhere;
+			this.#currentLimit = limit;
+			this.#currentOffset = offset;
+			/**
+			 * @todo: the isDeleted field must be set as 0 by default.
+			 */
 
-			return filter(store, offset, limit).offset(offset).limit(limit).toArray();
+			return filter(store)
+				.filter(i => i.isDeleted !== 1)
+				.offset(offset)
+				.limit(limit)
+				.toArray();
 		};
 	};
 
@@ -127,8 +153,16 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 			let first = true;
 			const live = liveQuery(this.where(limit));
 			this.#page++;
+			let currentPage;
 			live.subscribe({
 				next: async items => {
+					let sameQuery;
+					if (currentPage == this.#page) {
+						sameQuery = true;
+					} else {
+						currentPage = this.#page;
+					}
+
 					if (this.#promiseLoad) {
 						first = false;
 						const response = { status: true, data: items, total: this.#total, next: true };
@@ -137,8 +171,20 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 						this.#promiseLoad.resolve(response);
 						this.#promiseLoad = null;
 					}
+					const currentMap = new Set();
+					items.forEach(item => {
+						this.#listItems.set(item.id, item);
+						currentMap.add(item.id);
+					});
+					if (sameQuery) {
+						const removed = [...this.#listItems.keys()].forEach(id => {
+							if (!currentMap.has(id)) {
+								this.#listItems.delete(id);
+							}
+						});
+					}
+					this.#items = [...this.#listItems.values()];
 
-					this.#items = this.#items.concat(items.filter(item => !this.#ids.has(item.id)));
 					items.forEach(item => this.#ids.add(item.id));
 					this.trigger('items.changed');
 				},
@@ -166,8 +212,8 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 
 		data = process(data, this.isOnline ? 0 : 1);
 
-		await this.#records.init();
-		await this.#records.saveAll(data, this.#storeName);
+		await this.#registryFactory.init();
+		await this.#registryFactory.saveAll(data, this.#storeName);
 	}
 	#processControl(control, conditions) {
 		this.#store[control];
@@ -181,5 +227,26 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 			});
 			await this.store.bulkPut(data);
 		});
+	}
+
+	async softDelete(ids) {
+		if (!Array.isArray(ids)) {
+			console.error('Expected an array of items for soft deletion');
+			return { status: false, data: [] };
+		}
+		try {
+			const records = await this.store.bulkGet(ids);
+			const existingRecords = records.filter(record => record !== undefined);
+			if (!existingRecords.length) return;
+			// // Prepare items for bulk update
+			const itemsToUpdate = existingRecords.map(record => ({ ...record, isDeleted: 1 }));
+			// // Perform bulk update
+			await this.#store.bulkPut(itemsToUpdate);
+
+			return true;
+		} catch (error) {
+			console.error('Error occurred while performing a soft delete:', error);
+			return { status: false, error: error.message };
+		}
 	}
 }

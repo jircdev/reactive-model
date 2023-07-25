@@ -1,24 +1,30 @@
-import { ReactiveModel, reactiveProps } from '@beyond-js/reactive-2/model';
-import type { Item, IITem } from '../item';
+import { ReactiveModel, reactiveProps } from '@beyond-js/reactive/model';
+import type { Item } from '../item';
 import { CollectionLocalProvider } from './local-provider';
 import { CollectionSaveManager } from './publish';
 import { CollectionLoadManager } from './load';
+import { IProvider, IProviderConstructor } from '../interfaces/provider';
+import type { CollectionProvider } from '../providers/collection';
+import { IItemConfig } from '../item/interfaces/config';
 
-interface IColleciton {
+type ItemConstructor<T extends object = any> = new (args?: { id?: any }) => Item<T>;
+
+interface ICollection {
 	items: object[];
-	item: Item<IITem>;
+	item: ItemConstructor;
 	next: number | undefined;
-	provider: object;
+	provider: ItemConstructor;
 }
 
-interface ISpecs {}
-interface ICollectionProvider {
-	load: Function;
-	publish: Function;
-	delete: Function;
+interface ISpecs {
+	provider: IProviderConstructor;
+	storeName: string;
+	db: string;
+	localdb?: boolean;
+	item: ItemConstructor<any>;
 }
 
-export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> {
+export /*bundle */ class Collection extends ReactiveModel<Collection> {
 	#items: Array<any | undefined> = [];
 	protected localdb = true;
 	get items() {
@@ -52,36 +58,35 @@ export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> 
 
 	#saveManager: CollectionSaveManager;
 	#loadManager: CollectionLoadManager;
-	protected provider: ICollectionProvider;
-	#initSpecs: ISpecs = {};
+	#provider: IProvider;
+	get provider() {
+		return this.#provider;
+	}
+
 	protected sortBy: string = 'id';
 	protected sortDirection: 'asc' | 'desc' = 'asc';
 
-	constructor(specs) {
+	constructor(specs: ISpecs) {
 		super();
 
-		const { provider, storeName, db, localdb } = specs;
+		const { provider, storeName, db, localdb, item } = specs;
 
 		if (storeName) this.storeName = storeName;
 		if (db) this.db = db;
 		if (localdb) this.localdb = localdb;
+		if (item) this.item = item;
 		if (provider) {
 			if (typeof provider !== 'function') {
 				throw new Error('Provider must be a class object');
 			}
-			this.provider = new provider();
+			this.#provider = new provider();
 		}
 
-		this.reactiveProps<IColleciton>(['item', 'next', 'provider']);
+		this.reactiveProps<ICollection>(['next']);
 		this.init();
 	}
 
-	protected setItems(values) {
-		this.#items = values;
-	}
-	protected init(specs: ISpecs = {}) {
-		this.#initSpecs = specs;
-
+	protected init() {
 		const getProperty = property => {
 			return this[property];
 		};
@@ -91,6 +96,7 @@ export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> 
 
 		if (this.localdb) {
 			this.#localProvider = new CollectionLocalProvider(this, bridge);
+
 			this.#localProvider.on('items.changed', this.#listenItems);
 			this.localProvider.init();
 		}
@@ -108,8 +114,23 @@ export /*bundle */ abstract class Collection extends ReactiveModel<IColleciton> 
 
 	setOffline = value => this.localProvider.setOffline(value);
 
+	protected setItems(values) {
+		this.#items = values;
+	}
+
 	async store() {
 		await this.#localProvider.init();
 		return this.#localProvider.store;
+	}
+
+	async delete(ids) {
+		try {
+			if (this.#localProvider) await this.#localProvider.softDelete(ids);
+			if (this.provider) {
+				await this.provider.deleteItems(ids);
+			}
+		} catch (e) {
+			console.error(e);
+		}
 	}
 }

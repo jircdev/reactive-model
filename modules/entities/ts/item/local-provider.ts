@@ -1,10 +1,10 @@
-import { ReactiveModel } from '@beyond-js/reactive-2/model';
-import { IProvider } from '../interfaces/provider';
-import { PendingPromise } from '@beyond-js/kernel/core';
-import { DBManager, DatabaseManager } from '@beyond-js/reactive-2/database';
+import { ReactiveModel } from '@beyond-js/reactive/model';
+import { DBManager, DatabaseManager } from '@beyond-js/reactive/database';
 import Dexie from 'dexie';
-import { FactoryRecords } from '../registry/factory';
+import { RegistryFactory } from '../registry/factory';
 import type { Registry } from '../registry';
+import { PendingPromise } from '@beyond-js/kernel/core';
+
 export /*bundle*/
 class LocalProvider extends ReactiveModel<any> {
 	#isOnline = globalThis.navigator.onLine;
@@ -34,32 +34,39 @@ class LocalProvider extends ReactiveModel<any> {
 	#parent;
 	#getProperty;
 	/**
-	 * @type {FactoryRecords}
+	 * @type {RegistryFactory}
 	 */
-	#records: FactoryRecords;
+	#factoryRegistry: RegistryFactory;
 	/**
 	 * @type {Registry} Database Record
 	 *
 	 */
 	#registry: Registry;
+	#localdb: boolean;
+	#bridge;
 
 	get registry() {
 		return this.#registry;
 	}
-	constructor(parent, getProperty) {
+	constructor(parent, bridge) {
 		super();
 
-		this.#getProperty = getProperty;
+		this.#getProperty = bridge.get;
 		const { db, storeName } = parent;
 		this.__id = Math.floor(Math.random() * (100000 - 1000 + 1)) + 1000;
 		this.#parent = parent;
 
-		if (!db || !storeName) throw new Error('database and store are required');
+		if (!db || !storeName) {
+			throw new Error('database and store are required');
+		}
 		this.#databaseName = db;
 		this.#storeName = storeName;
-		this.#records = FactoryRecords.get(db);
+		this.#bridge = bridge;
+		this.#localdb = bridge.get('localdb');
+		this.#factoryRegistry = RegistryFactory.get(db);
 		globalThis.addEventListener('online', this.handleConnection);
 		globalThis.addEventListener('offline', this.handleConnection);
+		this.load = this.load.bind(this);
 	}
 
 	setOffline(value) {
@@ -69,14 +76,13 @@ class LocalProvider extends ReactiveModel<any> {
 
 	init = async (id: string | number | undefined = undefined) => {
 		try {
-			const database: DatabaseManager = await DBManager.get(this.#databaseName);
-			this.#database = database;
-			this.#store = database.db[this.#storeName];
+			if (this.#localdb) {
+				const database: DatabaseManager = await DBManager.get(this.#databaseName);
+				this.#database = database;
+				this.#store = database.db[this.#storeName];
+			}
 
 			await this.#getRegistry(id);
-			if (id) await this.load({ id });
-			else this.#isNew = true;
-
 			return;
 		} catch (e) {
 			console.error(e);
@@ -99,14 +105,14 @@ class LocalProvider extends ReactiveModel<any> {
 
 	async load(params: any = {}) {
 		let id = params.id;
-		id = id ?? this.#parent.id;
+		//TODO: review @julio
+		id = id ?? this.registry.values?.id;
 
 		try {
 			if (!id) throw 'ID IS REQUIRED';
 
-			const values = await this.#getRegistry(id);
-
-			this.#parent.loaded = true;
+			await this.#getRegistry(id);
+			this.#parent.localLoaded = true;
 			this.#parent.set(this.#registry.values);
 			return { status: true, data: this.#registry.values };
 		} catch (e) {
@@ -123,19 +129,42 @@ class LocalProvider extends ReactiveModel<any> {
 	 * @returns
 	 */
 	#getRegistry = async id => {
-		const registry = await this.#records.load(this.#storeName, id);
-
-		if (!registry) {
-			this.found = false;
-			return;
+		if (this.#factoryRegistry.hasItem(this.#storeName, id)) {
+			const item = this.#factoryRegistry.getItem(this.#storeName, id);
+			this.#registry = item;
+			this.#parent.localLoaded = this.#parent.found = item.values.found;
+			this.#parent.set(this.#registry.values);
+			return item.values;
 		}
 
-		this.#parent.set(registry.values);
-		this.#registry = registry;
-		this.#isNew = registry?.values?.isNew ? true : false;
+		const getRegistry = data => {
+			this.#registry = this.#factoryRegistry.create(this.#storeName, data);
+			this.#registry.on('change', this.#listenRegistry);
+			this.#parent.set(this.#registry.values);
+			this.trigger('change');
+		};
+		type ISpecs = {
+			id: string | number;
+			found?: boolean;
+			ready?: boolean;
+		};
+		let specs: ISpecs = { id };
+		if (!id || !this.#localdb) {
+			specs.ready = id && !this.#localdb;
+			getRegistry(specs);
+			return this.#registry.values;
+		}
+		// this code is only executed if the localdb is true
+		const promise = new PendingPromise();
 
-		registry.on('change', this.#listenRegistry);
-		return registry;
+		this.#store.get(id).then(data => {
+			specs = { ...specs, ...data };
+			specs.found = !!data;
+			getRegistry(specs);
+			promise.resolve(this.#registry.values);
+		});
+
+		return promise;
 	};
 
 	/**
@@ -157,20 +186,12 @@ class LocalProvider extends ReactiveModel<any> {
 			const duplicated = await this.validateUniqueFields(data);
 			if (duplicated.length) return { error: 'duplicated', fields: duplicated };
 
-			await this.#registry.update(data, backend);
+			await this.#update(data);
 
 			return this;
 		} catch (e) {
 			console.error('error saving', e.message);
 		}
-	}
-
-	async #update(data) {
-		try {
-			if (!this.isUnpublished) return;
-			await this.#store.update(data.id, data);
-			// recordsFactory.update(this.#storeName, data.id, data);
-		} catch (e) {}
 	}
 
 	async validateUniqueFields(data) {
@@ -192,4 +213,26 @@ class LocalProvider extends ReactiveModel<any> {
 		const duplicateFields = (await Promise.all(checkPromises)).filter(field => field !== null);
 		return duplicateFields;
 	}
+
+	delete = async () => {
+		const response = await this.#update({ isDeleted: 1 });
+
+		return response;
+	};
+
+	async #update(data) {
+		const updated = this.#registry.setValues(data);
+		if (!updated) return;
+
+		await this.#store.put(this.#registry.values);
+		this.triggerEvent();
+		return true;
+	}
+
+	// async #update(data) {
+	// 	try {
+	// 		if (!this.isUnpublished) return;
+	// 		await this.#store.update(data.id, data);
+	// 	} catch (e) {}
+	// }
 }

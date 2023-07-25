@@ -1,5 +1,6 @@
 import type { Collection } from '.';
 import type { CollectionLocalProvider } from './local-provider';
+import { RegistryFactory } from '../registry/factory';
 interface ILoadResponse {
 	localLoaded: true;
 	fetching: false;
@@ -8,18 +9,17 @@ interface ILoadResponse {
 	items?: any[];
 }
 export class CollectionLoadManager {
-	#parent: Collection;
 	filter: any;
-	get parent() {
-		return this.#parent;
-	}
-
 	#localProvider: CollectionLocalProvider;
 	#provider;
 	#getProperty;
 	#parentBridge;
 	#localdb;
-
+	#parent: Collection;
+	#registry: RegistryFactory;
+	get parent() {
+		return this.#parent;
+	}
 	/**
 	 * Original data obtained in provider.load
 	 *
@@ -31,17 +31,20 @@ export class CollectionLoadManager {
 	constructor(parent, parentBridge) {
 		this.#parent = parent;
 		this.#parentBridge = parentBridge;
+
 		this.init();
 	}
 
-	init = async () => {
+	init() {
 		this.#localdb = this.#parentBridge.get('localdb');
 		this.#localProvider = this.#parentBridge.get('localProvider');
 		this.#provider = this.#parentBridge.get('provider');
 		this.#parent.load = this.load;
 		this.#parent.filter = this.filter;
+
+		this.#registry = RegistryFactory.get(this.#parentBridge.get('storeName'));
 		if (this.#localProvider) this.#parent.customFilter = this.#localProvider?.customFilter;
-	};
+	}
 
 	/**
 	 * metodo general para las consultas de tipo lista para las colecciones
@@ -113,11 +116,12 @@ export class CollectionLoadManager {
 			}
 
 			const remoteData = await this.#provider.list(params);
+
 			this.remoteData = remoteData;
 			const { status, data, error } = remoteData;
 			if (!status) throw error ?? 'ERROR_LIST_QUERY';
 
-			const items: any[] = await this.processRemoteEntries(data.entries);
+			const items: any[] = await this.processRemoteEntries(data);
 			// if (this.#localProvider) await this.#localProvider.save(items);
 
 			this.#remoteElements = params.update === true ? this.#remoteElements.concat(items) : items;
@@ -141,9 +145,16 @@ export class CollectionLoadManager {
 		}
 	};
 
-	async processRemoteEntries(entries): Promise<any[]> {
-		await this.#localProvider.save(entries);
-		return entries.map(record => {
+	async processRemoteEntries(data): Promise<any[]> {
+		if (!data.entries) {
+			throw new Error('The list method must return an object with an entries property');
+		}
+		if (data.deletedEntries) {
+			// todo: unify it in recordsFactory
+			this.#localProvider.softDelete(data.deletedEntries);
+		}
+		await this.#localProvider.save(data.entries);
+		return data.entries.map(record => {
 			const item = new this.parent.item({ id: record.id });
 
 			item.set(record);
@@ -152,6 +163,7 @@ export class CollectionLoadManager {
 	}
 
 	processEntries = (entries): any[] => {
+		this.#registry.registerList(this.#parentBridge.get('storeName'), entries);
 		return entries.map(record => {
 			const item = new this.parent.item({ id: record.id });
 			item.set(record);

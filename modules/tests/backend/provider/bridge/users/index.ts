@@ -1,4 +1,4 @@
-import { UserStore } from '@beyond-js/reactive-2/tests/backend/database';
+import { UserStore } from '@beyond-js/reactive/tests/backend/database';
 import type { Server, Socket } from 'socket.io';
 
 export /*actions*/ /*bundle*/ class UserProvider {
@@ -9,7 +9,8 @@ export /*actions*/ /*bundle*/ class UserProvider {
 	async publish(data) {
 		try {
 			const user = new UserStore();
-			const response = await user.storeUser(data);
+			let response = await user.storeUser(data);
+
 			return { status: true, data: response };
 		} catch (e) {
 			console.error(e);
@@ -17,14 +18,21 @@ export /*actions*/ /*bundle*/ class UserProvider {
 		}
 	}
 
-	async load(id) {
+	async load({ id }) {
 		try {
 			if (!id) {
 				return { status: false, error: true, message: 'id is required' };
 			}
+
 			const user = new UserStore();
 			const data = await user.loadUser(id);
-
+			if (!data) {
+				return { status: true, data: false };
+			}
+			//@ts-ignore
+			data.isDeleted = data.deleted;
+			//@ts-ignore
+			delete data.deleted;
 			return { status: true, data };
 		} catch (e) {
 			return { error: true, message: e.message };
@@ -34,8 +42,9 @@ export /*actions*/ /*bundle*/ class UserProvider {
 	async list() {
 		try {
 			const user = new UserStore();
-			const entries = await user.loadAll();
-			return { status: true, data: { entries } };
+			const { entries, deletedIds } = await user.loadAll();
+
+			return { status: true, data: { entries, deletedEntries: deletedIds } };
 		} catch (e) {
 			return { error: true, message: e.message };
 		}
@@ -51,5 +60,35 @@ export /*actions*/ /*bundle*/ class UserProvider {
 		} catch (e) {
 			return { error: true, message: e.message };
 		}
+	}
+
+	async delete(id) {
+		try {
+			const user = new UserStore();
+			const response = await user.delete(id);
+
+			return { status: true, data: response };
+		} catch (e) {
+			return { error: true, message: e.message };
+		}
+	}
+
+	async deleteItems(ids) {
+		try {
+			if (!Array.isArray(ids)) {
+				return { error: true, message: 'ids must be an array' };
+			}
+			const users = new UserStore();
+
+			//@ts-ignore
+			const response = await users.deleteItems(ids);
+			return { status: true, data: response };
+		} catch (e) {
+			return { error: true, message: e.message };
+		}
+	}
+
+	prueba() {
+		return { data: 'prueba' };
 	}
 }

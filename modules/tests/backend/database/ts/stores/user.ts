@@ -19,6 +19,7 @@ export /*bundle*/ class UserStore {
 	}
 
 	async loadUser(id: number): Promise<User> {
+		await this.conn.connect();
 		const db = this.conn.connection;
 		const user = await db.get('SELECT * FROM users WHERE id = ?', id);
 
@@ -43,18 +44,19 @@ export /*bundle*/ class UserStore {
 		}
 		const response = await this.loadUser(recordId);
 		await this.conn.disconnect();
+
 		return response;
 	}
 
-	async loadAll(options?: LoadAllOptions): Promise<User[]> {
+	async loadAll(options?: LoadAllOptions): Promise<{ entries: User[]; deletedIds: number[] }> {
 		await this.conn.connect();
 		const db = this.conn.connection;
-		let filter = '';
+		let filter = 'WHERE deleted = 0';
 		let limit = 30;
 
 		if (options) {
 			if (options.filter) {
-				filter = `WHERE ${options.filter}`;
+				filter += ` AND ${options.filter}`;
 			}
 			if (options.limit) {
 				limit = options.limit;
@@ -63,8 +65,15 @@ export /*bundle*/ class UserStore {
 
 		const query = `SELECT * FROM users ${filter} LIMIT ${limit}`;
 		const users = await db.all(query);
+
+		const deletedUsersQuery = `SELECT id FROM users WHERE deleted = 1`;
+		const deletedUsers = await db.all(deletedUsersQuery);
+
 		await this.conn.disconnect();
-		return users as User[];
+		return {
+			entries: users as User[],
+			deletedIds: deletedUsers.map(user => user.id),
+		};
 	}
 
 	async bulkSave(users) {
@@ -110,5 +119,19 @@ export /*bundle*/ class UserStore {
 		await db.run(query);
 
 		await this.conn.disconnect();
+	}
+
+	async deleteItems(ids: number[]): Promise<void> {
+		await this.conn.connect();
+		const db = this.conn.connection;
+		const placeholders = ids.map(id => '?').join(', ');
+		const query = `UPDATE users SET deleted = 1 WHERE id IN (${placeholders})`;
+
+		await db.run(query, ids);
+		await this.conn.disconnect();
+	}
+
+	async delete(id) {
+		return this.deleteItems([id]);
 	}
 }

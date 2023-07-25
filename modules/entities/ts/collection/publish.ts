@@ -54,7 +54,7 @@ export class CollectionSaveManager {
 	};
 
 	// Send chunks with retries
-	sendChunk = async (chunk, index, retries = 0) => {
+	sendChunk = async (chunk ) => {
 			const response = await this.#provider.bulkSave(chunk);
 			
 			// Esto es lo que aveces no se ejecuta (el metodo bulkSave del provider tampoco)
@@ -65,9 +65,6 @@ export class CollectionSaveManager {
 				await this.#localProvider.upsert(data, chunk);
 				return { success: true, chunk, response };
 			}
-			// if (retries < this.MAX_RETRIES) {
-			// 	return this.sendChunk(chunk, retries + 1);
-			// }
 
 			return { success: false, chunk, response };
 	};
@@ -90,7 +87,7 @@ export class CollectionSaveManager {
 			const successChunks = [];
 
 			for (const [index, chunk] of chunks.entries()) {
-				const result = await this.sendChunk(chunk, index);
+				const result = await this.sendChunk(chunk);
 				if (!result.success) {
 					failedChunks.push(result);
 				} else successChunks.push(result);

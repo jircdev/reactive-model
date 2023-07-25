@@ -72,7 +72,6 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 			},
 			set(newVal: T[keyof T]): void {
 				if (newVal === this[privatePropKey]) return;
-
 				this[privatePropKey] = newVal;
 				this.triggerEvent();
 			},
@@ -102,6 +101,7 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 		Object.keys(properties).forEach(prop => {
 			const sameObject =
 				typeof properties[prop] === 'object' && JSON.stringify(properties[prop]) === JSON.stringify(this[prop]);
+
 			if (this[prop] === properties[prop] || sameObject) return;
 
 			this[prop] = properties[prop];
@@ -115,8 +115,17 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 		const props: Record<string, any> = {};
 		const properties = this.properties || this.skeleton;
 
-		properties.forEach(property => {
-			props[property] = this[property];
+		type IProperty = {
+			name: string;
+		};
+		properties.forEach((property: string | IProperty) => {
+			if (typeof property === 'object') {
+				if (!property.hasOwnProperty('name')) return;
+				props[property.name] = this[property.name];
+			}
+			let name = property as string;
+
+			props[name] = this[name];
 		});
 		return props;
 	}

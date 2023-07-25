@@ -1,7 +1,7 @@
-import { UserStore } from '@beyond-js/reactive-2/tests/backend/database';
+import { UserStore } from '@beyond-js/reactive/tests/backend/database';
 import { Server, Socket } from 'socket.io';
 
-export /*actions*/ /*bundle*/ class UsersProvider {
+export /*actions*/ /*bundle*/ class BooksProvider {
 	socket: Server;
 	constructor(socket: Server) {
 		this.socket = socket;

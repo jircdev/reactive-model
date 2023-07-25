@@ -13,16 +13,12 @@ export class ItemLoadManager {
 		this.#parent = parent;
 		this.#getProperty = bridge.get;
 		this.#bridge = bridge;
-
 		this.init();
 	}
 
 	init = () => {
 		this.#localProvider = this.#getProperty('localProvider');
-
 		this.#provider = this.#getProperty('provider');
-
-		this.#parent.load = this.load;
 		this.ready = true;
 	};
 
@@ -45,29 +41,37 @@ export class ItemLoadManager {
 			const localdb = await this.#getProperty('localdb');
 			const localProvider = this.#getProperty('localProvider');
 
-			if (localdb && localProvider) {
-				const localData = await localProvider.load(params);
-				if (localData?.status) this.#parent.set(localData.data, true);
+			if (!params && this.#parent.id) {
+				params = { id: this.#parent.id };
 			}
+			if (localdb && this.#localProvider) {
+				const localData = await this.#localProvider.load(params);
 
-			if (localProvider && !localProvider.isOnline) return { status: true };
-			if (!this.#provider) return;
+				if (localdb && localProvider) {
+					const localData = await localProvider.load(params);
+					if (localData?.status) this.#parent.set(localData.data, true);
+				}
 
-			const remoteData = await this.remoteLoad(params);
+				if (localProvider && !localProvider.isOnline) return { status: true };
+				if (!this.#provider) return;
 
-			if (!remoteData) {
-				this.#parent.found = false;
-			} else if (remoteData) {
-				let same = true;
-				Object.keys(remoteData).forEach(key => {
-					let original = localProvider.registry.values;
-					if (original[key] !== remoteData[key]) same = false;
-				});
-				if (!same) await this.#localProvider.save(remoteData);
-				this.#parent.found = true;
+				const remoteData = await this.remoteLoad(params);
+
+				if (!remoteData) {
+					this.#parent.found = false;
+				} else if (remoteData) {
+					let same = true;
+					Object.keys(remoteData).forEach(key => {
+						let original = localProvider.registry.values;
+						if (original[key] !== remoteData[key]) same = false;
+					});
+
+					if (!same) await this.#localProvider.save(remoteData);
+					this.#parent.found = true;
+				}
+
+				return { status: true, data: remoteData };
 			}
-
-			return { status: true, data: remoteData };
 		} catch (exc) {
 			console.error('ERROR LOAD', exc);
 			return { status: false, error: exc };
@@ -97,6 +101,7 @@ export class ItemLoadManager {
 			console.error(response);
 			throw 'ERROR_DATA_QUERY';
 		}
+
 		return response.data;
 	};
 }
