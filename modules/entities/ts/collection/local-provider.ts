@@ -79,6 +79,9 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 			const database: DatabaseManager = await DBManager.get(this.#databaseName);
 			this.#database = database;
 			this.#store = database.db[this.#storeName];
+			if (!this.#store) {
+				throw new Error(`The store ${this.#storeName} does not exists in the database ${this.#databaseName}`);
+			}
 			this.ready = true;
 			this.#promiseInit.resolve();
 		} catch (e) {
