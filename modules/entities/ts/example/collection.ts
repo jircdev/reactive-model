@@ -1,6 +1,6 @@
 import { Collection } from '../collection';
 import { Book } from './index';
-// import { UserProvider } from '@beyond-js/reactive/tests/backend/provider';
+// import { UserProvider } from '@beyond-js/reactive-2/tests/backend/provider';
 class UserProvider {}
 interface IUsers {
 	items: Book[];
