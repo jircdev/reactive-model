@@ -160,9 +160,7 @@ export /*bundle*/ class Item<T extends object> extends ReactiveModel<IItem> {
 			this.#localData = new Map(Object.entries(data));
 			this.localProvider.save(data, true);
 		}
-
 		// If a property is in the properties array, define it as a public property
-
 		type IProperty = {
 			name: string;
 		};
@@ -171,7 +169,6 @@ export /*bundle*/ class Item<T extends object> extends ReactiveModel<IItem> {
 				if (data.hasOwnProperty(property.name)) {
 					//	console.log(10, property);
 				}
-
 				return;
 			}
 			if (data.hasOwnProperty(property)) {

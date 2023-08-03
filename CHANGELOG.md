@@ -1,4 +1,7 @@
 # CHANGELOG
+## 1.1.3
+
+- Added a validation in the localProvider of the Collection class to check if the specified store exists in the database. If the store does not exist, an error will be thrown to handle the situation appropriately.
 
 ## 1.1.2 
 - Bug fix: Fixed error when passing parameters in the Item post method.
