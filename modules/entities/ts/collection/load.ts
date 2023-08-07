@@ -14,9 +14,7 @@ export class CollectionLoadManager {
 	filter: any;
 	#localProvider: CollectionLocalProvider;
 	#provider;
-	#getProperty;
 	#parentBridge;
-	#localdb;
 	#parent: Collection;
 	#registry: RegistryFactory;
 	get parent() {
@@ -41,8 +39,6 @@ export class CollectionLoadManager {
 		this.#localdb = this.#parentBridge.get('localdb');
 		this.#localProvider = this.#parentBridge.get('localProvider');
 		this.#provider = this.#parentBridge.get('provider');
-
-		this.#parent.filter = this.filter;
 
 		this.#registry = RegistryFactory.get(this.#parentBridge.get('storeName'));
 		if (this.#localProvider) this.#parent.customFilter = this.#localProvider?.customFilter;

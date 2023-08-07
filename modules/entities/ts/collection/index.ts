@@ -4,8 +4,6 @@ import { CollectionLocalProvider } from './local-provider';
 import { CollectionSaveManager } from './publish';
 import { CollectionLoadManager } from './load';
 import { IProvider, IProviderConstructor } from '../interfaces/provider';
-import type { CollectionProvider } from '../providers/collection';
-import { IItemConfig } from '../item/interfaces/config';
 
 type ItemConstructor<T extends object = any> = new (args?: { id?: any }) => Item<T>;
 
@@ -134,7 +132,8 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 		}
 	}
 
-	load() {
-		return this.#loadManager.load();
+	load(args?) {
+		return this.#loadManager.load(args);
 	}
+	filter = (args?) => this.#loadManager.filter(args);
 }
