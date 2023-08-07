@@ -16,11 +16,6 @@ export class CollectionSaveManager {
 	}
 
 	init() {
-		this.#parent.save = this.save;
-		this.#parent.sync = this.sync;
-		this.#parent.publish = this.publish;
-		this.#parent.toSync = this.toSync;
-
 		this.#localdb = this.#bridge.get('localdb');
 		if (this.#localdb) {
 			this.#localProvider = this.#bridge.get('localProvider');

@@ -36,7 +36,6 @@ export class CollectionLoadManager {
 	}
 
 	init() {
-		this.#localdb = this.#parentBridge.get('localdb');
 		this.#localProvider = this.#parentBridge.get('localProvider');
 		this.#provider = this.#parentBridge.get('provider');
 
