@@ -136,4 +136,8 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 		return this.#loadManager.load(args);
 	}
 	filter = (args?) => this.#loadManager.filter(args);
+	save = (args?) => this.#saveManager.save(args);
+	sync = (args?) => this.#saveManager.sync(args);
+	publish = (args?) => this.#saveManager.publish(args);
+	toSync = () => this.#saveManager.toSync();
 }
