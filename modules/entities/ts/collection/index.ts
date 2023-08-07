@@ -133,4 +133,8 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 			console.error(e);
 		}
 	}
+
+	load() {
+		return this.#loadManager.load();
+	}
 }
