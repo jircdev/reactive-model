@@ -82,6 +82,8 @@ class LocalProvider extends ReactiveModel<any> {
 				this.#store = database.db[this.#storeName];
 			}
 
+			this.#isNew = id === undefined;
+
 			await this.#getRegistry(id);
 			return;
 		} catch (e) {
