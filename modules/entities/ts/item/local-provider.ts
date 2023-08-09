@@ -75,6 +75,7 @@ class LocalProvider extends ReactiveModel<any> {
 	}
 
 	init = async (id: string | number | undefined = undefined) => {
+
 		try {
 			if (this.#localdb) {
 				const database: DatabaseManager = await DBManager.get(this.#databaseName);
@@ -82,7 +83,7 @@ class LocalProvider extends ReactiveModel<any> {
 				this.#store = database.db[this.#storeName];
 			}
 
-			this.#isNew = id === undefined;
+			this.#isNew = !id;
 
 			await this.#getRegistry(id);
 			return;
@@ -133,9 +134,11 @@ class LocalProvider extends ReactiveModel<any> {
 	#getRegistry = async id => {
 		if (this.#factoryRegistry.hasItem(this.#storeName, id)) {
 			const item = this.#factoryRegistry.getItem(this.#storeName, id);
+			
 			this.#registry = item;
 			this.#parent.localLoaded = this.#parent.found = item.values.found;
 			this.#parent.set(this.#registry.values);
+			this.#isNew = this.#registry?.values?.isNew ? true : false;
 			return item.values;
 		}
 
@@ -183,7 +186,6 @@ class LocalProvider extends ReactiveModel<any> {
 			if (!this.isUnpublished(data)) return;
 			data.offline = this.isOnline ? 0 : 1;
 			data.isNew = !this.#isNew ? 0 : 1;
-
 			// Add validation for unique fields
 			const duplicated = await this.validateUniqueFields(data);
 			if (duplicated.length) return { error: 'duplicated', fields: duplicated };

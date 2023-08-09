@@ -15,6 +15,8 @@ export class Registry extends ReactiveModel<IRegistry> {
 	#store;
 	#instanceId;
 	#isDeleted;
+	#isNew;
+	#keyId
 	get isDeleted() {
 		return this.#isDeleted;
 	}
@@ -31,6 +33,7 @@ export class Registry extends ReactiveModel<IRegistry> {
 		const { id } = data;
 
 		this.#store = store;
+		this.#isNew = id === undefined;
 		this.#id = id;
 		this.#instanceId = id ?? uuidv4();
 
