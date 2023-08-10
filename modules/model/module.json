@@ -2,8 +2,6 @@
 	"name": "model",
 	"description": "Reactive Model",
 	"platforms": "*",
-	"ts": {
-		"path": "ts",
-		"files": ["*"]
-	}
+	"bundle": "ts",
+	"files": "*"
 }
