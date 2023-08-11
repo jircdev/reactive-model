@@ -142,6 +142,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 		await this.init();
 		const conditions = Object.keys(params);
 		const controls = ['and', 'or'];
+
 		conditions.forEach(condition => {
 			if (controls.includes(condition)) {
 				this.#processControl(condition, params[condition]);

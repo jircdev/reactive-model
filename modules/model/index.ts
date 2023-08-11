@@ -98,17 +98,27 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 	set(properties: Partial<ReactiveModelPublic<T>>): void {
 		let props: Partial<ReactiveModelPublic<T>> = Object.keys(properties);
 		let updated = false;
-		Object.keys(properties).forEach(prop => {
-			const sameObject =
-				typeof properties[prop] === 'object' && JSON.stringify(properties[prop]) === JSON.stringify(this[prop]);
+		try {
+			Object.keys(properties).forEach(prop => {
+				const sameObject =
+					typeof properties[prop] === 'object' &&
+					JSON.stringify(properties[prop]) === JSON.stringify(this[prop]);
 
-			if (this[prop] === properties[prop] || sameObject) return;
-
-			this[prop] = properties[prop];
-			updated = true;
-		});
-
-		if (updated) this.triggerEvent();
+				if (this[prop] === properties[prop] || sameObject) return;
+				const descriptor = Object.getOwnPropertyDescriptor(this, prop);
+				if (descriptor?.set) {
+					// console.warn(`Property ${prop} is not settable`);
+					return;
+				}
+				// console.log(`Setting ${prop} to ${properties[prop]}`);
+				this[prop] = properties[prop];
+				updated = true;
+			});
+		} catch (e) {
+			throw new Error(`Error setting properties: ${e}`);
+		} finally {
+			if (updated) this.triggerEvent();
+		}
 	}
 
 	getProperties(): Record<string, any> {
