@@ -1,5 +1,5 @@
-import { Item, IItem } from '@beyond-js/reactive-2/entities';
-import { UserProvider } from '@beyond-js/reactive-2/tests/backend/provider';
+import { Item, IItem } from '@beyond-js/reactive/entities';
+import { UserProvider } from '@beyond-js/reactive/tests/backend/provider';
 
 interface IUser {
 	name?: string;

@@ -1,4 +1,4 @@
-# @beyond-js/reactive-2
+# @beyond-js/reactive
 
 ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E)
@@ -9,7 +9,7 @@
 
 
 
-`@beyond-js/reactive-2` is a powerful TypeScript library designed to provide a reactive data layer for your application. By offering tools to create and manage reactive data structures, it enables developers to construct performant and scalable applications with ease. It enhances data-driven views or components by reacting to changes and keeping everything in sync.
+`@beyond-js/reactive` is a powerful TypeScript library designed to provide a reactive data layer for your application. By offering tools to create and manage reactive data structures, it enables developers to construct performant and scalable applications with ease. It enhances data-driven views or components by reacting to changes and keeping everything in sync.
 
 ## Main Objects
 
@@ -29,10 +29,10 @@ Item is an abstract class that represents a "reactive" object in your applicatio
 
 ## Installation
 
-To add `@beyond-js/reactive-2` to your project, run:
+To add `@beyond-js/reactive` to your project, run:
 
 ```
-npm install @beyond-js/reactive-2
+npm install @beyond-js/reactive
 ```
 
 For more detailed information about the library and how to use it, refer to the individual READMEs of [ReactiveModel](./docs/model/README.md), [Collection](./docs/collection/README.md), and [Item](./docs/item/README.md). 
