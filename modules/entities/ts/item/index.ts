@@ -23,7 +23,7 @@ export /*bundle*/ class Item<T extends object> extends ReactiveModel<IItem> {
 	protected db: string;
 	#ignoredFields: Array<string> = [];
 	#skeleton: Array<string> = [];
-	protected localProvider: LocalProvider;
+	 localProvider: LocalProvider;
 
 	protected unique: Array<string> = [];
 
@@ -83,7 +83,7 @@ export /*bundle*/ class Item<T extends object> extends ReactiveModel<IItem> {
 		if (storeName) this.storeName = storeName;
 		if (config.provider) {
 			if (typeof config.provider !== 'function') {
-				throw new Error('Provider must be an object');
+				throw new Error('Provider must be an function');
 			}
 			this.#provider = new config.provider();
 		}
