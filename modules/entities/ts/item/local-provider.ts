@@ -1,10 +1,10 @@
 import { ReactiveModel } from '@beyond-js/reactive/model';
-import { IProvider } from '../interfaces/provider';
-import { PendingPromise } from '@beyond-js/kernel/core';
 import { DBManager, DatabaseManager } from '@beyond-js/reactive/database';
 import Dexie from 'dexie';
 import { RegistryFactory } from '../registry/factory';
 import type { Registry } from '../registry';
+import { PendingPromise } from '@beyond-js/kernel/core';
+
 export /*bundle*/
 class LocalProvider extends ReactiveModel<any> {
 	#isOnline = globalThis.navigator.onLine;
@@ -14,6 +14,7 @@ class LocalProvider extends ReactiveModel<any> {
 	}
 
 	#offline: boolean;
+	#isNew: boolean = false;
 	#database!: DatabaseManager;
 	#storeName!: string;
 	#databaseName!: string;
@@ -56,7 +57,6 @@ class LocalProvider extends ReactiveModel<any> {
 		this.#parent = parent;
 
 		if (!db || !storeName) {
-			return;
 			throw new Error('database and store are required');
 		}
 		this.#databaseName = db;
@@ -75,6 +75,7 @@ class LocalProvider extends ReactiveModel<any> {
 	}
 
 	init = async (id: string | number | undefined = undefined) => {
+
 		try {
 			if (this.#localdb) {
 				const database: DatabaseManager = await DBManager.get(this.#databaseName);
@@ -82,8 +83,9 @@ class LocalProvider extends ReactiveModel<any> {
 				this.#store = database.db[this.#storeName];
 			}
 
-			await this.#getRegistry(id);
+			this.#isNew = !id;
 
+			await this.#getRegistry(id);
 			return;
 		} catch (e) {
 			console.error(e);
@@ -132,9 +134,11 @@ class LocalProvider extends ReactiveModel<any> {
 	#getRegistry = async id => {
 		if (this.#factoryRegistry.hasItem(this.#storeName, id)) {
 			const item = this.#factoryRegistry.getItem(this.#storeName, id);
+			
 			this.#registry = item;
 			this.#parent.localLoaded = this.#parent.found = item.values.found;
 			this.#parent.set(this.#registry.values);
+			this.#isNew = this.#registry?.values?.isNew ? true : false;
 			return item.values;
 		}
 
@@ -181,7 +185,7 @@ class LocalProvider extends ReactiveModel<any> {
 		try {
 			if (!this.isUnpublished(data)) return;
 			data.offline = this.isOnline ? 0 : 1;
-
+			data.isNew = !this.#isNew ? 0 : 1;
 			// Add validation for unique fields
 			const duplicated = await this.validateUniqueFields(data);
 			if (duplicated.length) return { error: 'duplicated', fields: duplicated };

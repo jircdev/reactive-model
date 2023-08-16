@@ -19,7 +19,6 @@ export class ItemSaveManager {
 		this.#parent.localUpdate = this.localUpdate;
 		this.#localProvider = this.#getProperty('localProvider');
 		this.#provider = this.#getProperty('provider');
-		this.#parent.sync = this.sync;
 	}
 
 	save = async (data?) => {

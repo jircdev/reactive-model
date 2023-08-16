@@ -32,7 +32,7 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 	get isOnline() {
 		return !this.localProvider ? true : this.localProvider.isOnline;
 	}
-	set items(value: Array<string | undefined>) {
+	set items(value: Array<any | undefined>) {
 		if (!Array.isArray(value)) {
 			return;
 		}

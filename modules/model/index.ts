@@ -127,6 +127,7 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 
 		type IProperty = {
 			name: string;
+			type: string;
 		};
 		properties.forEach((property: string | IProperty) => {
 			if (typeof property === 'object') {

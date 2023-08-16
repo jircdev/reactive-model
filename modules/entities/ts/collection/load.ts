@@ -1,7 +1,5 @@
 import type { Collection } from '.';
-import { PendingPromise } from '@beyond-js/kernel/core';
 import type { CollectionLocalProvider } from './local-provider';
-import { CollectionSaveManager } from './publish';
 import { RegistryFactory } from '../registry/factory';
 interface ILoadResponse {
 	localLoaded: true;
@@ -102,12 +100,12 @@ export class CollectionLoadManager {
 			if (update) {
 				params.start = start;
 			}
+			const { isOnline } = this.parent;
 
-			const { isOnline } = this.#parent;
 
 			if (this.#localProvider) {
-				const localItems = await this.#localLoad(params);
 				if (!isOnline || !this.#provider) {
+				const localItems = await this.#localLoad(params);
 					return { status: true, data: localItems };
 				}
 			}
