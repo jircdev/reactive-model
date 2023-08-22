@@ -33,12 +33,14 @@ export class ItemSaveManager {
 			
 			const properties = this.#parent.getProperties();
 
+			if (this.#parent.isOnline) {
+				const response = await this.#publish(properties);
+				if (!response.status) throw response;
+			}
+
 			if (this.#localProvider) {
 				await this.#localProvider.save(properties);
 			}
-
-			const response = await this.#publish(properties);
-			if (!response?.status) throw response
 			this.#parent.triggerEvent();
 
 			return { status: true };
