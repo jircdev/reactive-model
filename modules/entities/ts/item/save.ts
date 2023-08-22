@@ -29,22 +29,22 @@ export class ItemSaveManager {
 				this.#parent.set(data);
 			}
 
-			if (!this.#parent.isUnpublished) {
-				return;
-			}
-
+			if (!this.#parent.isUnpublished) return;
+			
 			const properties = this.#parent.getProperties();
 
 			if (this.#localProvider) {
 				await this.#localProvider.save(properties);
 			}
 
-			await this.#publish(properties);
+			const response = await this.#publish(properties);
+			if (!response?.status) throw response
 			this.#parent.triggerEvent();
 
 			return { status: true };
 		} catch (e) {
 			console.error('error saving', e);
+			return e
 		}
 	};
 
