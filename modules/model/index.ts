@@ -46,9 +46,23 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 	protected properties: string[];
 	loaded: boolean = false;
 
+	#initialValues: Record<string, any> = {};
+	get isUnpublished() {
+		const properties = this.getProperties();
+
+		return Object.keys(properties).some(prop => {
+			if (prop === 'id') return false;
+			return properties[prop] !== this.#initialValues[prop];
+		});
+	}
 	constructor() {
 		super();
 		this.reactiveProps<IProps>(['fetching', 'fetched', 'processing', 'processed', 'loaded', 'ready']);
+	}
+
+	initialValues(values) {
+		this.set(values);
+		this.#initialValues = values;
 	}
 
 	protected reactiveProps<T>(props: Array<keyof T>): void {
