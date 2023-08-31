@@ -14,9 +14,11 @@ export class /*bundle*/ RegistryFactory extends ReactiveModel<IRecords> {
 	#database;
 	#batches = 200;
 	#dbName;
-	constructor(dbName) {
+	#localdb;
+	constructor(dbName, localdb) {
 		super();
 		this.#dbName = dbName;
+		this.#localdb = localdb;
 		this.init();
 	}
 
@@ -25,7 +27,8 @@ export class /*bundle*/ RegistryFactory extends ReactiveModel<IRecords> {
 		if (this.ready) return true;
 		if (this.#promiseReady) return this.#promiseReady;
 		this.#promiseReady = new PendingPromise();
-		this.#database = await DBManager.get(this.#dbName);
+
+		this.#database = this.#dbName ? await DBManager.get(this.#dbName) : false;
 
 		this.#promiseReady.resolve();
 		this.#promiseReady = undefined;
@@ -148,9 +151,9 @@ export class /*bundle*/ RegistryFactory extends ReactiveModel<IRecords> {
 	 * @param dbName IndexedDB database name
 	 * @returns
 	 */
-	static get(dbName) {
+	static get(dbName, localdb) {
 		if (this.#dbs.has(dbName)) return this.#dbs.get(dbName);
-		const db = new RegistryFactory(dbName);
+		const db = new RegistryFactory(dbName, localdb);
 		this.#dbs.set(dbName, db);
 		return db;
 	}

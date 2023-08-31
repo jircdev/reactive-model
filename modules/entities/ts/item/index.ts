@@ -23,7 +23,7 @@ export /*bundle*/ class Item<T extends object> extends ReactiveModel<IItem> {
 	protected db: string;
 	#ignoredFields: Array<string> = [];
 	#skeleton: Array<string> = [];
-	 localProvider: LocalProvider;
+	localProvider: LocalProvider;
 
 	protected unique: Array<string> = [];
 
@@ -77,8 +77,9 @@ export /*bundle*/ class Item<T extends object> extends ReactiveModel<IItem> {
 	constructor(config: IItemConfig = {}) {
 		super();
 
-		const { db, storeName } = config;
+		const { db, storeName, localdb = true } = config;
 
+		this.localdb = localdb;
 		if (db) this.db = db;
 		if (storeName) this.storeName = storeName;
 		if (config.provider) {
@@ -103,12 +104,14 @@ export /*bundle*/ class Item<T extends object> extends ReactiveModel<IItem> {
 	protected async init(config: { id?: string | number } = {}) {
 		try {
 			let id;
+
 			if (this.#initPromise) return this.#initPromise;
 
 			this.#initPromise = new PendingPromise();
 			if (config.id) id = config.id;
 
 			await this.localProvider.init(id);
+
 			if (this.#skeleton && this.#skeleton.length > 0) {
 				this.properties = this.#skeleton;
 			}
@@ -164,7 +167,7 @@ export /*bundle*/ class Item<T extends object> extends ReactiveModel<IItem> {
 		type IProperty = {
 			name: string;
 		};
-		this.properties.forEach((property: string | IProperty) => {
+				this.properties.forEach((property: string | IProperty) => {
 			if (typeof property === 'object') {
 				if (data.hasOwnProperty(property.name)) {
 					//	console.log(10, property);

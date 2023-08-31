@@ -35,6 +35,7 @@ export class ItemLoadManager {
 	load = async (params: any) => {
 		try {
 			await this.#getProperty('checkReady')();
+
 			if (!params) {
 				params = { id: this.#parent.id };
 			}
@@ -44,34 +45,31 @@ export class ItemLoadManager {
 			if (!params && this.#parent.id) {
 				params = { id: this.#parent.id };
 			}
-			if (localdb && this.#localProvider) {
-				const localData = await this.#localProvider.load(params);
 
-				if (localdb && localProvider) {
-					const localData = await localProvider.load(params);
-					if (localData?.status) this.#parent.set(localData.data, true);
-				}
-
-				if (localProvider && !localProvider.isOnline) return { status: true };
-				if (!this.#provider) return;
-
-				const remoteData = await this.remoteLoad(params);
-
-				if (!remoteData) {
-					this.#parent.found = false;
-				} else if (remoteData) {
-					let same = true;
-					Object.keys(remoteData).forEach(key => {
-						let original = localProvider.registry.values;
-						if (original[key] !== remoteData[key]) same = false;
-					});
-
-					if (!same) await this.#localProvider.save(remoteData);
-					this.#parent.found = true;
-				}
-
-				return { status: true, data: remoteData };
+			if (localdb && localProvider) {
+				const localData = await localProvider.load(params);
+				if (localData?.status) this.#parent.set(localData.data, true);
 			}
+
+			if (localProvider && !localProvider.isOnline) return { status: true };
+			if (!this.#provider) return;
+
+			const remoteData = await this.remoteLoad(params);
+
+			if (!remoteData) {
+				this.#parent.found = false;
+			} else if (remoteData && localdb) {
+				let same = true;
+				Object.keys(remoteData).forEach(key => {
+					let original = localProvider.registry.values;
+					if (original[key] !== remoteData[key]) same = false;
+				});
+
+				if (!same) await this.#localProvider.save(remoteData);
+				this.#parent.found = true;
+			}
+
+			return { status: true, data: remoteData };
 		} catch (exc) {
 			console.error('ERROR LOAD', exc);
 			return { status: false, error: exc };

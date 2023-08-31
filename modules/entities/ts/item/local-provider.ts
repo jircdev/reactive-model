@@ -48,6 +48,7 @@ class LocalProvider extends ReactiveModel<any> {
 	get registry() {
 		return this.#registry;
 	}
+	#apply: boolean;
 	constructor(parent, bridge) {
 		super();
 
@@ -56,16 +57,17 @@ class LocalProvider extends ReactiveModel<any> {
 		this.__id = Math.floor(Math.random() * (100000 - 1000 + 1)) + 1000;
 		this.#parent = parent;
 
-		if (!db || !storeName) {
-			throw new Error('database and store are required');
-		}
+		// if (!db || !storeName) {
+		// 	throw new Error('database and store are required');
+		// }
+		this.#apply = db && storeName;
 		this.#databaseName = db;
 		this.#storeName = storeName;
 		this.#bridge = bridge;
 		this.#localdb = bridge.get('localdb');
-		this.#factoryRegistry = RegistryFactory.get(db);
-		globalThis.addEventListener('online', this.handleConnection);
-		globalThis.addEventListener('offline', this.handleConnection);
+		this.#factoryRegistry = RegistryFactory.get(db, this.#localdb);
+		// globalThis.addEventListener('online', this.handleConnection);
+		// globalThis.addEventListener('offline', this.handleConnection);
 		this.load = this.load.bind(this);
 	}
 
@@ -75,7 +77,6 @@ class LocalProvider extends ReactiveModel<any> {
 	}
 
 	init = async (id: string | number | undefined = undefined) => {
-
 		try {
 			if (this.#localdb) {
 				const database: DatabaseManager = await DBManager.get(this.#databaseName);
@@ -134,7 +135,7 @@ class LocalProvider extends ReactiveModel<any> {
 	#getRegistry = async id => {
 		if (this.#factoryRegistry.hasItem(this.#storeName, id)) {
 			const item = this.#factoryRegistry.getItem(this.#storeName, id);
-			
+
 			this.#registry = item;
 			this.#parent.localLoaded = this.#parent.found = item.values.found;
 			this.#parent.set(this.#registry.values);
