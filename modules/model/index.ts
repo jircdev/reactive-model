@@ -55,9 +55,10 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 			return properties[prop] !== this.#initialValues[prop];
 		});
 	}
-	constructor() {
+	constructor(properties) {
 		super();
 		this.reactiveProps<IProps>(['fetching', 'fetched', 'processing', 'processed', 'loaded', 'ready']);
+		if (properties) this.initialValues(properties);
 	}
 
 	initialValues(values) {
