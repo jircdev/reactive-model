@@ -86,7 +86,7 @@ export /*bundle*/ class Item<T extends object> extends ReactiveModel<IItem> {
 			if (typeof config.provider !== 'function') {
 				throw new Error('Provider must be an function');
 			}
-			this.#provider = new config.provider();
+			this.#provider = new config.provider(this);
 		}
 
 		this.on('object.loaded', this.checkReady);
@@ -167,7 +167,7 @@ export /*bundle*/ class Item<T extends object> extends ReactiveModel<IItem> {
 		type IProperty = {
 			name: string;
 		};
-				this.properties.forEach((property: string | IProperty) => {
+		this.properties.forEach((property: string | IProperty) => {
 			if (typeof property === 'object') {
 				if (data.hasOwnProperty(property.name)) {
 					//	console.log(10, property);

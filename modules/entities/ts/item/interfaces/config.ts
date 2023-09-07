@@ -5,5 +5,5 @@ export interface IItemConfig {
 	db?: string;
 	id?: string | number;
 	localdb?: boolean;
-	provider?: new () => IProvider;
+	provider?: new (item?) => IProvider;
 }
