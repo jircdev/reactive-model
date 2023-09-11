@@ -1,7 +1,7 @@
-import { ReactiveModel } from '@beyond-js/reactive/model';
+import { ReactiveModel } from '@beyond-js/reactive-2/model';
 import { Registry } from './index';
 import { PendingPromise } from '@beyond-js/kernel/core';
-import { DBManager, DatabaseManager } from '@beyond-js/reactive/database';
+import { DBManager, DatabaseManager } from '@beyond-js/reactive-2/database';
 
 interface IRecords {
 	stores: Map<string, Map<string, Registry>>;

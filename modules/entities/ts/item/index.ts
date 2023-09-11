@@ -1,4 +1,4 @@
-import { ReactiveModel, reactiveProps } from '@beyond-js/reactive/model';
+import { ReactiveModel, reactiveProps } from '@beyond-js/reactive-2/model';
 
 import { LocalProvider } from './local-provider';
 import { ItemSaveManager } from './save';
@@ -23,7 +23,7 @@ export /*bundle*/ class Item<T extends object> extends ReactiveModel<IItem> {
 	protected db: string;
 	#ignoredFields: Array<string> = [];
 	#skeleton: Array<string> = [];
-	 localProvider: LocalProvider;
+	localProvider: LocalProvider;
 
 	protected unique: Array<string> = [];
 

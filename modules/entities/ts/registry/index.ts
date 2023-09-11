@@ -1,5 +1,5 @@
 import { PendingPromise } from '@beyond-js/kernel/core';
-import { ReactiveModel } from '@beyond-js/reactive/model';
+import { ReactiveModel } from '@beyond-js/reactive-2/model';
 import { v4 as uuidv4 } from 'uuid';
 interface IRegistry {
 	values?: object;
@@ -16,7 +16,7 @@ export class Registry extends ReactiveModel<IRegistry> {
 	#instanceId;
 	#isDeleted;
 	#isNew;
-	#keyId
+	#keyId;
 	get isDeleted() {
 		return this.#isDeleted;
 	}
