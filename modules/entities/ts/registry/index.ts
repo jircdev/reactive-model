@@ -15,8 +15,17 @@ export class Registry extends ReactiveModel<IRegistry> {
 	#store;
 	#instanceId;
 	#isDeleted;
-	#isNew;
-	#keyId
+	#isNew: boolean;
+
+	get isNew() {
+		return this.#isNew;
+	}
+	set isNew(value: boolean) {
+		this.#isNew = value;
+		this.triggerEvent();
+	}
+
+	#keyId;
 	get isDeleted() {
 		return this.#isDeleted;
 	}
