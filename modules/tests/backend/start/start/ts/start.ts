@@ -29,7 +29,6 @@ const createTable = async () => {
   )
   `);
 
-	console.log('Table created');
 	await insertUsers(); // Call insertUsers here
 	await db.close();
 };
@@ -49,7 +48,6 @@ const insertUsers = async () => {
 		const time_updated = Math.floor(Date.now() / 1000);
 		await db.run(insertQuery, id, name, deleted, lastnames, time_updated);
 	}
-	console.log('20 users inserted');
 	await db.close();
 };
 

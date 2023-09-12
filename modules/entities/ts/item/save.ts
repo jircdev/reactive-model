@@ -29,17 +29,13 @@ export class ItemSaveManager {
 				this.#parent.set(data);
 			}
 
-			console.log('REACTIVE 0 ', data, this.#parent.isUnpublished, this.#parent.getProperties());
 			if (!this.#parent.isUnpublished) return;
-			console.log('REACTIVE 0.5 ', data);
 
 			const properties = this.#parent.getProperties();
 			properties.isNew = this.#localProvider.registry.isNew;
 
 			if (this.#parent.isOnline) {
-				console.log('REACTIVE 1 ', properties);
 				const response = await this.#publish(properties);
-				console.log('REACTIVE 2 ', response);
 
 				if (!response.status) throw response;
 				this.#localProvider.registry.isNew = false;
@@ -61,7 +57,6 @@ export class ItemSaveManager {
 		try {
 			if (!this.#provider || !this.#bridge.get('isOnline')) return;
 
-			console.log('PROPERTIES => ', properties);
 			const response = await this.#provider.publish(properties);
 
 			if (!response?.status) throw response.error;
