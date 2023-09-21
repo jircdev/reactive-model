@@ -1,7 +1,13 @@
 import { IResponseAdapter } from './interface';
 
-interface IParams {
+interface Iresponse {
 	status: boolean;
+	error?: any;
+	data?: any;
+}
+
+interface IParams {
+	status?: boolean;
 	error?: any;
 	data?: any;
 }
@@ -10,7 +16,7 @@ export class LegacyAdapter implements IResponseAdapter {
 	constructor(parent) {
 		this.#parent = parent;
 	}
-	toClient({ error, data }: IParams): IParams {
+	toClient({ error, data }: IParams): Iresponse {
 		if (error) {
 			return { status: false, error: { message: error } };
 		}
