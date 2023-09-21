@@ -16,7 +16,7 @@ export class LegacyAdapter implements IResponseAdapter {
 	constructor(parent) {
 		this.#parent = parent;
 	}
-	toClient({ error, data }: IParams): Iresponse {
+	toClient({ error, data }: IParams = {}): Iresponse {
 		if (error) {
 			return { status: false, error: { message: error } };
 		}

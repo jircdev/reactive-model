@@ -1,4 +1,5 @@
 import type { ResponseAdapter } from '../adapter';
+import { IResponseAdapter } from '../adapter/interface';
 import type { Item } from './index';
 import type { LocalProvider } from './local-provider';
 
@@ -9,7 +10,7 @@ export class ItemSaveManager {
 	#provider;
 	#localProvider: LocalProvider;
 
-	#adapter: ResponseAdapter;
+	#adapter: IResponseAdapter;
 	constructor(parent: Item<any>, bridge) {
 		this.#parent = parent;
 		this.#getProperty = bridge.get;
@@ -27,8 +28,9 @@ export class ItemSaveManager {
 	save = async (data?) => {
 		try {
 			await this.#getProperty('checkReady')();
-
+			console.log(40.1, data);
 			if (data) {
+				console.log(40.2, data);
 				this.#parent.set(data);
 			}
 

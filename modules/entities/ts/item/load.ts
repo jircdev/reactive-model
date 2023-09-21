@@ -57,14 +57,14 @@ export class ItemLoadManager {
 			if (!this.#provider) return;
 
 			const remoteData = await this.remoteLoad(params);
-
 			if (!remoteData) {
 				this.#parent.found = false;
 				return this.#adapter.toClient();
 			}
 
 			this.#parent.found = true;
-
+			console.log(99, remoteData, localdb);
+			this.#parent.set(remoteData);
 			if (localdb) {
 				let same = true;
 				this.#parent.landed = true;
