@@ -54,7 +54,6 @@ export /*bundle */ class DatabaseManager extends Events {
 			throw new Error(`Identifier ${identifier} was not defined correctly`);
 		}
 		let [name, version = 1] = identifier.split('@');
-
 		if (!this.#databases.has(name)) {
 			const schema = new Database(name, version);
 			this.#databases.set(name, schema);

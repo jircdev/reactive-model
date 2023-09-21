@@ -42,7 +42,6 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 	processing: boolean = false;
 	ready: boolean = false;
 	processed: boolean = false;
-	protected localdb = false;
 	protected properties: string[];
 	loaded: boolean = false;
 
@@ -121,11 +120,8 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 
 				if (this[prop] === properties[prop] || sameObject) return;
 				const descriptor = Object.getOwnPropertyDescriptor(this, prop);
-				if (descriptor?.set) {
-					// console.warn(`Property ${prop} is not settable`);
-					return;
-				}
-				// console.log(`Setting ${prop} to ${properties[prop]}`);
+				if (descriptor?.set) return;
+
 				this[prop] = properties[prop];
 				updated = true;
 			});

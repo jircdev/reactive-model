@@ -1,26 +1,12 @@
-import { ReactiveModel, reactiveProps } from '@beyond-js/reactive/model';
-import type { Item } from '../item';
+import { ReactiveModel } from '@beyond-js/reactive/model';
 import { CollectionLocalProvider } from './local-provider';
 import { CollectionSaveManager } from './publish';
 import { CollectionLoadManager } from './load';
-import { IProvider, IProviderConstructor } from '../interfaces/provider';
+import { IProvider } from '../interfaces/provider';
 
-type ItemConstructor<T extends object = any> = new (args?: { id?: any }) => Item<T>;
-
-interface ICollection {
-	items: object[];
-	item: ItemConstructor;
-	next: number | undefined;
-	provider: ItemConstructor;
-}
-
-interface ISpecs {
-	provider: IProviderConstructor;
-	storeName: string;
-	db: string;
-	localdb?: boolean;
-	item: ItemConstructor<any>;
-}
+import { ICollectionSpecs, ICollection } from './interfaces/ICollection';
+import { ResponseAdapter } from '../adapter';
+import { IResponseAdapter } from '../adapter/interface';
 
 export /*bundle */ class Collection extends ReactiveModel<Collection> {
 	#items: Array<any | undefined> = [];
@@ -36,7 +22,6 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 		if (!Array.isArray(value)) {
 			return;
 		}
-
 		this.#items = value;
 		this.triggerEvent();
 	}
@@ -46,9 +31,7 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 	 * Represents the number of elements in the collection
 	 */
 	total: number = 0;
-
 	next: number | undefined;
-
 	#localProvider: CollectionLocalProvider;
 	get localProvider() {
 		return this.#localProvider;
@@ -64,11 +47,16 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 	protected sortBy: string = 'id';
 	protected sortDirection: 'asc' | 'desc' = 'asc';
 
-	constructor(specs: ISpecs) {
+	#responseAdapter: IResponseAdapter;
+	get responseAdapter() {
+		return this.#responseAdapter;
+	}
+	#initialSpecs: ICollectionSpecs;
+	constructor(specs: ICollectionSpecs) {
 		super();
 
 		const { provider, storeName, db, localdb, item } = specs;
-
+		this.#initialSpecs = specs;
 		if (storeName) this.storeName = storeName;
 		if (db) this.db = db;
 		if (localdb) this.localdb = localdb;
@@ -79,7 +67,6 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 			}
 			this.#provider = new provider();
 		}
-
 		this.reactiveProps<ICollection>(['next']);
 		this.init();
 	}
@@ -89,18 +76,13 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 			return this[property];
 		};
 		const setProperty = (property, value) => (this[property] = value);
-
 		const bridge = { get: getProperty, set: setProperty };
-
-		if (this.localdb) {
-			this.#localProvider = new CollectionLocalProvider(this, bridge);
-
-			this.#localProvider.on('items.changed', this.#listenItems);
-			this.localProvider.init();
-		}
-
+		this.#responseAdapter = ResponseAdapter.get(this, this.#initialSpecs?.adapter);
+		this.#localProvider = new CollectionLocalProvider(this, bridge);
 		this.#saveManager = new CollectionSaveManager(this, bridge);
 		this.#loadManager = new CollectionLoadManager(this, bridge);
+		this.#localProvider.on('items.changed', this.#listenItems);
+		this.localProvider.init();
 	}
 
 	#listenItems = () => {

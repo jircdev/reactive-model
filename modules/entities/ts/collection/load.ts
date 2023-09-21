@@ -1,6 +1,8 @@
 import type { Collection } from '.';
 import type { CollectionLocalProvider } from './local-provider';
 import { RegistryFactory } from '../registry/factory';
+import type { ResponseAdapter } from '../adapter';
+import { IResponseAdapter } from '../adapter/interface';
 interface ILoadResponse {
 	localLoaded: true;
 	fetching: false;
@@ -15,6 +17,7 @@ export class CollectionLoadManager {
 	#parentBridge;
 	#parent: Collection;
 	#registry: RegistryFactory;
+	#adapter: IResponseAdapter;
 	get parent() {
 		return this.#parent;
 	}
@@ -29,6 +32,7 @@ export class CollectionLoadManager {
 	constructor(parent, parentBridge) {
 		this.#parent = parent;
 		this.#parentBridge = parentBridge;
+		this.#adapter = this.#parent.responseAdapter;
 
 		this.init();
 	}
@@ -67,6 +71,8 @@ export class CollectionLoadManager {
 	 */
 
 	#localLoad = async params => {
+		if (!this.#localProvider) return;
+		//if (this.parent.sOnline || this.#provider) return;
 		const localData = (await this.#localProvider.load(params)) ?? { data: [] };
 
 		const newItems = this.processEntries(localData.data);
@@ -80,47 +86,37 @@ export class CollectionLoadManager {
 			items,
 		};
 		if (localData.next) properties.next = localData.next;
-
+		this.#parent.loaded = true;
 		this.parent.set(properties);
-		return items;
+		return this.#adapter.toClient({ data: items });
 	};
 
-	#localData = [];
 	#page = 1;
 	#remoteElements = [];
+
+	#localSave = async (params: any = {}) => {};
+
 	load = async (params: any = {}) => {
 		try {
 			this.parent.fetching = true;
-			let { start = 0, update } = params;
-
-			params.limit = params.limit ?? 30;
 			const { next } = this.parent;
-			if (update) this.#page++;
+			let { start = 0, update } = params;
+			params.limit = params.limit ?? 30;
 			start = update === true && next ? next : start;
 			if (update) {
+				this.#page++;
 				params.start = start;
 			}
-			const { isOnline } = this.parent;
 
+			await this.#localLoad(params);
 
-			if (this.#localProvider) {
-				if (!isOnline || !this.#provider) {
-				const localItems = await this.#localLoad(params);
-					return { status: true, data: localItems };
-				}
-			}
-
-			const remoteData = await this.#provider.list(params);
-
-			this.remoteData = remoteData;
-			const { status, data, error } = remoteData;
-			if (!status) throw error ?? 'ERROR_LIST_QUERY';
-
+			const response = await this.#provider.list(params);
+			const data = this.#adapter.fromRemote(response);
 			const items: any[] = await this.processRemoteEntries(data);
-			// if (this.#localProvider) await this.#localProvider.save(items);
+
+			this.remoteData = response;
 
 			this.#remoteElements = params.update === true ? this.#remoteElements.concat(items) : items;
-
 			const properties = {
 				items: this.#remoteElements,
 				next: data.next,
@@ -128,33 +124,42 @@ export class CollectionLoadManager {
 				fetching: false,
 				total: data.total ?? 0,
 			};
-
 			this.parent.set(properties);
 			this.parent.triggerEvent();
-			return { status: true, data: items };
+			return this.#adapter.toClient({ data: items });
 		} catch (exc) {
-			console.error('ERROR LOAD', exc);
-			this.#parent.set({ loaded: false, fetching: true });
 			this.parent.triggerEvent();
-			return { status: false, error: { message: exc } };
+			console.error(exc);
+			return this.#adapter.toClient({ error: exc });
+		} finally {
+			this.#parent.fetching = false;
+			this.#parent.fetched = true;
+			this.#parent.landed = true;
 		}
 	};
 
 	async processRemoteEntries(data): Promise<any[]> {
-		if (!data.entries) {
+		if (!data.entries && !data.items) {
 			throw new Error('The list method must return an object with an entries property');
 		}
+
+		const elements = data.items ? data.items : data.entries;
 		if (data.deletedEntries) {
 			// todo: unify it in recordsFactory
 			this.#localProvider.softDelete(data.deletedEntries);
 		}
-		await this.#localProvider.save(data.entries);
-		return data.entries.map(record => {
-			const item = new this.parent.item({ id: record.id });
 
-			item.set(record);
+		await this.#localProvider.save(elements);
+
+		const promises = [];
+		const items = elements.map(record => {
+			const item = new this.parent.item({ id: record.id, properties: record });
+			promises.push(item.isReady);
 			return item;
 		});
+		await Promise.all(promises);
+		items.forEach((item, index) => item.set(elements[index], true));
+		return items;
 	}
 
 	processEntries = (entries): any[] => {

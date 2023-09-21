@@ -43,6 +43,9 @@ class LocalProvider extends ReactiveModel<any> {
 	 */
 	#registry: Registry;
 	#localdb: boolean;
+	get localdb() {
+		return this.#parent.localdb;
+	}
 	#bridge;
 
 	get registry() {
@@ -56,18 +59,12 @@ class LocalProvider extends ReactiveModel<any> {
 		const { db, storeName } = parent;
 		this.__id = Math.floor(Math.random() * (100000 - 1000 + 1)) + 1000;
 		this.#parent = parent;
-
-		// if (!db || !storeName) {
-		// 	throw new Error('database and store are required');
-		// }
 		this.#apply = db && storeName;
 		this.#databaseName = db;
 		this.#storeName = storeName;
 		this.#bridge = bridge;
 		this.#localdb = bridge.get('localdb');
 		this.#factoryRegistry = RegistryFactory.get(db, this.#localdb);
-		// globalThis.addEventListener('online', this.handleConnection);
-		// globalThis.addEventListener('offline', this.handleConnection);
 		this.load = this.load.bind(this);
 	}
 
@@ -84,19 +81,18 @@ class LocalProvider extends ReactiveModel<any> {
 				this.#store = database.db[this.#storeName];
 			}
 
-			this.#isNew = !id;
-
-			await this.#getRegistry(id);
-			return;
+			this.#isNew = !!id;
+			return this.#getRegistry(id);
 		} catch (e) {
 			console.error(e);
 		}
 	};
 
-	private handleConnection = () => {
-		this.triggerEvent();
-	};
-
+	/**
+	 * todo: @jircdev replace with the model method
+	 * @param data \
+	 * @returns
+	 */
 	isUnpublished(data) {
 		const properties = Object.keys(data);
 		const toCompare = { ...this.#registry.values };
@@ -108,11 +104,12 @@ class LocalProvider extends ReactiveModel<any> {
 	}
 
 	async load(params: any = {}) {
-		let id = params.id;
-		//TODO: review @julio
-		id = id ?? this.registry.values?.id;
-
 		try {
+			let id = params.id;
+			//TODO: review @julio
+			id = id ?? this.registry.values?.id;
+
+			// try {
 			if (!id) throw 'ID IS REQUIRED';
 
 			await this.#getRegistry(id);
@@ -133,53 +130,27 @@ class LocalProvider extends ReactiveModel<any> {
 	 * @returns
 	 */
 	#getRegistry = async id => {
-		if (this.#factoryRegistry.hasItem(this.#storeName, id)) {
-			const item = this.#factoryRegistry.getItem(this.#storeName, id);
+		let found = await this.#factoryRegistry.get(this.#storeName, id);
+		let data = { id };
 
-			this.#registry = item;
-			this.#parent.localLoaded = this.#parent.found = item.values.found;
-			this.#parent.set(this.#registry.values);
-			this.#isNew = this.#registry?.values?.isNew ? true : false;
-			return item.values;
+		if (!found && this.localdb && id) {
+			const store = this.#store;
+			const localData = await store.get(id);
+			data = localData;
+			found = true;
 		}
 
-		const getRegistry = data => {
-			this.#registry = this.#factoryRegistry.create(this.#storeName, data);
-			this.#registry.on('change', this.#listenRegistry);
-			this.#parent.set(this.#registry.values);
-			this.trigger('change');
-		};
-		type ISpecs = {
-			id: string | number;
-			found?: boolean;
-			ready?: boolean;
-		};
-		let specs: ISpecs = { id };
-		if (!id || !this.#localdb) {
-			specs.ready = id && !this.#localdb;
-			getRegistry(specs);
-			return this.#registry.values;
+		if (found) {
+			this.#parent.found = found;
+			this.#parent.loaded = true;
 		}
-		// this code is only executed if the localdb is true
-		const promise = new PendingPromise();
 
-		this.#store.get(id).then(data => {
-			specs = { ...specs, ...data };
-			specs.found = !!data;
-			getRegistry(specs);
-			promise.resolve(this.#registry.values);
-		});
+		const registry = this.#factoryRegistry.create(this.#storeName, data);
 
-		return promise;
-	};
-
-	/**
-	 * Trigger the event to update the component when the registry changes.
-	 */
-	#listenRegistry = async () => {
-		if (!this.#registry) return;
+		this.#registry = registry;
 		this.#parent.set(this.#registry.values);
-		this.trigger('change');
+		this.#isNew = this.#registry?.values?.isNew ? true : false;
+		return this.#registry.values;
 	};
 
 	async save(data, backend = false) {
@@ -200,6 +171,7 @@ class LocalProvider extends ReactiveModel<any> {
 	}
 
 	async validateUniqueFields(data) {
+		if (!this.localdb) return [];
 		if (!this.#getProperty('unique').length) return [];
 
 		const checkPromises = this.#getProperty('unique').map(field =>
@@ -228,16 +200,8 @@ class LocalProvider extends ReactiveModel<any> {
 	async #update(data) {
 		const updated = this.#registry.setValues(data);
 		if (!updated) return;
-
-		await this.#store.put(this.#registry.values);
+		await this.#store.put(data);
 		this.triggerEvent();
 		return true;
 	}
-
-	// async #update(data) {
-	// 	try {
-	// 		if (!this.isUnpublished) return;
-	// 		await this.#store.update(data.id, data);
-	// 	} catch (e) {}
-	// }
 }

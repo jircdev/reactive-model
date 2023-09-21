@@ -1,4 +1,6 @@
 import type { Item } from '.';
+
+import { IResponseAdapter } from '../adapter/interface';
 import { LocalProvider } from './local-provider';
 export class ItemLoadManager {
 	#parent: Item<any>;
@@ -7,12 +9,14 @@ export class ItemLoadManager {
 	#provider;
 	#getProperty;
 	#bridge;
+	#adapter: IResponseAdapter;
 	ready: boolean;
 
 	constructor(parent, bridge) {
 		this.#parent = parent;
 		this.#getProperty = bridge.get;
 		this.#bridge = bridge;
+		this.#adapter = this.#parent.responseAdapter;
 		this.init();
 	}
 
@@ -42,9 +46,7 @@ export class ItemLoadManager {
 			const localdb = await this.#getProperty('localdb');
 			const localProvider = this.#getProperty('localProvider');
 
-			if (!params && this.#parent.id) {
-				params = { id: this.#parent.id };
-			}
+			if (!params && this.#parent.id) params = { id: this.#parent.id };
 
 			if (localdb && localProvider) {
 				const localData = await localProvider.load(params);
@@ -58,21 +60,26 @@ export class ItemLoadManager {
 
 			if (!remoteData) {
 				this.#parent.found = false;
-			} else if (remoteData && localdb) {
+				return this.#adapter.toClient();
+			}
+
+			this.#parent.found = true;
+
+			if (localdb) {
 				let same = true;
+				this.#parent.landed = true;
+
 				Object.keys(remoteData).forEach(key => {
 					let original = localProvider.registry.values;
 					if (original[key] !== remoteData[key]) same = false;
 				});
 
 				if (!same) await this.#localProvider.save(remoteData);
-				this.#parent.found = true;
 			}
 
-			return { status: true, data: remoteData };
+			return this.#adapter.toClient({ data: remoteData });
 		} catch (exc) {
-			console.error('ERROR LOAD', exc);
-			return { status: false, error: exc };
+			return this.#adapter.toClient({ error: exc });
 		} finally {
 			this.#parent.fetching = false;
 		}
@@ -94,12 +101,6 @@ export class ItemLoadManager {
 		}
 
 		const response = await loadMethod(params);
-
-		if (!response.status) {
-			console.error(response);
-			throw 'ERROR_DATA_QUERY';
-		}
-
-		return response.data;
+		return this.#adapter.fromRemote(response);
 	};
 }

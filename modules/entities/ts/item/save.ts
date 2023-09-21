@@ -1,3 +1,4 @@
+import type { ResponseAdapter } from '../adapter';
 import type { Item } from './index';
 import type { LocalProvider } from './local-provider';
 
@@ -8,10 +9,12 @@ export class ItemSaveManager {
 	#provider;
 	#localProvider: LocalProvider;
 
+	#adapter: ResponseAdapter;
 	constructor(parent: Item<any>, bridge) {
 		this.#parent = parent;
 		this.#getProperty = bridge.get;
 		this.#bridge = bridge;
+		this.#adapter = this.#parent.responseAdapter;
 		this.init();
 	}
 
@@ -36,8 +39,7 @@ export class ItemSaveManager {
 
 			if (this.#parent.isOnline) {
 				const response = await this.#publish(properties);
-
-				if (!response.status) throw response;
+				this.#adapter.fromRemote(response);
 				this.#localProvider.registry.isNew = false;
 			}
 
@@ -46,7 +48,7 @@ export class ItemSaveManager {
 			}
 			this.#parent.triggerEvent();
 
-			return { status: true };
+			return this.#adapter.toClient();
 		} catch (e) {
 			console.error('error saving', e);
 			return e;
@@ -58,17 +60,16 @@ export class ItemSaveManager {
 			if (!this.#provider || !this.#bridge.get('isOnline')) return;
 
 			const response = await this.#provider.publish(properties);
-
-			if (!response?.status) throw response.error;
+			const data = this.#adapter.fromRemote(response);
 
 			if (this.#localProvider) {
-				this.#localProvider.save(response.data, true);
+				this.#localProvider.save(data, true);
 				this.#localProvider.triggerEvent();
 			}
-			return { status: true, data: response };
+			return this.#adapter.toClient({ data });
 		} catch (error) {
 			console.error('ERROR PUBLISHING', error);
-			return { status: false, error };
+			return this.#adapter.toClient({ error });
 		}
 	};
 
@@ -104,7 +105,7 @@ export class ItemSaveManager {
 
 			this.#parent.triggerEvent();
 
-			return { status: true };
+			return this.#adapter.toClient();
 		} catch (e) {
 			console.error('error updating locally', e);
 		}
