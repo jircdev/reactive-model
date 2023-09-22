@@ -63,7 +63,7 @@ export class ItemLoadManager {
 			}
 
 			this.#parent.found = true;
-			console.log(99, remoteData, localdb);
+
 			this.#parent.set(remoteData);
 			if (localdb) {
 				let same = true;

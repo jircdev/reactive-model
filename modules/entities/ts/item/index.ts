@@ -185,15 +185,10 @@ export /*bundle*/ class Item<Item> extends ReactiveModel<IItem> {
 		this.properties.forEach((property: string | IProperty) => {
 			if (typeof property === 'object') {
 				if (data.hasOwnProperty(property.name)) {
-					//	console.log(10, property);
 				}
 				return;
 			}
-			if (this[property] !== data[property]) console.log(0.1, property, this[property], data[property]);
-			if (data.hasOwnProperty(property)) {
-				this[property] = data[property];
-			}
-			if (this[property] !== data[property]) console.log(0.2, property, this[property]);
+			if (data.hasOwnProperty(property)) this[property] = data[property];
 		});
 
 		this.triggerEvent();

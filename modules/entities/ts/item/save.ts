@@ -28,9 +28,8 @@ export class ItemSaveManager {
 	save = async (data?) => {
 		try {
 			await this.#getProperty('checkReady')();
-			console.log(40.1, data);
+
 			if (data) {
-				console.log(40.2, data);
 				this.#parent.set(data);
 			}
 

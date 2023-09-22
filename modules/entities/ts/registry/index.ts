@@ -53,7 +53,7 @@ export class Registry extends ReactiveModel<IRegistry> {
 
 	setValues = data => {
 		if (!data) {
-			console.trace(data);
+			// console.trace(data);
 			return;
 		}
 		const props = Object.keys(data);
