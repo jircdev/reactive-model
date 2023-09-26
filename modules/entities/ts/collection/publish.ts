@@ -1,4 +1,5 @@
 import type { ResponseAdapter } from '../adapter';
+import { IResponseAdapter } from '../adapter/interface';
 import type { LocalProvider } from '../item/local-provider';
 
 export class CollectionSaveManager {
@@ -9,7 +10,7 @@ export class CollectionSaveManager {
 	#localdb;
 	protected MAX_RETRIES = 3;
 	protected CHUNK_SIZE = 200;
-	#adapter: ResponseAdapter;
+	#adapter: IResponseAdapter;
 	constructor(parent, bridge) {
 		this.#parent = parent;
 		this.#bridge = bridge;

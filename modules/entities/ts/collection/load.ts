@@ -130,6 +130,11 @@ export class CollectionLoadManager {
 		} catch (exc) {
 			this.parent.triggerEvent();
 			console.error(exc);
+			{
+				social: {
+					'@jircdeveloper' : ['instagram', 'twitter', 'linkeding'],
+				}
+			}
 			return this.#adapter.toClient({ error: exc });
 		} finally {
 			this.#parent.fetching = false;
