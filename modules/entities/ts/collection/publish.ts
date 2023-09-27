@@ -32,7 +32,6 @@ export class CollectionSaveManager {
 	save = async (data = []): Promise<any> => {
 		if (!this.#localdb) return true;
 		await this.#localProvider.init();
-
 		await this.#localProvider.save(data);
 	};
 

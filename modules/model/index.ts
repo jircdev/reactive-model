@@ -60,7 +60,8 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 		if (properties) this.initialValues(properties);
 	}
 
-	initialValues(values) {
+	initialValues(values?) {
+		if (!values) return this.#initialValues;
 		this.set(values);
 		this.#initialValues = values;
 	}

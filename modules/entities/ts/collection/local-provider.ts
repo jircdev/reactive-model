@@ -47,7 +47,10 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 	#parent;
 	#bridge;
 	#localdb: boolean;
-	#apply: boolean;
+	/**
+	 *
+	 */
+	#apply: boolean = true;
 	constructor(parent, bridge: any) {
 		super();
 		const { db, storeName } = parent;
@@ -219,8 +222,12 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 		}
 	}
 
+	/**
+	 *
+	 * @param data
+	 * @returns
+	 */
 	async save(data): Promise<any> {
-		
 		const process = (entries, offline = 0) => {
 			return entries.map(item => {
 				const record =
@@ -231,7 +238,8 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 		};
 
 		data = process(data, this.isOnline ? 0 : 1);
-		if (this.#apply) return;
+
+		if (!this.#apply) return;
 		await this.#registryFactory.init();
 		await this.saveAll(data, this.#storeName);
 	}
@@ -260,6 +268,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 		const store = this.#database.db[storeName];
 		const promises = [];
 		const chunks = [];
+		console.log(11, [...elements]);
 		while (elements.length > 0) {
 			const batch = elements.splice(0, this.#batches);
 			const data = batch.map(item => item.getValues());

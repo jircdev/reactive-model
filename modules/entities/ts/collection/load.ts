@@ -117,6 +117,7 @@ export class CollectionLoadManager {
 			this.remoteData = response;
 
 			this.#remoteElements = params.update === true ? this.#remoteElements.concat(items) : items;
+			this.#remoteElements.forEach(item => console.log(10.8, item.id, item));
 			const properties = {
 				items: this.#remoteElements,
 				next: data.next,
@@ -158,7 +159,11 @@ export class CollectionLoadManager {
 			return item;
 		});
 		await Promise.all(promises);
-		items.forEach((item, index) => item.set(elements[index], true));
+		console.log(10.5, items);
+		items.forEach((item, index) => {
+			console.log(10.6, item.id, item);
+			item.set(elements[index], true);
+		});
 		return items;
 	}
 

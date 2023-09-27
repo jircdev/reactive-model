@@ -117,6 +117,7 @@ export /*bundle*/ class Item<Item> extends ReactiveModel<IItem> {
 			if (this.#initPromise) return this.#initPromise;
 
 			this.#initPromise = new PendingPromise();
+
 			if (config.id) id = config.id;
 
 			await this.localProvider.init(id);
@@ -130,6 +131,7 @@ export /*bundle*/ class Item<Item> extends ReactiveModel<IItem> {
 			this.ready = true;
 			this.#initPromise.resolve(true);
 			this.trigger('object.loaded');
+			this.set(this.localProvider.registry.values, true);
 		} catch (e) {
 			console.error('error initializing', e);
 		}
@@ -171,7 +173,6 @@ export /*bundle*/ class Item<Item> extends ReactiveModel<IItem> {
 	 */
 	async set(data, init = false) {
 		await this.isReady;
-
 		if (init && this.localdb) {
 			this.#localData = new Map(Object.entries(data));
 			this.localProvider.save(data, init);
@@ -217,6 +218,7 @@ export /*bundle*/ class Item<Item> extends ReactiveModel<IItem> {
 	}
 
 	publish(data?) {
+		console.log(19.2, data);
 		return this.#saveManager.publish(data);
 	}
 	load(params?) {

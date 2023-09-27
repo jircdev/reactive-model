@@ -11,6 +11,11 @@ import { IResponseAdapter } from '../adapter/interface';
 export /*bundle */ class Collection extends ReactiveModel<Collection> {
 	#items: Array<any | undefined> = [];
 	protected localdb = true;
+	#elements = new Map();
+	get elements() {
+		return this.#elements;
+	}
+
 	get items() {
 		return this.#items;
 	}
@@ -103,6 +108,15 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 		return this.#localProvider.store;
 	}
 
+	async set(data) {
+		const { items } = data;
+		delete data.item;
+		await super.set(data);
+
+		items.forEach(item => {
+			if (item.id) this.#elements.set(item.id, item);
+		});
+	}
 	async delete(ids) {
 		try {
 			if (this.#localProvider) await this.#localProvider.softDelete(ids);
