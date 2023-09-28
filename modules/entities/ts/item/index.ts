@@ -6,8 +6,9 @@ import { ItemLoadManager } from './load';
 import { PendingPromise } from '@beyond-js/kernel/core';
 import { IItem } from './interfaces/item';
 import { IItemConfig } from './interfaces/config';
-
-export /*bundle*/ class Item<T extends object> extends ReactiveModel<IItem> {
+import { ResponseAdapter } from '../adapter';
+import { IResponseAdapter } from '../adapter/interface';
+export /*bundle*/ class Item<Item> extends ReactiveModel<IItem> {
 	#info = new Map();
 	/**
 	 * Represent the data that is stored in the local database
@@ -23,13 +24,10 @@ export /*bundle*/ class Item<T extends object> extends ReactiveModel<IItem> {
 	protected db: string;
 	#ignoredFields: Array<string> = [];
 	#skeleton: Array<string> = [];
-	protected localProvider: LocalProvider;
+	localProvider: LocalProvider;
 
 	protected unique: Array<string> = [];
 
-	get isUnpublished() {
-		return this.localProvider.isUnpublished(this.getProperties());
-	}
 	#saveManager: ItemSaveManager;
 
 	get skeleton() {
@@ -57,10 +55,6 @@ export /*bundle*/ class Item<T extends object> extends ReactiveModel<IItem> {
 		return this.localProvider.instanceId;
 	}
 
-	get landed() {
-		return this.localProvider?.landed;
-	}
-
 	get isReady() {
 		return this.checkReady();
 	}
@@ -74,22 +68,31 @@ export /*bundle*/ class Item<T extends object> extends ReactiveModel<IItem> {
 	 * Defines if the item was found in the local database
 	 */
 	declare found: boolean;
+	#config: IItemConfig;
+	#responseAdapter: IResponseAdapter;
+	get responseAdapter() {
+		return this.#responseAdapter;
+	}
 	constructor(config: IItemConfig = {}) {
 		super();
 
-		const { db, storeName } = config;
+		const { db, storeName, localdb = true } = config;
+		this.#config = config;
+		this.localdb = localdb;
+		this.#responseAdapter = ResponseAdapter.get(this, this.#config?.adapter);
 
 		if (db) this.db = db;
 		if (storeName) this.storeName = storeName;
 		if (config.provider) {
 			if (typeof config.provider !== 'function') {
-				throw new Error('Provider must be an object');
+				throw new Error('Provider must be an function');
 			}
-			this.#provider = new config.provider();
+
+			this.#provider = new config.provider(this);
 		}
 
 		this.on('object.loaded', this.checkReady);
-		this.reactiveProps(['found']);
+		this.reactiveProps(['found', 'landed']);
 		const getProperty = property => this.__get(property);
 		const setProperty = (property, value) => (this[property] = value);
 		const bridge = { get: getProperty, set: setProperty };
@@ -100,18 +103,27 @@ export /*bundle*/ class Item<T extends object> extends ReactiveModel<IItem> {
 		if (this.db && this.storeName) this.init(config);
 	}
 
-	protected async init(config: { id?: string | number } = {}) {
+	protected async initialise() {
+		this.init(this.#config);
+	}
+
+	protected async init(config: IItemConfig) {
 		try {
 			let id;
+
 			if (this.#initPromise) return this.#initPromise;
 
 			this.#initPromise = new PendingPromise();
 			if (config.id) id = config.id;
 
 			await this.localProvider.init(id);
+
 			if (this.#skeleton && this.#skeleton.length > 0) {
 				this.properties = this.#skeleton;
 			}
+
+			if (config.properties) this.set(config.properties, true);
+
 			this.ready = true;
 			this.#initPromise.resolve(true);
 			this.trigger('object.loaded');
@@ -154,29 +166,26 @@ export /*bundle*/ class Item<T extends object> extends ReactiveModel<IItem> {
 	 * @param data The data to set
 	 * @param init If true, the data will be stored in the local database
 	 */
-	set(data, init = false) {
-		//	If init is true, store the data in localData Map
+	async set(data, init = false) {
+		await this.isReady;
+
 		if (init && this.localdb) {
 			this.#localData = new Map(Object.entries(data));
-			this.localProvider.save(data, true);
+			this.localProvider.save(data, init);
 		}
 
 		// If a property is in the properties array, define it as a public property
-
 		type IProperty = {
 			name: string;
 		};
+
 		this.properties.forEach((property: string | IProperty) => {
 			if (typeof property === 'object') {
 				if (data.hasOwnProperty(property.name)) {
-					//	console.log(10, property);
 				}
-
 				return;
 			}
-			if (data.hasOwnProperty(property)) {
-				this[property] = data[property];
-			}
+			if (data.hasOwnProperty(property)) this[property] = data[property];
 		});
 
 		this.triggerEvent();
@@ -200,20 +209,19 @@ export /*bundle*/ class Item<T extends object> extends ReactiveModel<IItem> {
 		return this.properties;
 	}
 
-	save() {
-		return this.#saveManager.save();
+	save(data?) {
+		return this.#saveManager.save(data);
 	}
 
-	publish() {
-		return this.#saveManager.publish();
+	publish(data?) {
+		return this.#saveManager.publish(data);
 	}
-	load(params?: any | undefined) {
+	load(params?) {
 		return this.#loadManager.load(params);
 	}
 	async delete() {
 		try {
 			this.#isDeleted = 1;
-
 			if (this.localProvider) await this.localProvider.delete();
 			if (this.provider) await this.provider.delete(this.id);
 			this.triggerEvent();

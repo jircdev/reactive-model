@@ -1,10 +1,10 @@
 import { ReactiveModel } from '@beyond-js/reactive/model';
-import { IProvider } from '../interfaces/provider';
-import { PendingPromise } from '@beyond-js/kernel/core';
 import { DBManager, DatabaseManager } from '@beyond-js/reactive/database';
 import Dexie from 'dexie';
 import { RegistryFactory } from '../registry/factory';
 import type { Registry } from '../registry';
+import { PendingPromise } from '@beyond-js/kernel/core';
+
 export /*bundle*/
 class LocalProvider extends ReactiveModel<any> {
 	#isOnline = globalThis.navigator.onLine;
@@ -14,6 +14,7 @@ class LocalProvider extends ReactiveModel<any> {
 	}
 
 	#offline: boolean;
+	#isNew: boolean = false;
 	#database!: DatabaseManager;
 	#storeName!: string;
 	#databaseName!: string;
@@ -42,11 +43,15 @@ class LocalProvider extends ReactiveModel<any> {
 	 */
 	#registry: Registry;
 	#localdb: boolean;
+	get localdb() {
+		return this.#parent.localdb;
+	}
 	#bridge;
 
 	get registry() {
 		return this.#registry;
 	}
+	#apply: boolean;
 	constructor(parent, bridge) {
 		super();
 
@@ -54,18 +59,12 @@ class LocalProvider extends ReactiveModel<any> {
 		const { db, storeName } = parent;
 		this.__id = Math.floor(Math.random() * (100000 - 1000 + 1)) + 1000;
 		this.#parent = parent;
-
-		if (!db || !storeName) {
-			return;
-			throw new Error('database and store are required');
-		}
+		this.#apply = db && storeName;
 		this.#databaseName = db;
 		this.#storeName = storeName;
 		this.#bridge = bridge;
 		this.#localdb = bridge.get('localdb');
-		this.#factoryRegistry = RegistryFactory.get(db);
-		globalThis.addEventListener('online', this.handleConnection);
-		globalThis.addEventListener('offline', this.handleConnection);
+		this.#factoryRegistry = RegistryFactory.get(db, this.#localdb);
 		this.load = this.load.bind(this);
 	}
 
@@ -82,19 +81,19 @@ class LocalProvider extends ReactiveModel<any> {
 				this.#store = database.db[this.#storeName];
 			}
 
-			await this.#getRegistry(id);
-
-			return;
+			this.#isNew = !!id;
+			return this.#getRegistry(id);
 		} catch (e) {
 			console.error(e);
 		}
 	};
 
-	private handleConnection = () => {
-		this.triggerEvent();
-	};
-
-	isUnpublished(data) {
+	/**
+	 * todo: @jircdev replace with the model method
+	 * @param data \
+	 * @returns
+	 */
+	#isUnpublished(data) {
 		const properties = Object.keys(data);
 		const toCompare = { ...this.#registry.values };
 
@@ -105,11 +104,12 @@ class LocalProvider extends ReactiveModel<any> {
 	}
 
 	async load(params: any = {}) {
-		let id = params.id;
-		//TODO: review @julio
-		id = id ?? this.registry.values?.id;
-
 		try {
+			let id = params.id;
+			//TODO: review @julio
+			id = id ?? this.registry.values?.id;
+
+			// try {
 			if (!id) throw 'ID IS REQUIRED';
 
 			await this.#getRegistry(id);
@@ -130,58 +130,34 @@ class LocalProvider extends ReactiveModel<any> {
 	 * @returns
 	 */
 	#getRegistry = async id => {
-		if (this.#factoryRegistry.hasItem(this.#storeName, id)) {
-			const item = this.#factoryRegistry.getItem(this.#storeName, id);
-			this.#registry = item;
-			this.#parent.localLoaded = this.#parent.found = item.values.found;
-			this.#parent.set(this.#registry.values);
-			return item.values;
+		let found = await this.#factoryRegistry.get(this.#storeName, id);
+		let data = { id };
+
+		if (!found && this.localdb && id) {
+			const store = this.#store;
+			const localData = await store.get(id);
+			data = localData;
+			found = true;
 		}
 
-		const getRegistry = data => {
-			this.#registry = this.#factoryRegistry.create(this.#storeName, data);
-			this.#registry.on('change', this.#listenRegistry);
-			this.#parent.set(this.#registry.values);
-			this.trigger('change');
-		};
-		type ISpecs = {
-			id: string | number;
-			found?: boolean;
-			ready?: boolean;
-		};
-		let specs: ISpecs = { id };
-		if (!id || !this.#localdb) {
-			specs.ready = id && !this.#localdb;
-			getRegistry(specs);
-			return this.#registry.values;
+		if (found) {
+			this.#parent.found = found;
+			this.#parent.loaded = true;
 		}
-		// this code is only executed if the localdb is true
-		const promise = new PendingPromise();
 
-		this.#store.get(id).then(data => {
-			specs = { ...specs, ...data };
-			specs.found = !!data;
-			getRegistry(specs);
-			promise.resolve(this.#registry.values);
-		});
+		const registry = this.#factoryRegistry.create(this.#storeName, data);
 
-		return promise;
-	};
-
-	/**
-	 * Trigger the event to update the component when the registry changes.
-	 */
-	#listenRegistry = async () => {
-		if (!this.#registry) return;
+		this.#registry = registry;
 		this.#parent.set(this.#registry.values);
-		this.trigger('change');
+		this.#isNew = this.#registry?.values?.isNew ? true : false;
+		return this.#registry.values;
 	};
 
 	async save(data, backend = false) {
 		try {
-			if (!this.isUnpublished(data)) return;
+			if (!this.#isUnpublished(data)) return;
 			data.offline = this.isOnline ? 0 : 1;
-
+			data.isNew = !this.#isNew ? 0 : 1;
 			// Add validation for unique fields
 			const duplicated = await this.validateUniqueFields(data);
 			if (duplicated.length) return { error: 'duplicated', fields: duplicated };
@@ -195,6 +171,7 @@ class LocalProvider extends ReactiveModel<any> {
 	}
 
 	async validateUniqueFields(data) {
+		if (!this.localdb) return [];
 		if (!this.#getProperty('unique').length) return [];
 
 		const checkPromises = this.#getProperty('unique').map(field =>
@@ -223,16 +200,10 @@ class LocalProvider extends ReactiveModel<any> {
 	async #update(data) {
 		const updated = this.#registry.setValues(data);
 		if (!updated) return;
+		const store = this.#database.db[this.#storeName];
 
-		await this.#store.put(this.#registry.values);
+		await store.put(data);
 		this.triggerEvent();
 		return true;
 	}
-
-	// async #update(data) {
-	// 	try {
-	// 		if (!this.isUnpublished) return;
-	// 		await this.#store.update(data.id, data);
-	// 	} catch (e) {}
-	// }
 }

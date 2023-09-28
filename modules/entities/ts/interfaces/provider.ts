@@ -2,7 +2,7 @@ export interface IResponse {
 	status: boolean;
 	data: object;
 }
-export /*bundle */ interface IProvider {
+export interface IProvider {
 	publish?(properties: Record<string, any>): Promise<IResponse>;
 	load?: (data: object) => Promise<any>;
 	list?: (params: any) => Promise<any>;
@@ -11,5 +11,5 @@ export /*bundle */ interface IProvider {
 }
 
 export interface IProviderConstructor {
-	new (): IProvider;
+	new (specs?): IProvider;
 }

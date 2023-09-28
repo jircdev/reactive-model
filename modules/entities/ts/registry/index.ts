@@ -15,6 +15,17 @@ export class Registry extends ReactiveModel<IRegistry> {
 	#store;
 	#instanceId;
 	#isDeleted;
+	#isNew: boolean;
+
+	get isNew() {
+		return this.#isNew;
+	}
+	set isNew(value: boolean) {
+		this.#isNew = value;
+		this.triggerEvent();
+	}
+
+	#keyId;
 	get isDeleted() {
 		return this.#isDeleted;
 	}
@@ -28,9 +39,11 @@ export class Registry extends ReactiveModel<IRegistry> {
 	constructor(store, data: IRegistry = { id: undefined }) {
 		super();
 
+		// console.trace(0.1, 'id', store, data);
 		const { id } = data;
 
 		this.#store = store;
+		this.#isNew = id === undefined;
 		this.#id = id;
 		this.#instanceId = id ?? uuidv4();
 
@@ -39,13 +52,14 @@ export class Registry extends ReactiveModel<IRegistry> {
 	}
 
 	setValues = data => {
+		if (!data) {
+			// console.trace(data);
+			return;
+		}
 		const props = Object.keys(data);
-
 		let updated = false;
 
-		if (!data.id) {
-			data.id = this.#id;
-		}
+		if (!data.id) data.id = this.#id;
 
 		const newValues = { ...this.#values };
 		props.forEach(property => {
@@ -53,9 +67,7 @@ export class Registry extends ReactiveModel<IRegistry> {
 			newValues[property] = data[property];
 			updated = true;
 		});
-
 		newValues.isDeleleted = this.isDeleted === 1 ?? 0;
-
 		this.#values = newValues;
 
 		this.triggerEvent();

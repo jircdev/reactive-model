@@ -1,3 +1,5 @@
+import type { ResponseAdapter } from '../adapter';
+import { IResponseAdapter } from '../adapter/interface';
 import type { LocalProvider } from '../item/local-provider';
 
 export class CollectionSaveManager {
@@ -8,19 +10,15 @@ export class CollectionSaveManager {
 	#localdb;
 	protected MAX_RETRIES = 3;
 	protected CHUNK_SIZE = 200;
-
+	#adapter: IResponseAdapter;
 	constructor(parent, bridge) {
 		this.#parent = parent;
 		this.#bridge = bridge;
+		this.#adapter = this.#parent.responseAdapter;
 		this.init();
 	}
 
 	init() {
-		this.#parent.save = this.save;
-		this.#parent.sync = this.sync;
-		this.#parent.publish = this.publish;
-		this.#parent.toSync = this.toSync;
-
 		this.#localdb = this.#bridge.get('localdb');
 		if (this.#localdb) {
 			this.#localProvider = this.#bridge.get('localProvider');
@@ -28,7 +26,7 @@ export class CollectionSaveManager {
 			console.warn('la colleccion no usa indexeddb');
 		}
 
-		this.#provider = this.#bridge.get('#provider');
+		this.#provider = this.#bridge.get('provider');
 	}
 
 	save = async (data = []): Promise<any> => {
@@ -46,24 +44,24 @@ export class CollectionSaveManager {
 			const response = await this.#provider.bulkSave(data);
 			if (!response.status) throw response.error;
 
-			return { status: true };
+			return this.#adapter.toClient({ status: true });
 		} catch (error) {
 			console.error(error);
-			return { status: false, error };
+			return this.#adapter.toClient({ error });
 		}
 	};
 
 	// Send chunks with retries
-	sendChunk = async (chunk, index, retries = 0) => {
+	sendChunk = async chunk => {
 		const response = await this.#provider.bulkSave(chunk);
+
+		// Esto es lo que aveces no se ejecuta (el metodo bulkSave del provider tampoco)
+
 		if (response.status) {
 			const data = response.data.entries.map(item => ({ ...item, offline: 0, instanceId: undefined }));
 
 			await this.#localProvider.upsert(data, chunk);
 			return { success: true, chunk, response };
-		}
-		if (retries < this.MAX_RETRIES) {
-			return await this.sendChunk(chunk, retries + 1);
 		}
 
 		return { success: false, chunk, response };
@@ -79,37 +77,34 @@ export class CollectionSaveManager {
 	};
 
 	sync = async data => {
-		try {
-			await this.#localProvider.init();
-			if (!data) data = await this.#parent.localProvider.store.where('offline').equals(1).toArray();
+		await this.#localProvider.init();
+		if (!data) data = await this.#parent.localProvider.store.where('offline').equals(1).toArray();
 
-			const chunks = this.splitDataIntoChunks(data);
-			const failedChunks = [];
-			const successChunks = [];
+		const chunks = this.splitDataIntoChunks(data);
+		const failedChunks = [];
+		const successChunks = [];
 
-			for (const [index, chunk] of chunks.entries()) {
-				const result = await this.sendChunk(chunk, index);
-				if (!result.success) {
-					failedChunks.push(result);
-				} else successChunks.push(result);
-			}
-			this.#bridge.set('items', []);
-			await this.#parent.load();
-			if (failedChunks.length) {
-				const message = failedChunks.length === chunks.length ? 'FAILED_SYNC' : 'INCOMPLETE_SYNC';
-				return { status: false, message, data: { failed: failedChunks, success: successChunks } };
-			}
-
-			return { status: true, data: successChunks };
-		} catch (e) {
-			throw Error(e.message);
+		for (const [index, chunk] of chunks.entries()) {
+			const result = await this.sendChunk(chunk);
+			if (!result.success) {
+				failedChunks.push(result);
+			} else successChunks.push(result);
 		}
+
+		this.#bridge.set('items', []);
+		await this.#parent.load();
+		if (failedChunks.length) {
+			const message = failedChunks.length === chunks.length ? 'FAILED_SYNC' : 'INCOMPLETE_SYNC';
+
+			return this.#adapter.toClient({ data: { failed: failedChunks, success: successChunks, error: message } });
+		}
+
+		return this.#adapter.toClient({ data: successChunks });
 	};
 
 	toSync = async () => {
 		try {
 			await this.#localProvider.init();
-
 			return this.#localProvider.store.where('offline').equals(1).toArray();
 		} catch (e) {
 			console.error(e);

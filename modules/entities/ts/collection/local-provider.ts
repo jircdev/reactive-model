@@ -6,6 +6,7 @@ import { PendingPromise } from '@beyond-js/kernel/core';
 import { DBManager, DatabaseManager } from '@beyond-js/reactive/database';
 import Dexie from 'dexie';
 import { RegistryFactory } from '../registry/factory';
+import { Registry } from '../registry';
 
 interface IItemValues {
 	[key: string]: any;
@@ -15,6 +16,7 @@ interface IItemValues {
 export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 	#isOnline = globalThis.navigator.onLine;
 	#store!: Dexie.Table<any, any>;
+	#batches = 200;
 	get store() {
 		return this.#store;
 	}
@@ -44,11 +46,19 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 	}
 	#parent;
 	#bridge;
+	#localdb: boolean;
+	#apply: boolean;
 	constructor(parent, bridge: any) {
 		super();
 		const { db, storeName } = parent;
 		this.#parent = parent;
 		this.#bridge = bridge;
+		this.localdb = this.#parent.localdb;
+
+		if (!this.localdb) {
+			this.#apply = false;
+			return;
+		}
 		if (db) {
 			this.#registryFactory = RegistryFactory.get(db);
 		}
@@ -67,6 +77,10 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 	#promiseInit: PendingPromise<void>;
 	init = async () => {
 		try {
+			if (!this.#apply) {
+				this.ready = true;
+				return;
+			}
 			if (this.#promiseInit) return this.#promiseInit;
 			this.#promiseInit = new PendingPromise();
 
@@ -79,6 +93,9 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 			const database: DatabaseManager = await DBManager.get(this.#databaseName);
 			this.#database = database;
 			this.#store = database.db[this.#storeName];
+			if (!this.#store) {
+				throw new Error(`The store ${this.#storeName} does not exists in the database ${this.#databaseName}`);
+			}
 			this.ready = true;
 			this.#promiseInit.resolve();
 		} catch (e) {
@@ -131,6 +148,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 		return this.#parent;
 	};
 	async load(params) {
+		if (!this.#apply) return;
 		if (this.#promiseLoad) return this.#promiseLoad;
 		if (JSON.stringify(this.#params) === JSON.stringify(params)) {
 			return this.#promiseLoad;
@@ -139,6 +157,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 		await this.init();
 		const conditions = Object.keys(params);
 		const controls = ['and', 'or'];
+
 		conditions.forEach(condition => {
 			if (controls.includes(condition)) {
 				this.#processControl(condition, params[condition]);
@@ -201,6 +220,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 	}
 
 	async save(data): Promise<any> {
+		
 		const process = (entries, offline = 0) => {
 			return entries.map(item => {
 				const record =
@@ -211,15 +231,59 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 		};
 
 		data = process(data, this.isOnline ? 0 : 1);
-
+		if (this.#apply) return;
 		await this.#registryFactory.init();
-		await this.#registryFactory.saveAll(data, this.#storeName);
+		await this.saveAll(data, this.#storeName);
+	}
+	/**
+	 * Saves a collection of items to the specified store in batches.
+	 *
+	 * @param {Array} items - The items to be saved.
+	 * @param {string} storeName - The name of the store where items will be saved.
+	 * @returns {Promise<{ status: boolean, failed?: Array }>} An object containing the status of the operation.
+	 * If the status is true, all batches have been saved successfully. If the status is false, the failed property contains an array with information about failed batches.
+	 * Each failed batch object has a status, a reason (if the batch is rejected), an index (the original batch position), and data (the failed batch data).
+	 * @throws Will throw an error if there's an issue with the Promise.allSettled() call itself.
+	 */
+
+	async saveAll(items, storeName) {
+		if (!this.#apply) return;
+		const elements = items.map(item => {
+			const registry = new Registry(storeName);
+			if (item.deleted) {
+				registry.isDeleted = true;
+			}
+			registry.setValues(item);
+			return registry;
+		});
+
+		const store = this.#database.db[storeName];
+		const promises = [];
+		const chunks = [];
+		while (elements.length > 0) {
+			const batch = elements.splice(0, this.#batches);
+			const data = batch.map(item => item.getValues());
+			chunks.push(data);
+			promises.push(store.bulkPut(data));
+		}
+		try {
+			const results = await Promise.allSettled(promises);
+			const mappedFn = (result, index) => ({ ...result, index, data: chunks[index] });
+			const failed = results.map(mappedFn).filter(result => result.status === 'rejected');
+			if (!failed.length) return { status: true };
+			else {
+				return { status: false, failed };
+			}
+		} catch (e) {
+			return { status: false, failed: e };
+		}
 	}
 	#processControl(control, conditions) {
 		this.#store[control];
 	}
 
 	async upsert(data: IItemValues[], originalData: any[]): Promise<void> {
+		if (!this.#apply) return;
 		return this.#database.db.transaction('rw', this.store, async () => {
 			const instanceIdToIdMap = new Map<string, number>();
 			data.forEach(item => {
@@ -230,6 +294,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 	}
 
 	async softDelete(ids) {
+		if (!this.#apply) return;
 		if (!Array.isArray(ids)) {
 			console.error('Expected an array of items for soft deletion');
 			return { status: false, data: [] };
