@@ -28,9 +28,6 @@ export /*bundle*/ class Item<Item> extends ReactiveModel<IItem> {
 
 	protected unique: Array<string> = [];
 
-	get isUnpublished() {
-		return this.localProvider.isUnpublished(this.getProperties());
-	}
 	#saveManager: ItemSaveManager;
 
 	get skeleton() {

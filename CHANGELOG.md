@@ -2,13 +2,14 @@
 
 ## 1.1.6
 
-    - Agregado concepto de Adapters para gestionar respuestas obtenidas del backend y respuestas retornadas por los items y collections.
-    - bugfix: propiedades `fetching`, `loading`, `loaded` y `found` funcionan correctamente
+-   Added concept of Adapters to manage responses obtained from the backend and responses returned by items and
+    collections.
+-   bugfix: `fetching`, `loading`, `loaded` and `found` properties work correctly
 
 ## 1.1.5
 
--   Agregado método initialise para que sea llamado en los constructores de los items. Este metodo permite asegurarse de
-    ejecutar lógicas en la instancia del objeto que requieran del manejo de las propiedades definidas en el item.
+-   Added initialise method to be called in item constructors. This method allows you to ensure
+-   execute logic in the instance of the object that requires the management of the properties defined in the item.
 
 ## 1.1.3
 

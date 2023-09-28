@@ -93,7 +93,7 @@ class LocalProvider extends ReactiveModel<any> {
 	 * @param data \
 	 * @returns
 	 */
-	isUnpublished(data) {
+	#isUnpublished(data) {
 		const properties = Object.keys(data);
 		const toCompare = { ...this.#registry.values };
 
@@ -152,7 +152,7 @@ class LocalProvider extends ReactiveModel<any> {
 
 	async save(data) {
 		try {
-			if (!this.isUnpublished(data)) return;
+			if (!this.#isUnpublished(data)) return;
 			data.offline = this.isOnline ? 0 : 1;
 			data.isNew = !this.#isNew ? 0 : 1;
 			// Add validation for unique fields
