@@ -29,9 +29,16 @@ export class CollectionSaveManager {
 		this.#provider = this.#bridge.get('provider');
 	}
 
-	save = async (data = []): Promise<any> => {
+	/**
+	 *
+	 * @param data elements to save
+	 * @param init  lets define if the elements to save will work as a list of elements in the collection when is instanced
+	 * @returns
+	 */
+	save = async (data = [], init = false): Promise<any> => {
 		if (!this.#localdb) return true;
 		await this.#localProvider.init();
+
 		await this.#localProvider.save(data);
 	};
 

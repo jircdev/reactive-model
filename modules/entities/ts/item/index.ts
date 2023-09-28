@@ -172,7 +172,7 @@ export /*bundle*/ class Item<Item> extends ReactiveModel<IItem> {
 		await this.isReady;
 		if (init && this.localdb) {
 			this.#localData = new Map(Object.entries(data));
-			this.localProvider.save(data, init);
+			this.localProvider.save(data);
 		}
 
 		// If a property is in the properties array, define it as a public property
@@ -215,7 +215,6 @@ export /*bundle*/ class Item<Item> extends ReactiveModel<IItem> {
 	}
 
 	publish(data?) {
-		console.log(19.2, data);
 		return this.#saveManager.publish(data);
 	}
 	load(params?) {

@@ -87,7 +87,29 @@ class LocalProvider extends ReactiveModel<any> {
 			console.error(e);
 		}
 	};
+	deepCompare(obj1, obj2) {
+		const keys1 = Object.keys(obj1);
+		const keys2 = Object.keys(obj2);
 
+		if (keys1.length !== keys2.length) {
+			return false;
+		}
+
+		for (let key of keys1) {
+			const val1 = obj1[key];
+			const val2 = obj2[key];
+
+			const areObjects = this.isObject(val1) && this.isObject(val2);
+			if ((areObjects && !this.deepCompare(val1, val2)) || (!areObjects && val1 !== val2)) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+	isObject(object) {
+		return object != null && typeof object === 'object';
+	}
 	/**
 	 * todo: @jircdev replace with the model method
 	 * @param data \
@@ -96,11 +118,9 @@ class LocalProvider extends ReactiveModel<any> {
 	#isUnpublished(data) {
 		const properties = Object.keys(data);
 		const toCompare = { ...this.#registry.values };
+		const areEqual = this.deepCompare(toCompare, data);
 
-		return properties.some(prop => {
-			if (prop === 'id') return false;
-			return toCompare[prop] !== data[prop];
-		});
+		return !areEqual;
 	}
 
 	async load(params: any = {}) {
@@ -199,7 +219,7 @@ class LocalProvider extends ReactiveModel<any> {
 		const updated = this.#registry.setValues(data);
 		if (!updated) return;
 		const store = this.#database.db[this.#storeName];
-		const answer = await store.put(data);
+		await store.put(data);
 		this.triggerEvent();
 		return true;
 	}

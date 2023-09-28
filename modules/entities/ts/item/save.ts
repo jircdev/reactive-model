@@ -28,12 +28,11 @@ export class ItemSaveManager {
 	save = async (data?) => {
 		try {
 			await this.#getProperty('checkReady')();
-			console.log(20, data, this.#parent.getProperties());
+
 			if (data) {
-				console.log(21);
 				await this.#parent.set(data);
 			}
-			console.log(23, this.#parent.isUnpublished);
+
 			if (!this.#parent.isUnpublished) return;
 
 			const properties = { ...data, ...this.#parent.getProperties() };
@@ -44,9 +43,8 @@ export class ItemSaveManager {
 				this.#adapter.fromRemote(response);
 				this.#localProvider.registry.isNew = false;
 			}
-			console.log(24);
+
 			if (this.#localProvider) {
-				console.log(25);
 				await this.#localProvider.save(properties);
 			}
 			this.#parent.triggerEvent();
@@ -58,7 +56,7 @@ export class ItemSaveManager {
 		}
 	};
 	publish = this.save;
-	#publish = async properties => {
+	#publish = async (properties?) => {
 		try {
 			if (!this.#provider || !this.#bridge.get('isOnline')) return;
 

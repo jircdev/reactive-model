@@ -150,6 +150,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 		this.#customWhere = callback;
 		return this.#parent;
 	};
+	#cantidad = 0;
 	async load(params) {
 		if (!this.#apply) return;
 		if (this.#promiseLoad) return this.#promiseLoad;
@@ -171,18 +172,28 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 			if (!this.#total) this.#total = await this.#store.count();
 			let limit = params.limit ?? 30;
 			const totalPages = Math.ceil(this.#total / limit);
-			if (totalPages <= this.#page) return;
+
+			if (totalPages < this.#page) return;
 			let first = true;
 			const live = liveQuery(this.where(limit));
 			this.#page++;
 			let currentPage;
+
 			live.subscribe({
 				next: async items => {
 					let sameQuery;
+					this.#cantidad++;
 					if (currentPage == this.#page) {
 						sameQuery = true;
 					} else {
 						currentPage = this.#page;
+					}
+
+					if (this.#cantidad === 8) {
+						return;
+					}
+					if (sameQuery && items.length === this.#parent.items.length) {
+						return;
 					}
 
 					if (this.#promiseLoad) {
@@ -255,6 +266,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 	 */
 
 	async saveAll(items, storeName) {
+		if (!items.length) console.trace(80, items);
 		if (!this.#apply) return;
 		const elements = items.map(item => {
 			const registry = new Registry(storeName);
@@ -268,7 +280,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 		const store = this.#database.db[storeName];
 		const promises = [];
 		const chunks = [];
-		console.log(11, [...elements]);
+
 		while (elements.length > 0) {
 			const batch = elements.splice(0, this.#batches);
 			const data = batch.map(item => item.getValues());

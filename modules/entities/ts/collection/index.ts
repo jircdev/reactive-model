@@ -90,10 +90,10 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 		this.localProvider.init();
 	}
 
-	#listenItems = () => {
+	#listenItems = async () => {
 		if (!this.localdb) return;
 
-		this.#items = this.#loadManager.processEntries(this.#localProvider.items);
+		this.#items = await this.#loadManager.processEntries(this.#localProvider.items);
 		this.trigger('change');
 	};
 
@@ -113,6 +113,8 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 		delete data.item;
 		await super.set(data);
 
+		if (!items) return;
+
 		items.forEach(item => {
 			if (item.id) this.#elements.set(item.id, item);
 		});
@@ -131,9 +133,22 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 	load(args?) {
 		return this.#loadManager.load(args);
 	}
+	localLoad(args) {
+		return this.#loadManager.localLoad(args);
+	}
 	filter = (args?) => this.#loadManager.filter(args);
-	save = (args?) => this.#saveManager.save(args);
+	save = (args?, init?) => this.#saveManager.save(args, init);
 	sync = (args?) => this.#saveManager.sync(args);
 	publish = (args?) => this.#saveManager.publish(args);
 	toSync = () => this.#saveManager.toSync();
+
+	async setEntries(entries) {
+		await this.save(entries, true);
+		const items = await this.#loadManager.processEntries(entries);
+
+		items.forEach(item => this.#elements.set(item.id, item));
+		this.#items = items;
+		this.trigger('change');
+		return items;
+	}
 }

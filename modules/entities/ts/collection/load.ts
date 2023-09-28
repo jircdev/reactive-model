@@ -3,6 +3,7 @@ import type { CollectionLocalProvider } from './local-provider';
 import { RegistryFactory } from '../registry/factory';
 import type { ResponseAdapter } from '../adapter';
 import { IResponseAdapter } from '../adapter/interface';
+import { Item } from '../item';
 interface ILoadResponse {
 	localLoaded: true;
 	fetching: false;
@@ -75,7 +76,8 @@ export class CollectionLoadManager {
 		//if (this.parent.sOnline || this.#provider) return;
 		const localData = (await this.#localProvider.load(params)) ?? { data: [] };
 
-		const newItems = this.processEntries(localData.data);
+		const newItems = await this.processEntries(localData.data);
+
 		let items = params.update === true ? this.parent.items.concat(newItems) : newItems;
 
 		const properties: ILoadResponse = {
@@ -87,15 +89,20 @@ export class CollectionLoadManager {
 		};
 		if (localData.next) properties.next = localData.next;
 		this.#parent.loaded = true;
+
 		this.parent.set(properties);
 		return this.#adapter.toClient({ data: items });
 	};
 
 	#page = 1;
 	#remoteElements = [];
-
-	#localSave = async (params: any = {}) => {};
-
+	localLoad = async (params: any = {}) => {
+		try {
+			return this.#localLoad(params);
+		} catch (e) {
+			console.error(e);
+		}
+	};
 	load = async (params: any = {}) => {
 		try {
 			this.parent.fetching = true;
@@ -117,7 +124,7 @@ export class CollectionLoadManager {
 			this.remoteData = response;
 
 			this.#remoteElements = params.update === true ? this.#remoteElements.concat(items) : items;
-			this.#remoteElements.forEach(item => console.log(10.8, item.id, item));
+
 			const properties = {
 				items: this.#remoteElements,
 				next: data.next,
@@ -151,29 +158,40 @@ export class CollectionLoadManager {
 		}
 
 		await this.#localProvider.save(elements);
+		return this.setItems(elements);
+	}
 
+	async setItems(entries) {
 		const promises = [];
-		const items = elements.map(record => {
+		const items = entries.map(record => {
 			const item = new this.parent.item({ id: record.id, properties: record });
-			promises.push(item.isReady);
+			promises.push(item.set(record));
 			return item;
 		});
+
 		await Promise.all(promises);
-		console.log(10.5, items);
 		items.forEach((item, index) => {
-			console.log(10.6, item.id, item);
-			item.set(elements[index], true);
+			item.set(entries[index], true);
 		});
+
 		return items;
 	}
 
-	processEntries = (entries): any[] => {
+	processEntries = async (entries): Promise<Item<any>[]> => {
 		this.#registry.registerList(this.#parentBridge.get('storeName'), entries);
-		return entries.map(record => {
-			const item = new this.parent.item({ id: record.id });
-			item.set(record);
+		const promises = [];
+		const items = entries.map(record => {
+			const item = new this.parent.item({ id: record.id, properties: record });
+			promises.push(item.set(record));
 			return item;
 		});
+
+		await Promise.all(promises);
+		items.forEach((item, index) => {
+			item.set(entries[index], true);
+		});
+
+		return items;
 	};
 
 	remoteLoad = async params => {
