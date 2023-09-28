@@ -1,0 +1,26 @@
+{
+  "name": "@beyond-js/reactive-tests",
+  "version": "0.0.1",
+  "title": "",
+  "description": "",
+  "license": "ISC",
+  "template": "template/template.json",
+  "languages": {
+    "default": "en",
+    "supported": [
+      "en",
+      "es"
+    ]
+  },
+  "modules": {
+    "path": "modules"
+  },
+  "deployment": {
+    "distributions": []
+  },
+  "dependencies": {
+    "@beyond-js/kernel": "~0.1.9",
+    "@beyond-js/local": "~0.1.3",
+    "socket.io-client": "^4.5.4"
+  }
+}
