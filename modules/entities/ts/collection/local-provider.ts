@@ -189,7 +189,6 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 
 			live.subscribe({
 				next: async items => {
-					console.log(12, items);
 					let sameQuery;
 					this.#cantidad++;
 					if (currentPage == this.#page) {
