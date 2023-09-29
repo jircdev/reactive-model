@@ -127,18 +127,26 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 
 	#currentLimit;
 	#currentOffset;
-	where = limit => {
+	where = (params, limit) => {
 		return () => {
 			let store = this.#store;
+
 			const offset = (this.#page - 1) * limit;
+			const specs = { ...params };
+			Object.keys(specs).forEach(key => {
+				['and', 'or'].includes(key) && delete specs[key];
+			});
+			const collection = store.where(specs);
+
 			const filter = this.#customWhere ?? this.#defaultWhere;
+
 			this.#currentLimit = limit;
 			this.#currentOffset = offset;
 			/**
 			 * @todo: the isDeleted field must be set as 0 by default.
 			 */
 
-			return filter(store)
+			return collection
 				.filter(i => i.isDeleted !== 1)
 				.offset(offset)
 				.limit(limit)
@@ -175,12 +183,13 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 
 			if (totalPages < this.#page) return;
 			let first = true;
-			const live = liveQuery(this.where(limit));
+			const live = liveQuery(this.where(params, limit));
 			this.#page++;
 			let currentPage;
 
 			live.subscribe({
 				next: async items => {
+					console.log(12, items);
 					let sameQuery;
 					this.#cantidad++;
 					if (currentPage == this.#page) {
