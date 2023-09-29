@@ -134,8 +134,9 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 			const offset = (this.#page - 1) * limit;
 			const specs = { ...params };
 			Object.keys(specs).forEach(key => {
-				['and', 'or'].includes(key) && delete specs[key];
+				['and', 'or', 'limit'].includes(key) && delete specs[key];
 			});
+			console.log(40, specs);
 			const collection = store.where(specs);
 
 			const filter = this.#customWhere ?? this.#defaultWhere;
