@@ -113,6 +113,7 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 	set(properties: Partial<ReactiveModelPublic<T>>): void {
 		let props: Partial<ReactiveModelPublic<T>> = Object.keys(properties);
 		let updated = false;
+
 		try {
 			Object.keys(properties).forEach(prop => {
 				const sameObject =

@@ -128,18 +128,18 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 	#currentLimit;
 	#currentOffset;
 	where = (params, limit) => {
-		return () => {
+		return async () => {
 			let store = this.#store;
-
+			const { sortBy, sortDirection } = params;
 			const offset = (this.#page - 1) * limit;
 			const specs = { ...params };
 			Object.keys(specs).forEach(key => {
-				['and', 'or', 'limit'].includes(key) && delete specs[key];
+				['and', 'or', 'limit', 'sortBy', 'sortDirection'].includes(key) && delete specs[key];
 			});
 
-			const collection = store.where(specs);
+			let collection = store.where(specs);
 
-			const filter = this.#customWhere ?? this.#defaultWhere;
+			//const filter = this.#customWhere ?? this.#defaultWhere;
 
 			this.#currentLimit = limit;
 			this.#currentOffset = offset;
@@ -147,10 +147,15 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 			 * @todo: the isDeleted field must be set as 0 by default.
 			 */
 
+			if (sortBy) {
+				await collection.sortBy(sortBy);
+			}
+			collection = collection.filter(i => i.isDeleted !== 1);
+
 			return collection
-				.filter(i => i.isDeleted !== 1)
 				.offset(offset)
 				.limit(limit)
+
 				.toArray();
 		};
 	};
@@ -192,6 +197,16 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 				next: async items => {
 					let sameQuery;
 					this.#cantidad++;
+					items.forEach(item => {
+						// console.log(item.id, '\n', item.content);
+					});
+					if (params.sortBy) {
+						items.sort((a, b) => {
+							return a[params.sortBy] - b[params.sortBy];
+						});
+					}
+					if (!globalThis.data) globalThis.data = [];
+					globalThis.data.push([...items]);
 					if (currentPage == this.#page) {
 						sameQuery = true;
 					} else {
@@ -207,6 +222,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 
 					if (this.#promiseLoad) {
 						first = false;
+
 						const response = { status: true, data: items, total: this.#total, next: true };
 						if (this.#page + 1 >= totalPages) delete response.next;
 
@@ -275,7 +291,6 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 	 */
 
 	async saveAll(items, storeName) {
-		if (!items.length) console.trace(80, items);
 		if (!this.#apply) return;
 		const elements = items.map(item => {
 			const registry = new Registry(storeName);

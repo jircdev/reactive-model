@@ -36,6 +36,7 @@ export class ItemSaveManager {
 			if (!this.#parent.isUnpublished) return;
 
 			const properties = { ...data, ...this.#parent.getProperties() };
+
 			properties.isNew = this.#localProvider.registry.isNew;
 
 			if (this.#parent.isOnline) {

@@ -165,6 +165,10 @@ class LocalProvider extends ReactiveModel<any> {
 		}
 
 		const registry = this.#factoryRegistry.create(this.#storeName, data);
+
+		// registry.on('change', () => {
+		// 	this.#parent.set(data);
+		// });
 		this.#registry = registry;
 		this.#isNew = this.#registry?.values?.isNew ? true : false;
 		return this.#registry.values;
