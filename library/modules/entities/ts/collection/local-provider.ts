@@ -137,7 +137,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 				['and', 'or', 'limit', 'sortBy', 'sortDirection'].includes(key) && delete specs[key];
 			});
 
-			let collection = store.where(specs);
+			let collection = Object.keys(specs).length === 0 ? store : store.where(specs);
 
 			//const filter = this.#customWhere ?? this.#defaultWhere;
 
@@ -200,22 +200,22 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 					items.forEach(item => {
 						// console.log(item.id, '\n', item.content);
 					});
+
 					if (params.sortBy) {
 						items.sort((a, b) => {
 							return a[params.sortBy] - b[params.sortBy];
 						});
 					}
+
 					if (!globalThis.data) globalThis.data = [];
 					globalThis.data.push([...items]);
+
 					if (currentPage == this.#page) {
 						sameQuery = true;
 					} else {
 						currentPage = this.#page;
 					}
 
-					if (this.#cantidad === 8) {
-						return;
-					}
 					if (sameQuery && items.length === this.#parent.items.length) {
 						return;
 					}

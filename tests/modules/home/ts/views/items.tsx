@@ -1,5 +1,5 @@
-import * as React from 'react';
-import { useBinder } from '@beyond-js/react-18-widgets/hooks';
+import React from 'react';
+
 import { useTestContext } from './context';
 
 export /*bundle*/
@@ -16,7 +16,7 @@ function Item({ data }): JSX.Element {
 
 	return (
 		<li>
-			<input type="checkbox" {...attrs} onChange={onCheck} value={data.id} />
+			<input type='checkbox' {...attrs} onChange={onCheck} value={data.id} />
 			<div>{data.name}</div>
 			<section>
 				<button onClick={onDelete}>delete</button>

@@ -69,7 +69,7 @@ export class Registry extends ReactiveModel<IRegistry> {
 		});
 		newValues.isDeleleted = this.isDeleted === 1 ?? 0;
 		this.#values = newValues;
-		// console.log('updating', this.#values);
+		// console.trace('updating', this.#values);
 		this.triggerEvent();
 
 		return updated;

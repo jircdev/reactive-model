@@ -115,8 +115,9 @@ export class CollectionLoadManager {
 				params.start = start;
 			}
 
-			await this.#localLoad(params);
+			const localResponse = await this.#localLoad(params);
 
+			if (!this.#provider) return localResponse;
 			const response = await this.#provider.list(params);
 			const data = this.#adapter.fromRemote(response);
 			const items: any[] = await this.processRemoteEntries(data);
@@ -178,7 +179,7 @@ export class CollectionLoadManager {
 	}
 
 	processEntries = async (entries): Promise<Item<any>[]> => {
-		this.#registry.registerList(this.#parentBridge.get('storeName'), entries);
+		//	this.#registry.registerList(this.#parentBridge.get('storeName'), entries);
 		const promises = [];
 		const items = entries.map(record => {
 			const item = new this.parent.item({ id: record.id, properties: record });

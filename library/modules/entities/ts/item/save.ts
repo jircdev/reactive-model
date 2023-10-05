@@ -39,7 +39,7 @@ export class ItemSaveManager {
 
 			properties.isNew = this.#localProvider.registry.isNew;
 
-			if (this.#parent.isOnline) {
+			if (this.#parent.isOnline && this.#provider) {
 				const response = await this.#publish(properties);
 				this.#adapter.fromRemote(response);
 				this.#localProvider.registry.isNew = false;

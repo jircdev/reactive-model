@@ -129,7 +129,6 @@ class LocalProvider extends ReactiveModel<any> {
 			//TODO: review @julio
 			id = id ?? this.registry.values?.id;
 
-			// try {
 			if (!id) throw 'ID IS REQUIRED';
 
 			await this.#getRegistry(id);
@@ -150,9 +149,19 @@ class LocalProvider extends ReactiveModel<any> {
 	 * @returns
 	 */
 	#getRegistry = async id => {
-		let found = await this.#factoryRegistry.get(this.#storeName, id);
+		let registry = await this.#factoryRegistry.get(this.#storeName, id);
 		let data = { id };
-		if (!found && this.localdb && id) {
+		let found = !!registry;
+
+		if (found) {
+			this.#parent.set(registry.values);
+			found = true;
+			this.#registry = registry;
+			this.#registry.on('change', this.#listenRegistry.bind(this));
+			this.#isNew = this.#registry?.values?.isNew ? true : false;
+			return;
+		}
+		if (!registry && this.localdb && id) {
 			const store = this.#store;
 			const localData = await store.get(id);
 			data = localData;
@@ -164,16 +173,16 @@ class LocalProvider extends ReactiveModel<any> {
 			this.#parent.loaded = true;
 		}
 
-		const registry = this.#factoryRegistry.create(this.#storeName, data);
-
-		// registry.on('change', () => {
-		// 	this.#parent.set(data);
-		// });
+		registry = this.#factoryRegistry.create(this.#storeName, data);
 		this.#registry = registry;
+		this.#registry.on('change', this.#listenRegistry.bind(this));
 		this.#isNew = this.#registry?.values?.isNew ? true : false;
 		return this.#registry.values;
 	};
 
+	#listenRegistry() {
+		this.#parent.set(this.#registry.values);
+	}
 	async save(data) {
 		try {
 			if (!this.#isUnpublished(data)) return;

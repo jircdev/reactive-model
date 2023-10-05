@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import { useBinder } from '@beyond-js/react-18-widgets/hooks';
 import { Item } from './items';
 import { TestContext } from './context';
