@@ -210,7 +210,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 					}
 
 					if (!globalThis.data) globalThis.data = [];
-					globalThis.data.push([...items]);
+					//globalThis.data.push([...items]);
 
 					if (currentPage == this.#page) {
 						sameQuery = true;
