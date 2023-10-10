@@ -1,0 +1,6 @@
+{
+	"name": "routes",
+	"platforms": ["node", "backend"],
+	"bundle": "ts",
+	"files": "*"
+}

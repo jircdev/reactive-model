@@ -37,16 +37,6 @@
 				"ports": {
 					"bundles": 8530
 				}
-			},
-			{
-				"name": "backend",
-				"environment": "development",
-				"platform": "backend",
-				"ports": {
-					"bundles": 8780,
-					"http": 8581,
-					"inspect": 8782
-				}
 			}
 		]
 	},

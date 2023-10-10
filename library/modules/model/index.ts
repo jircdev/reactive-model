@@ -1,24 +1,8 @@
 import { Events } from '@beyond-js/events/events';
 import { reactiveProps } from './property';
+import { IReactiveProperties } from './interfaces/reactive-props';
+import { ReactiveModelPublic } from './interfaces/reactive-public-props';
 
-interface ReactiveModelPublic<T> {
-	ready: boolean | undefined;
-	fetching: boolean | undefined;
-	fetched: boolean;
-	processing: boolean;
-	processed: boolean;
-	loaded: boolean;
-	[key: string]: any;
-}
-
-interface IProps {
-	fetching: boolean;
-	fetched: boolean;
-	processing: boolean;
-	processed: boolean;
-	loaded: boolean;
-	ready: boolean;
-}
 /**
  * The `ReactiveModel` class is a subclass of the `Events` class that provides a simple way to create
  * reactive properties that can trigger events when they change. It also provides methods for setting
@@ -34,9 +18,7 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 	get isReactive() {
 		return this.#isReactive;
 	}
-
 	[key: string]: any;
-
 	fetching!: boolean;
 	fetched: boolean = false;
 	processing: boolean = false;
@@ -50,13 +32,13 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 		const properties = this.getProperties();
 
 		return Object.keys(properties).some(prop => {
-			if (prop === 'id') return false;
+			if (prop === 'id' || typeof prop === 'object') return false;
 			return properties[prop] !== this.#initialValues[prop];
 		});
 	}
 	constructor(properties?) {
 		super();
-		this.reactiveProps<IProps>(['fetching', 'fetched', 'processing', 'processed', 'loaded', 'ready']);
+		this.reactiveProps<IReactiveProperties>(['fetching', 'fetched', 'processing', 'processed', 'loaded', 'ready']);
 		if (properties) this.initialValues(properties);
 	}
 

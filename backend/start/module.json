@@ -1,7 +1,7 @@
 {
 	"name": "tests/backend/start",
 	"description": "start backend",
-	"platforms": ["backend", "node"],
+	"platforms": ["backend"],
 	"bundle": "start",
 	"path": "./",
 	"files": ["*"]
