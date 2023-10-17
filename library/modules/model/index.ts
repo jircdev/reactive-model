@@ -84,7 +84,11 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 	 * @param {string} event - The name of the event to trigger.
 	 * @returns {void}
 	 */
-	triggerEvent = (event: string = 'change'): void => this.trigger(event);
+	triggerEvent = (event: string = 'change'): void => {
+		globalThis.setTimeout(() => {
+			this.trigger(event);
+		}, 0);
+	};
 	/**
 	 * The `set` method sets one or more properties on the model.
 	 *
