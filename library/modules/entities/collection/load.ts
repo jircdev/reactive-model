@@ -118,7 +118,9 @@ export class CollectionLoadManager {
 			const localResponse = await this.#localLoad(params);
 
 			if (!this.#provider) return localResponse;
+			console.log(100, this.#provider);
 			const response = await this.#provider.list(params);
+			console.log(101, response);
 			const data = this.#adapter.fromRemote(response);
 			const items: any[] = await this.processRemoteEntries(data);
 

@@ -26,6 +26,20 @@ export class ItemLoadManager {
 		this.ready = true;
 	};
 
+	async loadLocally(params) {
+		if (!params) {
+			params = { id: this.#parent.id };
+		}
+		const localdb = await this.#getProperty('localdb');
+		const localProvider = this.#getProperty('localProvider');
+
+		if (!params && this.#parent.id) params = { id: this.#parent.id };
+
+		if (localdb && localProvider) {
+			const localData = await localProvider.load(params);
+			if (localData?.status) this.#parent.set(localData.data, true);
+		}
+	}
 	/**
 	 * Load the data from the provider and save it in the local database
 	 *
@@ -39,20 +53,9 @@ export class ItemLoadManager {
 	load = async (params: any) => {
 		try {
 			await this.#getProperty('checkReady')();
-
-			if (!params) {
-				params = { id: this.#parent.id };
-			}
 			const localdb = await this.#getProperty('localdb');
 			const localProvider = this.#getProperty('localProvider');
-
-			if (!params && this.#parent.id) params = { id: this.#parent.id };
-
-			if (localdb && localProvider) {
-				const localData = await localProvider.load(params);
-				if (localData?.status) this.#parent.set(localData.data, true);
-			}
-
+			await this.loadLocally(params);
 			if (localProvider && !localProvider.isOnline) return { status: true };
 			if (!this.#provider) return;
 
@@ -64,18 +67,9 @@ export class ItemLoadManager {
 			}
 
 			this.#parent.found = true;
-
 			this.#parent.set(remoteData);
 			if (localdb) {
-				let same = true;
-				this.#parent.landed = true;
-
-				Object.keys(remoteData).forEach(key => {
-					let original = localProvider.registry.values;
-					if (original[key] !== remoteData[key]) same = false;
-				});
-
-				if (!same) await this.#localProvider.save(remoteData);
+				await this.updateLocally(remoteData);
 			}
 
 			return this.#adapter.toClient({ data: remoteData });
@@ -86,12 +80,25 @@ export class ItemLoadManager {
 		}
 	};
 
+	async updateLocally(data) {
+		let same = true;
+		this.#parent.landed = true;
+		const localProvider = this.#getProperty('localProvider');
+		Object.keys(data).forEach(key => {
+			let original = localProvider.registry.values;
+			if (original[key] !== data[key]) same = false;
+		});
+
+		if (!same) await this.#localProvider.save(data);
+	}
+
 	remoteLoad = async params => {
 		// TODO: CHANGE TO LOAD
 		if (!this.#parent.isOnline) return;
 		/**
 		 * The data method is validated to support old providers.
 		 */
+		console.log(101, this.#provider, this.#provider.data);
 		let loadMethod = this.#provider.data
 			? this.#provider.data.bind(this.#provider)
 			: this.#provider.load.bind(this.#provider);

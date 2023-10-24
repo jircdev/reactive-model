@@ -1,5 +1,10 @@
 # CHANGELOG
 
+# 1.2.0
+
+-   Support to manage "internal" provider: Which means the methods can be written inside the collection without require
+    and external class. This behavior is now by default.
+
 ## 1.1.6
 
 -   Added concept of Adapters to manage responses obtained from the backend and responses returned by items and

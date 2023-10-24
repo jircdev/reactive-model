@@ -12,7 +12,7 @@ export interface ICollection {
 }
 
 export interface ICollectionSpecs {
-	provider: IProviderConstructor;
+	provider?: IProviderConstructor | 'internal';
 	storeName: string;
 	db: string;
 	localdb?: boolean;

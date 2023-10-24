@@ -62,6 +62,7 @@ class LocalProvider extends ReactiveModel<any> {
 		this.#apply = db && storeName;
 		this.#databaseName = db;
 		this.#storeName = storeName;
+		console.log(99, storeName);
 		this.#bridge = bridge;
 		this.#localdb = bridge.get('localdb');
 		this.#factoryRegistry = RegistryFactory.get(db, this.#localdb);

@@ -7,6 +7,6 @@ export interface IItemConfig<T = any> {
 	id?: string | number;
 	localdb?: boolean;
 	properties?: { [key: string]: T };
-	provider?: new (item?: any) => IProvider;
+	provider?: 'internal' | (new (item?: any) => IProvider);
 	adapter?: TAdapters;
 }

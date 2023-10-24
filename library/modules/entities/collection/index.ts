@@ -59,13 +59,16 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 	constructor(specs: ICollectionSpecs) {
 		super();
 
-		const { provider, storeName, db, localdb, item } = specs;
+		const { provider = 'internal', storeName, db, localdb, item } = specs;
 		this.#initialSpecs = specs;
 		if (storeName) this.storeName = storeName;
 		if (db) this.db = db;
 		if (localdb) this.localdb = localdb;
 		if (item) this.item = item;
-		if (provider) {
+		if (provider === 'internal') {
+			//support to manage provider as the same class.
+			this.#provider = this;
+		} else if (provider) {
 			if (typeof provider !== 'function') {
 				throw new Error('Provider must be a class object');
 			}

@@ -85,12 +85,12 @@ export /*bundle*/ class Item<Item> extends ReactiveModel<IItem> {
 
 		if (db) this.db = db;
 		if (storeName) this.storeName = storeName;
+
 		if (config.provider) {
-			if (typeof config.provider !== 'function') {
+			if (config.provider !== 'internal' && typeof config.provider !== 'function') {
 				throw new Error('Provider must be an function');
 			}
-
-			this.#provider = new config.provider(this);
+			this.#provider = config.provider === 'internal' ? this : new config.provider(this);
 		}
 
 		this.on('object.loaded', this.checkReady);
@@ -183,7 +183,7 @@ export /*bundle*/ class Item<Item> extends ReactiveModel<IItem> {
 			name: string;
 		};
 
-		this.properties.forEach((property: string | IProperty) => {
+		this.properties?.forEach((property: string | IProperty) => {
 			if (typeof property === 'object') {
 				if (data.hasOwnProperty(property.name)) {
 				}
