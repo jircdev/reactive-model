@@ -29,31 +29,21 @@ export class ItemSaveManager {
 		try {
 			await this.#getProperty('checkReady')();
 
-			console.log(1);
-
 			if (data) {
 				await this.#parent.set(data);
 			}
-
-			console.log(2);
 
 			if (!this.#parent.isUnpublished) return;
 
 			const properties = { ...data, ...this.#parent.getProperties() };
 
-			console.log(4);
-
 			properties.isNew = this.#localProvider.registry.isNew;
-
-			console.log(5);
 
 			if (this.#parent.isOnline && this.#provider) {
 				const response = await this.#publish(properties);
 				this.#adapter.fromRemote(response);
 				this.#localProvider.registry.isNew = false;
 			}
-
-			console.log(6);
 
 			if (this.#localProvider) {
 				await this.#localProvider.save(properties);

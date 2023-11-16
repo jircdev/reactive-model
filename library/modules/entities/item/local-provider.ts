@@ -234,7 +234,6 @@ class LocalProvider extends ReactiveModel<any> {
 		const updated = this.#registry.setValues(data);
 		if (!updated) return;
 		const store = this.#database.db[this.#storeName];
-
 		await store.put({ ...this.#registry.values, ...data });
 		this.triggerEvent();
 		return true;
