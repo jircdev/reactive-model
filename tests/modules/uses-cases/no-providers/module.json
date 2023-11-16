@@ -1,0 +1,9 @@
+{
+  "name": "uses-cases/no-providers",
+  "ts": {
+    "path": "ts",
+    "files": [
+      "*"
+    ]
+  }
+}
