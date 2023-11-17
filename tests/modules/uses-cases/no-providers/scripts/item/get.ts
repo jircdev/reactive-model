@@ -7,20 +7,22 @@ import { Book } from '../../entities/book-item';
  */
 
 /**
- * Asynchronously retrieves a specific item by its ID.
+ * Asynchronously updates a specific item identified by its ID.
  *
- * This function is designed to load an item, identified by a given ID, from a data source.
- * It handles several scenarios including:
- * - If no ID is provided, it logs an error message with instructions on how to create an item.
- * - If there are issues loading the item (e.g., response status is false).
- * - If the item cannot be found or the loaded item's ID does not match the provided ID.
+ * The function performs the following actions:
+ * 1. Validates if an ID is provided; if not, logs an error with instructions.
+ * 2. Attempts to load the item with the given ID, handling errors if the item can't be loaded or found.
+ * 3. Updates the 'title' property of the item to a new value.
+ * 4. Publishes the updated item and handles any related errors.
+ * 5. Verifies the update by searching for the item in IndexedDB.
  *
- * It's important to ensure that the item's ID is known and correct before calling this function.
+ * It uses Dexie.js for interacting with IndexedDB and assumes that the data structure in IndexedDB is known and matches the expected format.
  *
  * @async
- * @function getAItem
- * @param {string} id - The unique identifier for the item to be retrieved.
- * @returns {Promise<void>} - The function returns nothing but performs console logging based on different scenarios.
+ * @function updateAItem
+ * @param {string} id - The unique identifier of the item to be updated.
+ * @param {string} newValue - The new value to set for the item's 'title' property.
+ * @returns {Promise<void>} - The function returns nothing but performs console logging based on different scenarios, including the validation of the update against IndexedDB records.
  */
 export /*bundle*/ const getAItem = async (id: string) => {
 	const noIdErrorMessage = `❌ In order to get an item, you must specify the item you want to delete. 
