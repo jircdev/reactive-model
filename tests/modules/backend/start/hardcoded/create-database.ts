@@ -9,18 +9,25 @@ export const createDatabase = async () => {
 	});
 
 	await db.exec(`
-  DROP TABLE IF EXISTS users;
-  CREATE TABLE users (
-    id VARCHAR(50) PRIMARY KEY,
+    DROP TABLE IF EXISTS users;
+    CREATE TABLE users (
+      id VARCHAR(50) PRIMARY KEY,
+      name TEXT,
+      deleted INTEGER,
+      lastnames TEXT,
+      time_updated INTEGER,
+      UNIQUE(id)
+    );
     
-    name TEXT,
-    deleted INTEGER,
-    lastnames TEXT,
-    time_updated INTEGER,
-    UNIQUE(id)
-  )
+    DROP TABLE IF EXISTS books;
+    CREATE TABLE books (
+      id VARCHAR(50) PRIMARY KEY,
+      title TEXT,
+      year INTEGER,
+      author TEXT,
+      UNIQUE(id)
+    );
   `);
 
-	await insertUsers(); // Call insertUsers here
 	await db.close();
 };

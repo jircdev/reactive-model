@@ -2,15 +2,19 @@ import * as sqlite3 from 'sqlite3';
 import { open, Database } from 'sqlite';
 
 export /*bundle*/ class DatabaseConnection {
-	private db: Database;
+	#db: Database;
+
+	get db() {
+		return this.#db;
+	}
 
 	constructor() {
-		this.db = null;
+		this.#db = null;
 	}
 
 	async connect() {
-		if (!this.db) {
-			this.db = await open({
+		if (!this.#db) {
+			this.#db = await open({
 				filename: 'reactive.db',
 				driver: sqlite3.Database,
 			});
@@ -18,13 +22,13 @@ export /*bundle*/ class DatabaseConnection {
 	}
 
 	async disconnect() {
-		if (this.db) {
-			await this.db.close();
-			this.db = null;
+		if (this.#db) {
+			await this.#db.close();
+			this.#db = null;
 		}
 	}
 
 	get connection() {
-		return this.db;
+		return this.#db;
 	}
 }

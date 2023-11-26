@@ -1,0 +1,12 @@
+{
+	"name": "uses-cases/backend-providers/entities",
+	"ts": {
+		"path": "ts",
+		"files": ["*"]
+	},
+	"bridge": {
+		"path": "providers",
+		"files": ["*"]
+	},
+	"platforms": ["web", "backend", "android"]
+}

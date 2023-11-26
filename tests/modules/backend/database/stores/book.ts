@@ -14,29 +14,35 @@ interface LoadAllOptions {
 
 export /*bundle*/ class BookStore {
 	private conn: DatabaseConnection;
+	get isReady() {
+		return this.conn.db !== null;
+	}
 
 	constructor() {
 		this.conn = new DatabaseConnection();
 	}
 
 	async loadBook(id: number): Promise<Book> {
-		await this.conn.connect();
-		const db = this.conn.connection;
-		const book = await db.get('SELECT * FROM books WHERE id = ?', id);
+		if (!this.isReady) {
+			await this.conn.connect();
+		}
+		const book = await this.conn.db.get(`SELECT * FROM books WHERE id = "${id}"`);
 		await this.conn.disconnect();
 		return book as Book;
 	}
 
 	async storeBook(book: Book): Promise<any> {
-		await this.conn.connect();
-		const db = this.conn.connection;
+		if (!this.isReady) {
+			await this.conn.connect();
+		}
+
 		let recordId = book.id;
-		const existingBook = await this.loadBook(recordId);
+		const existingBook = !book?.isNew;
 		let data;
 
 		if (existingBook) {
 			const { title, author, year } = book;
-			data = await db.run(
+			data = await this.conn.db.run(
 				'UPDATE books SET title = ?, author = ?, year = ? WHERE id = ?',
 				title,
 				author,
@@ -45,23 +51,25 @@ export /*bundle*/ class BookStore {
 			);
 		} else {
 			const { id, title, author, year } = book;
-			data = await db.run(
+			data = await this.conn.db.run(
 				'INSERT INTO books (id, title, author, year) VALUES (?, ?, ?, ?)',
 				id,
 				title,
 				author,
 				year
 			);
-			recordId = data.lastID;
 		}
+
 		const response = await this.loadBook(recordId);
 		await this.conn.disconnect();
 		return response;
 	}
 
 	async loadAll(options?: LoadAllOptions): Promise<Book[]> {
-		const db = this.conn.connection;
-		await this.conn.connect();
+		if (!this.isReady) {
+			await this.conn.connect();
+		}
+
 		let filter = '';
 		let limit = 30;
 
@@ -75,13 +83,15 @@ export /*bundle*/ class BookStore {
 		}
 
 		const query = `SELECT * FROM books ${filter} LIMIT ${limit}`;
-		const books = await db.all(query);
+		const books = await this.conn.db.all(query);
 		await this.conn.disconnect();
 		return books as Book[];
 	}
 
 	async bulkSave(books) {
-		await this.conn.connect();
+		if (!this.isReady) {
+			await this.conn.connect();
+		}
 		const db = this.conn.connection;
 		const insertedBooks = [];
 

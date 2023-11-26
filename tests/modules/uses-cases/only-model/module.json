@@ -1,0 +1,9 @@
+{
+  "name": "uses-cases/only-model",
+  "ts": {
+    "path": "ts",
+    "files": [
+      "*"
+    ]
+  }
+}
