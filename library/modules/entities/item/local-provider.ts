@@ -165,7 +165,7 @@ class LocalProvider extends ReactiveModel<any> {
 		if (!registry && this.localdb && id) {
 			const store = this.#store;
 			const localData = await store.get(id);
-			data = localData;
+			if (localData) data = localData;
 			found = true;
 		}
 
