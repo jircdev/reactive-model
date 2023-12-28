@@ -225,6 +225,7 @@ class LocalProvider extends ReactiveModel<any> {
 	}
 
 	delete = async () => {
+		if (!this.#database) return;
 		const response = await this.#update({ isDeleted: 1 });
 
 		return response;
