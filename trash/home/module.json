@@ -1,12 +1,12 @@
 {
-	"name": "ractive-test",
+	"name": "home",
 	"platforms": ["web", "android", "ios"],
 	"widget": {
 		"is": "page",
-		"route": "/tests",
+		"route": "/home-reactive",
 
 		"element": {
-			"name": "test-page-reactive"
+			"name": "home-page-reactive"
 		},
 		"scss": {
 			"path": "scss",

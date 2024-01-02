@@ -1,1 +1,1 @@
-["library/package.json", "tests/package.json"]
+["library/package.json", "tests/package.json", "../pragmate-ui/library/package.json"]
