@@ -1,0 +1,11 @@
+{
+	"name": "register-db",
+	"description": "Module to register indexedDB tables",
+	"platforms": ["web", "android", "ios"],
+	"bundle": "start",
+
+	"ts": {
+		"path": "/",
+		"files": ["*"]
+	}
+}

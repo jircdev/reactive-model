@@ -1,0 +1,6 @@
+{
+	"name": "models/user",
+	"platforms": ["node", "backend"],
+	"bundle": "ts",
+	"files": "*"
+}

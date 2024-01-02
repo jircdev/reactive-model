@@ -1,3 +1,1 @@
-[
-  "/reactive-tests/package.json"
-]
+["library/package.json", "tests/package.json"]
