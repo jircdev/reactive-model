@@ -165,7 +165,7 @@ class LocalProvider extends ReactiveModel<any> {
 		if (!registry && this.localdb && id) {
 			const store = this.#store;
 			const localData = await store.get(id);
-			data = localData;
+			if (localData) data = localData;
 			found = true;
 		}
 
@@ -225,6 +225,7 @@ class LocalProvider extends ReactiveModel<any> {
 	}
 
 	delete = async () => {
+		if (!this.#database) return;
 		const response = await this.#update({ isDeleted: 1 });
 
 		return response;

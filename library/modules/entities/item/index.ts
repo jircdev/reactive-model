@@ -236,6 +236,7 @@ export /*bundle*/ class Item<Item> extends ReactiveModel<IItem> {
 			this.#isDeleted = 1;
 			if (this.localProvider) await this.localProvider.delete();
 			if (this.provider) await this.provider.delete(this.id);
+			console.log(500);
 			this.triggerEvent();
 
 			return true;
