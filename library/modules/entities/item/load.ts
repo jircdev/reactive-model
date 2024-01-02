@@ -50,14 +50,15 @@ export class ItemLoadManager {
 
 			if (localdb && localProvider) {
 				const localData = await localProvider.load(params);
-				if (localData?.status) this.#parent.set(localData.data, true);
+				if (localData?.status) {
+					this.#parent.set(localData.data, true);
+					if (localData.data.__instanceId) this.#localProvider.__instanceId = localData.data.__instanceId;
+				}
 			}
 
 			if (localProvider && !localProvider.isOnline) return { status: true };
 			if (!this.#provider) return;
-
 			const remoteData = await this.remoteLoad(params);
-
 			if (!remoteData) {
 				this.#parent.found = false;
 				return this.#adapter.toClient();
