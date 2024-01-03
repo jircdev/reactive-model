@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import * as sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
+import { insertUsers } from './insert-users';
 
 export const createDatabase = async () => {
 	const db = await open({
@@ -30,4 +31,6 @@ export const createDatabase = async () => {
   `);
 
 	await db.close();
+
+	await insertUsers();
 };

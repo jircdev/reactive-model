@@ -1,4 +1,4 @@
-import { UserStore } from '@beyond-js/reactive/tests/backend/database';
+import { UserStore } from '@beyond-js/reactive-tests/backend/database';
 import type { Server, Socket } from 'socket.io';
 
 export /*actions*/ /*bundle*/ class UserProvider {
@@ -26,6 +26,7 @@ export /*actions*/ /*bundle*/ class UserProvider {
 
 			const user = new UserStore();
 			const data = await user.loadUser(id);
+			console.log(0.1, data);
 			if (!data) {
 				return { status: true, data: false };
 			}

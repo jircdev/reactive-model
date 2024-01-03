@@ -22,7 +22,7 @@ export /*bundle*/ class UserStore {
 		await this.conn.connect();
 		const db = this.conn.connection;
 		const user = await db.get('SELECT * FROM users WHERE id = ?', id);
-
+		console.log(1, 'select * from users where id = ', id);
 		return user as IUser;
 	}
 

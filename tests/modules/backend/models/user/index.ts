@@ -1,4 +1,4 @@
-import { UserStore } from '@beyond-js/reactive/tests/backend/database';
+import { UserStore } from '@beyond-js/reactive-tests/backend/database';
 
 export /*actions*/ /*bundle*/ class Users {
 	async publish(data) {

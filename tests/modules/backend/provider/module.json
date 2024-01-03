@@ -1,5 +1,5 @@
 {
-	"name": "tests/backend/provider",
+	"name": "backend/provider",
 	"description": "Model test provider bridge",
 	"bridge": {
 		"path": "bridge",
