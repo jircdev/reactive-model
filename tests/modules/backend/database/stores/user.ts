@@ -22,7 +22,6 @@ export /*bundle*/ class UserStore {
 		await this.conn.connect();
 		const db = this.conn.connection;
 		const user = await db.get('SELECT * FROM users WHERE id = ?', id);
-		console.log(1, 'select * from users where id = ', id);
 		return user as IUser;
 	}
 
@@ -53,7 +52,6 @@ export /*bundle*/ class UserStore {
 		const db = this.conn.connection;
 		let filter = 'WHERE deleted = 0';
 		let limit = 30;
-		console.log('50');
 		if (options) {
 			if (options.filter) {
 				filter += ` AND ${options.filter}`;

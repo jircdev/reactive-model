@@ -44,7 +44,6 @@ export class ItemSaveManager {
 				const response = await this.#publish(properties);
 				this.#localProvider.registry.setValues(response.data);
 				properties.id = response?.data?.id;
-				console.log(0.1, response.data);
 				this.#adapter.fromRemote(response);
 				this.#localProvider.registry.isNew = false;
 			}
@@ -66,18 +65,18 @@ export class ItemSaveManager {
 			if (!this.#provider || !this.#bridge.get('isOnline')) return;
 
 			let props = { ...properties };
+			console.log('props', props);
 			this.#parent.localFields.forEach(field => {
 				delete props[field];
 			});
 			const response = await this.#provider.publish(props);
-			console.log('responseeeeeeeee2222', response);
 
 			const data = this.#adapter.fromRemote(response);
-			console.log('data----publish', data);
 			await this.#parent.set(data);
-
+			console.log('this---', this, response, data);
 			if (this.#localProvider) {
 				this.#localProvider.save(data);
+				if (isNaN(props.id)) this.#localProvider.deleteRegistry(props.id);
 				this.#localProvider.trigger('change');
 			}
 			return this.#adapter.toClient({ data });

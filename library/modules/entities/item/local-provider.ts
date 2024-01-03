@@ -232,11 +232,17 @@ class LocalProvider extends ReactiveModel<any> {
 		return response;
 	};
 
+	deleteRegistry = async identifier => {
+		const store = this.#database.db[this.#storeName];
+		await store.delete(identifier);
+		this.triggerEvent();
+		return true;
+	};
+
 	async #update(data) {
 		const updated = this.#registry.setValues(data);
 		if (!updated) return;
 		const store = this.#database.db[this.#storeName];
-		// store.delete(this.#registry.__instanceId)
 		await store.put({ ...this.#registry.values, ...data });
 		this.triggerEvent();
 		return true;
