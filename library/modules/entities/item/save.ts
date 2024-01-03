@@ -42,6 +42,10 @@ export class ItemSaveManager {
 
 			if (this.#parent.isOnline && this.#provider) {
 				const response = await this.#publish(properties);
+				console.log('response====', response, properties, response.id);
+				properties.__instanceId = response.id;
+				this.#localProvider.registry.__instanceId = response.id;
+				properties.id = response?.data?.id;
 				this.#adapter.fromRemote(response);
 				this.#localProvider.registry.isNew = false;
 			}
@@ -67,8 +71,11 @@ export class ItemSaveManager {
 				delete props[field];
 			});
 			const response = await this.#provider.publish(props);
+			console.log('responseeeeeeeee2222', response);
 
 			const data = this.#adapter.fromRemote(response);
+			console.log('data----publish', data);
+			await this.#parent.set(data);
 
 			if (this.#localProvider) {
 				this.#localProvider.save(data);
