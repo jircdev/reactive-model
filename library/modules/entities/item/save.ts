@@ -42,10 +42,9 @@ export class ItemSaveManager {
 
 			if (this.#parent.isOnline && this.#provider) {
 				const response = await this.#publish(properties);
-				console.log('response====', response, properties, response.id);
-				properties.__instanceId = response.id;
-				this.#localProvider.registry.__instanceId = response.id;
+				this.#localProvider.registry.setValues(response.data);
 				properties.id = response?.data?.id;
+				console.log(0.1, response.data);
 				this.#adapter.fromRemote(response);
 				this.#localProvider.registry.isNew = false;
 			}
