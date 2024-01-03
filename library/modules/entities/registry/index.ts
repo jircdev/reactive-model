@@ -11,11 +11,10 @@ export class Registry extends ReactiveModel<IRegistry> {
 		return this.#values;
 	}
 	#id;
-
 	#store;
-	#instanceId;
 	#isDeleted;
 	#isNew: boolean;
+	__instanceId: string;
 
 	get isNew() {
 		return this.#isNew;
@@ -44,9 +43,8 @@ export class Registry extends ReactiveModel<IRegistry> {
 		this.#store = store;
 		this.#isNew = id === undefined;
 		this.#id = id;
-		this.#instanceId = id ?? uuidv4();
-
-		if (!id) this.#id = this.#instanceId;
+		this.__instanceId = id ?? uuidv4();
+		if (!id) this.#id = this.__instanceId;
 		if (this.#id) this.#values.id = this.#id;
 	}
 
@@ -74,7 +72,7 @@ export class Registry extends ReactiveModel<IRegistry> {
 
 	getValues() {
 		const values = { ...this.#values };
-		if (this.#instanceId) values.instanceId = this.#instanceId;
+		if (this.__instanceId) values.__instanceId = this.__instanceId;
 		//		if (this.offline) values.offline = this.offline; // this line may be removed, the offline value must be set by the localProvider
 		return values;
 	}

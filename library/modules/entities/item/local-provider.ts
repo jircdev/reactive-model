@@ -20,7 +20,7 @@ class LocalProvider extends ReactiveModel<any> {
 	#databaseName!: string;
 	#originalData: {};
 	#exists = false;
-
+	__instanceId: string;
 	get originalData() {
 		return this.#originalData;
 	}

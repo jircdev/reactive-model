@@ -38,6 +38,7 @@ export class ItemSaveManager {
 			const properties = { ...data, ...this.#parent.getProperties() };
 
 			properties.isNew = this.#localProvider.registry.isNew;
+			properties.__instanceId = this.#localProvider.registry.__instanceId;
 
 			if (this.#parent.isOnline && this.#provider) {
 				const response = await this.#publish(properties);
