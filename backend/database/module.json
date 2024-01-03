@@ -1,8 +1,0 @@
-{
-	"name": "tests/backend/database",
-	"platforms": ["backend", "node"],
-	"ts": {
-		"path": "./",
-		"files": ["*"]
-	}
-}
