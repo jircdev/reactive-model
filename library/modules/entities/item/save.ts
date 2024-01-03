@@ -65,7 +65,6 @@ export class ItemSaveManager {
 			if (!this.#provider || !this.#bridge.get('isOnline')) return;
 
 			let props = { ...properties };
-			console.log('props', props);
 			this.#parent.localFields.forEach(field => {
 				delete props[field];
 			});
@@ -73,7 +72,6 @@ export class ItemSaveManager {
 
 			const data = this.#adapter.fromRemote(response);
 			await this.#parent.set(data);
-			console.log('this---', this, response, data);
 			if (this.#localProvider) {
 				this.#localProvider.save(data);
 				if (isNaN(props.id)) this.#localProvider.deleteRegistry(props.id);
