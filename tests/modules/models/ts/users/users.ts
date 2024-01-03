@@ -9,6 +9,6 @@ export /*bundle*/ class Users extends Collection {
 	item = User;
 
 	constructor() {
-		super({ storeName: 'user', db: 'test', item: User });
+		super({ storeName: 'user', db: 'test', item: User, provider: UserProvider });
 	}
 }

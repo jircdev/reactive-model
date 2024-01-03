@@ -12,10 +12,11 @@ export const createDatabase = async () => {
 	await db.exec(`
     DROP TABLE IF EXISTS users;
     CREATE TABLE users (
-      id VARCHAR(50) PRIMARY KEY,
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT,
       deleted INTEGER,
       lastnames TEXT,
+      instance_id INTEGER,
       time_updated INTEGER,
       UNIQUE(id)
     );

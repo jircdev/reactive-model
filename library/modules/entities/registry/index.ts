@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 interface IRegistry {
 	values?: object;
 	id?: string | number;
+	__instanceId: string;
 }
 export class Registry extends ReactiveModel<IRegistry> {
 	#values: any = {};
@@ -39,11 +40,10 @@ export class Registry extends ReactiveModel<IRegistry> {
 		super();
 
 		const { id } = data;
-
 		this.#store = store;
 		this.#isNew = id === undefined;
 		this.#id = id;
-		this.__instanceId = id ?? uuidv4();
+		this.__instanceId = data.__instanceId ?? uuidv4();
 		if (!id) this.#id = this.__instanceId;
 		if (this.#id) this.#values.id = this.#id;
 	}
@@ -72,6 +72,7 @@ export class Registry extends ReactiveModel<IRegistry> {
 
 	getValues() {
 		const values = { ...this.#values };
+		console.log('valuues', values);
 		if (this.__instanceId) values.__instanceId = this.__instanceId;
 		//		if (this.offline) values.offline = this.offline; // this line may be removed, the offline value must be set by the localProvider
 		return values;

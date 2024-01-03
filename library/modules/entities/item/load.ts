@@ -53,6 +53,8 @@ export class ItemLoadManager {
 				if (localData?.status) {
 					this.#parent.set(localData.data, true);
 					if (localData.data.__instanceId) this.#localProvider.__instanceId = localData.data.__instanceId;
+					if (!this.#localProvider.__instanceId)
+						this.#localProvider.__instanceId = this.#localProvider.registry.__instanceId;
 				}
 			}
 
@@ -76,7 +78,14 @@ export class ItemLoadManager {
 					if (original[key] !== remoteData[key]) same = false;
 				});
 
-				if (!same) await this.#localProvider.save(remoteData);
+				if (!same) {
+					const id = isNaN(this.#parent.id) ? parseInt(this.#parent.id) : this.#parent.id;
+					await this.#localProvider.save({
+						...remoteData,
+						id,
+						__instanceId: this.#localProvider.__instanceId,
+					});
+				}
 			}
 
 			return this.#adapter.toClient({ data: remoteData });

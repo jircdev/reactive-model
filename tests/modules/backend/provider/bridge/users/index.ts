@@ -8,9 +8,11 @@ export /*actions*/ /*bundle*/ class UserProvider {
 	}
 	async publish(data) {
 		try {
+			const instanceId = data.__instanceId;
+			delete data.id;
 			const user = new UserStore();
 			let response = await user.storeUser(data);
-
+			response.__instanceId = instanceId;
 			return { status: true, data: response };
 		} catch (e) {
 			console.error(e);
@@ -26,7 +28,6 @@ export /*actions*/ /*bundle*/ class UserProvider {
 
 			const user = new UserStore();
 			const data = await user.loadUser(id);
-			console.log(0.1, data);
 			if (!data) {
 				return { status: true, data: false };
 			}
@@ -44,7 +45,6 @@ export /*actions*/ /*bundle*/ class UserProvider {
 		try {
 			const user = new UserStore();
 			const { entries, deletedIds } = await user.loadAll();
-
 			return { status: true, data: { entries, deletedEntries: deletedIds } };
 		} catch (e) {
 			return { error: true, message: e.message };
