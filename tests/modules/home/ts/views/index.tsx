@@ -2,6 +2,7 @@ import React from 'react';
 import { useBinder } from '@beyond-js/react-18-widgets/hooks';
 import { Item } from './items';
 import { TestContext } from './context';
+import { Link } from 'pragmate-ui/components';
 
 export /*bundle*/
 function Page({ store }): JSX.Element {
@@ -16,46 +17,29 @@ function Page({ store }): JSX.Element {
 		setCount(store.users?.items?.length ?? 0);
 	});
 
-	if (!ready) return <div>cargando....</div>;
-
-	const onCheck = event => {
-		if (!event.currentTarget) return;
-		const { value } = event.currentTarget;
-
-		setSelected(prev => new Set(prev.add(value)));
-	};
-
-	const onToggle = event => {
-		const newset = new Set();
-		if (selected.size === store.users.items.length) {
-			setSelected(newset);
-			return;
-		}
-		store.users.items.forEach(user => newset.add(user.id.toString()));
-		setSelected(newset);
-	};
-
-	const users = store.users.items.map(user => <Item data={user} key={user.id} />);
-	const onBulkDelete = event => {
-		event.stopPropagation();
-
-		store.deleteItems(Array.from(selected));
-	};
-	const props = { disabled: selected.size === 0 };
-
 	return (
 		<TestContext.Provider
-			value={{ total: store.users.items?.length, totalSelected: selected.size, selected, onCheck, store }}
+			value={{ total: store.users.items?.length, totalSelected: selected.size, selected, store }}
 		>
 			<div className='page__container'>
 				<header>
-					<h1>Página de prueba</h1>
+					<h1>Use cases</h1>
+					<ul>
+						<li>
+							<Link href='/tests?case=backend-providers'>Backend providers</Link>
+						</li>
+						<li>
+							<Link href='/tests?case=no-providers'>No providers</Link>
+						</li>
+
+						<li>
+							<Link href='/tests?case=only-local'>Local data</Link>
+						</li>
+						<li>
+							<Link href='/tests?case=local-and-remote'>Local and remote data</Link>
+						</li>
+					</ul>
 				</header>
-				<button onClick={onToggle}>Select all</button>
-				<button ref={ref} onClick={onBulkDelete} {...props}>
-					Eliminar
-				</button>
-				<ul>{users}</ul>
 			</div>
 		</TestContext.Provider>
 	);

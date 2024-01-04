@@ -38,9 +38,12 @@ export class ItemSaveManager {
 			const properties = { ...data, ...this.#parent.getProperties() };
 
 			properties.isNew = this.#localProvider.registry.isNew;
+			properties.__instanceId = this.#localProvider.registry.__instanceId;
 
 			if (this.#parent.isOnline && this.#provider) {
 				const response = await this.#publish(properties);
+				this.#localProvider.registry.setValues(response.data);
+				properties.id = response?.data?.id;
 				this.#adapter.fromRemote(response);
 				this.#localProvider.registry.isNew = false;
 			}
@@ -68,9 +71,10 @@ export class ItemSaveManager {
 			const response = await this.#provider.publish(props);
 
 			const data = this.#adapter.fromRemote(response);
-
+			await this.#parent.set(data);
 			if (this.#localProvider) {
 				this.#localProvider.save(data);
+				if (isNaN(props.id)) this.#localProvider.deleteRegistry(props.id);
 				this.#localProvider.trigger('change');
 			}
 			return this.#adapter.toClient({ data });

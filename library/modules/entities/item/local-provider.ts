@@ -20,7 +20,7 @@ class LocalProvider extends ReactiveModel<any> {
 	#databaseName!: string;
 	#originalData: {};
 	#exists = false;
-
+	__instanceId: string;
 	get originalData() {
 		return this.#originalData;
 	}
@@ -162,10 +162,11 @@ class LocalProvider extends ReactiveModel<any> {
 			this.#isNew = this.#registry?.values?.isNew ? true : false;
 			return;
 		}
+
 		if (!registry && this.localdb && id) {
 			const store = this.#store;
 			const localData = await store.get(id);
-			data = localData;
+			if (localData) data = localData;
 			found = true;
 		}
 
@@ -225,9 +226,17 @@ class LocalProvider extends ReactiveModel<any> {
 	}
 
 	delete = async () => {
+		if (!this.#database) return;
 		const response = await this.#update({ isDeleted: 1 });
 
 		return response;
+	};
+
+	deleteRegistry = async identifier => {
+		const store = this.#database.db[this.#storeName];
+		await store.delete(identifier);
+		this.triggerEvent();
+		return true;
 	};
 
 	async #update(data) {

@@ -1,12 +1,19 @@
 import { UserStore } from '@beyond-js/reactive-tests/backend/database';
+import type { Server, Socket } from 'socket.io';
 
-export /*actions*/ /*bundle*/ class Users {
+export /*actions*/ /*bundle*/ class UserProvider {
+	socket: Server;
+	constructor(socket: Server) {
+		this.socket = socket;
+	}
 	async publish(data) {
 		try {
+			const instanceId = data.__instanceId;
+			delete data.id;
 			const user = new UserStore();
 			let response = await user.storeUser(data);
-
-			return response;
+			response.__instanceId = instanceId;
+			return { status: true, data: response };
 		} catch (e) {
 			console.error(e);
 			return { error: true, message: e.message };
@@ -22,13 +29,13 @@ export /*actions*/ /*bundle*/ class Users {
 			const user = new UserStore();
 			const data = await user.loadUser(id);
 			if (!data) {
-				return;
+				return { status: true, data: false };
 			}
 			//@ts-ignore
 			data.isDeleted = data.deleted;
 			//@ts-ignore
 			delete data.deleted;
-			return data;
+			return { status: true, data };
 		} catch (e) {
 			return { error: true, message: e.message };
 		}
@@ -38,8 +45,7 @@ export /*actions*/ /*bundle*/ class Users {
 		try {
 			const user = new UserStore();
 			const { entries, deletedIds } = await user.loadAll();
-
-			return { entries, deletedEntries: deletedIds };
+			return { status: true, data: { entries, deletedEntries: deletedIds } };
 		} catch (e) {
 			return { error: true, message: e.message };
 		}
@@ -51,7 +57,7 @@ export /*actions*/ /*bundle*/ class Users {
 
 			const entries = await user.bulkSave(data);
 
-			return { entries };
+			return { status: true, data: { entries } };
 		} catch (e) {
 			return { error: true, message: e.message };
 		}
@@ -62,9 +68,9 @@ export /*actions*/ /*bundle*/ class Users {
 			const user = new UserStore();
 			const response = await user.delete(id);
 
-			return { data: response };
+			return { status: true, data: response };
 		} catch (e) {
-			return { message: e.message };
+			return { error: true, message: e.message };
 		}
 	}
 
@@ -77,7 +83,7 @@ export /*actions*/ /*bundle*/ class Users {
 
 			//@ts-ignore
 			const response = await users.deleteItems(ids);
-			return response;
+			return { status: true, data: response };
 		} catch (e) {
 			return { error: true, message: e.message };
 		}

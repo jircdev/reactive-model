@@ -11,3 +11,6 @@ export /*bundle */ class ReactiveConfig {
 		});
 	}
 }
+
+
+// ReactiveConfig.set({adapter: 'default'});

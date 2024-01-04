@@ -53,8 +53,8 @@ export /*bundle*/ class Item<Item> extends ReactiveModel<IItem> {
 		return this.localProvider.isOnline && !localStorage.getItem('reactive.offline');
 	}
 
-	get instanceId() {
-		return this.localProvider.instanceId;
+	get __instanceId() {
+		return this.localProvider.__instanceId;
 	}
 
 	get isReady() {

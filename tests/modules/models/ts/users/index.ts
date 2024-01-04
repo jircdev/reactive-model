@@ -1,5 +1,5 @@
 import { Item, IItem } from '@beyond-js/reactive/entities';
-// import { UserProvider } from '@beyond-js/reactive/tests/backend/provider';
+import { UserProvider } from '@beyond-js/reactive-tests/backend/provider';
 
 interface IUser {
 	name?: string;
@@ -14,6 +14,6 @@ class User extends Item<IUser> {
 	protected properties = ['id', 'name', 'lastname'];
 
 	constructor({ id = undefined }: ISpecs = {}) {
-		super({ storeName: 'user', db: 'test', id });
+		super({ storeName: 'user', db: 'test', id, provider: UserProvider });
 	}
 }
