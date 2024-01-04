@@ -1,5 +1,26 @@
 # CHANGELOG
 
+# 1.1.7
+
+#### Enhancements
+
+-   **Enhanced Item Identification**: To provide more flexibility and control over item identification, the library now
+    supports and prioritizes IDs defined by the backend. While client-generated IDs are still accepted, backend-defined
+    IDs, when available, will be used as the primary identifier.
+
+#### What's Changed
+
+-   **Priority to Backend IDs**: When an ID is defined from the backend for an item, this ID will now take precedence
+    over any client-generated ID. This ensures that items can be more reliably identified and managed in systems where
+    backend control is paramount.
+
+#### Implications for Existing Projects
+
+-   **Backward Compatibility**: Existing projects will continue to function as before, using client-generated IDs.
+    However, you can now enhance your item management by integrating backend-defined IDs.
+-   **Enhanced Flexibility**: This update provides the flexibility to maintain existing client-side ID generation while
+    also allowing for a more robust backend-driven identification system when needed.
+
 ## 1.1.6
 
 -   Added concept of Adapters to manage responses obtained from the backend and responses returned by items and
