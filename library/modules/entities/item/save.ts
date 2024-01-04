@@ -74,7 +74,10 @@ export class ItemSaveManager {
 			await this.#parent.set(data);
 			if (this.#localProvider) {
 				this.#localProvider.save(data);
-				if (isNaN(props.id)) this.#localProvider.deleteRegistry(props.id);
+				if (props.id === this.#localProvider.registry.__instanceId) {
+					this.#localProvider.deleteRegistry(props.id);
+				}
+
 				this.#localProvider.trigger('change');
 			}
 			return this.#adapter.toClient({ data });
