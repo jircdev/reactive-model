@@ -1,7 +1,7 @@
 import { ReactiveModel } from '@beyond-js/reactive/model';
 
 import { IProvider } from '../interfaces/provider';
-import { liveQuery } from 'dexie';
+import { Collection, liveQuery } from 'dexie';
 import { PendingPromise } from '@beyond-js/kernel/core';
 import { DBManager, DatabaseManager } from '@beyond-js/reactive/database';
 import Dexie from 'dexie';
@@ -34,7 +34,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 	 *
 	 */
 	#apply: boolean = true;
-	#store!: Dexie.Table<any, any>;
+	#store;
 	get store() {
 		return this.#store;
 	}
@@ -136,10 +136,10 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 			const offset = (this.#page - 1) * limit;
 			const specs = { ...params };
 			Object.keys(specs).forEach(key => {
-				['and', 'or', 'limit', 'sortBy', 'sortDirection'].includes(key) && delete specs[key];
+				['where', 'and', 'or', 'limit', 'sortBy', 'sortDirection'].includes(key) && delete specs[key];
 			});
 
-			let collection = Object.keys(specs).length === 0 ? store : store.where(specs);
+			let collection: Collection = Object.keys(specs).length === 0 ? store : store.where(specs);
 
 			//const filter = this.#customWhere ?? this.#defaultWhere;
 
@@ -148,17 +148,21 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 			/**
 			 * @todo: the isDeleted field must be set as 0 by default.
 			 */
+			console.log(1, specs, collection);
 
 			if (sortBy) {
 				await collection.sortBy(sortBy);
 			}
+			//@ts-ignore
 			collection = collection.filter(i => i.isDeleted !== 1);
 
-			return collection
-				.offset(offset)
-				.limit(limit)
-
-				.toArray();
+			return (
+				collection
+					//@ts-ignore
+					.offset(offset)
+					.limit(limit)
+					.toArray()
+			);
 		};
 	};
 
@@ -191,7 +195,8 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 
 			if (totalPages < this.#page) return;
 			let first = true;
-			const live = liveQuery(this.where(params, limit));
+			const specs = params.where ?? {};
+			const live = liveQuery(this.where(specs, limit));
 			this.#page++;
 			let currentPage;
 
