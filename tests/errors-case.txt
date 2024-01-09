@@ -1,0 +1,60 @@
+//CASO DE CARGA DE COLECCION QUE NO DISPARA CONSULTA AL BACKEND DESPUES DE LA 3ERA CARGA
+// carga #1
+m = await bimport('@beyond-js/reactive-tests@0.0.1/examples/models');
+const collection = new m.Users();
+collection.bind('change', () => console.log('change', collection.fetching));
+collection.load({instanceId: 1});
+
+//carga #2
+collection.load({instanceId: 1});
+
+//carga #3
+collection.load({instanceId: 1});
+
+//carga #4 -----> la coleccion no carga
+collection.load({instanceId: 1});
+
+
+/////////////////////////////////////////////////////////////////////////////////
+
+//CASO DE ELIMINAR REGISTROS ---> DESPUES DE ELIMINAR UN REGISTRO LOS ITEMS DE LA COLECCION NO SE ACTUALIZA AUTOMATICAMENTE 
+// Y DESPUES DE LA SEGUNDA CARGA DE LA COLECCION LOS ITEMS DE LA COLECCION NO SE ACTUALIZAN PESE A QUE SE HIZO LA MODIFICACION EN DB
+
+//CARGA COLECCION
+m = await bimport('@beyond-js/reactive-tests@0.0.1/examples/models');
+const collection = new m.Users();
+collection.bind('change', () => console.log('change', collection.fetching, collection.items));
+collection.load({instanceId: 1});
+
+//INSTANCIA E ELIMINACION DEL PRIMER REGISTRO
+const record = new m.User({id:10})
+await record.load();
+
+//SE ELIMINA EL PRIMER REGISTRO
+await record.delete();
+
+//SE CARGA LA COLECCION PARA QUE SE ACTUALICEN LOS ITEMS (1ERA VEZ)
+collection.load({instanceId: 1});
+
+//INSTANCIA E ELIMINACION DEL SEGUNDO REGISTRO
+const record2 = new m.User({id:11})
+await record2.load();
+
+//SE ELIMINA EL SEGUNDO REGISTRO
+await record2.delete();
+
+//SE CARGA LA COLECCION PARA QUE SE ACTUALICEN LOS ITEMS (2DA VEZ)
+collection.load({instanceId: 1});
+
+//INSTANCIA E ELIMINACION DEL TERCER REGISTRO
+const record3 = new m.User({id:12})
+await record3.load();
+
+//SE ELIMINA EL TERCER REGISTRO
+await record3.delete();
+
+//SE CARGA LA COLECCION PARA QUE SE ACTUALICEN LOS ITEMS (3ERA VEZ)
+collection.load({instanceId: 1});
+
+//////////////////////////////////////////////////////////
+

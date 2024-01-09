@@ -11,7 +11,7 @@ interface ISpecs {
 }
 export /*bundle */
 class User extends Item<IUser> {
-	protected properties = ['id', 'name', 'lastname'];
+	protected properties = ['id', 'name', 'lastname', 'instanceId'];
 
 	constructor({ id = undefined }: ISpecs = {}) {
 		super({ storeName: 'user', db: 'test', id, provider: UserProvider });

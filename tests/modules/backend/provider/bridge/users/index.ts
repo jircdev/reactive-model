@@ -41,10 +41,10 @@ export /*actions*/ /*bundle*/ class UserProvider {
 		}
 	}
 
-	async list() {
+	async list(params) {
 		try {
 			const user = new UserStore();
-			const { entries, deletedIds } = await user.loadAll();
+			const { entries, deletedIds } = await user.loadAll(params);
 			return { status: true, data: { entries, deletedEntries: deletedIds } };
 		} catch (e) {
 			return { error: true, message: e.message };

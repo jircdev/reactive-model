@@ -16,7 +16,7 @@ export const createDatabase = async () => {
       name TEXT,
       deleted INTEGER,
       lastnames TEXT,
-      instance_id INTEGER,
+      instanceId INTEGER,
       time_updated INTEGER,
       UNIQUE(id)
     );

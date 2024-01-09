@@ -4,11 +4,13 @@ export /*bundle*/ interface IUser {
 	id: number;
 	name: string;
 	lastnames: string;
+	instanceId?: number;
 }
 
 interface LoadAllOptions {
 	filter?: string;
 	limit?: number;
+	instanceId?: number;
 }
 
 export /*bundle*/ class UserStore {
@@ -33,12 +35,23 @@ export /*bundle*/ class UserStore {
 		let data;
 
 		if (existingUser) {
-			const { name, lastnames } = user;
-			data = await db.run('UPDATE users SET name = ?, lastnames = ? WHERE id = ?', name, lastnames, user.id);
+			const { name, lastnames, instanceId } = user;
+			data = await db.run(
+				'UPDATE users SET name = ?, lastnames = ?, instanceId = ? WHERE id = ?',
+				name,
+				lastnames,
+				user.id
+			);
 		} else {
-			const { id, name, lastnames } = user;
+			const { id, name, lastnames, instanceId } = user;
 
-			data = await db.run('INSERT INTO users (id, name, lastnames) VALUES (?, ?, ?)', id, name, lastnames);
+			data = await db.run(
+				'INSERT INTO users (id, name, lastnames, instanceId) VALUES (?, ?, ?, ?)',
+				id,
+				name,
+				lastnames,
+				instanceId
+			);
 			recordId = data.lastID;
 		}
 		const response = await this.loadUser(recordId);
@@ -53,8 +66,8 @@ export /*bundle*/ class UserStore {
 		let filter = 'WHERE deleted = 0';
 		let limit = 30;
 		if (options) {
-			if (options.filter) {
-				filter += ` AND ${options.filter}`;
+			if (options.instanceId) {
+				filter += ` AND instanceId = ${options.instanceId}`;
 			}
 			if (options.limit) {
 				limit = options.limit;

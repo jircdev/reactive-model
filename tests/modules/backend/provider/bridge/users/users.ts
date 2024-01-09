@@ -27,7 +27,7 @@ export /*actions*/ /*bundle*/ class UsersProvider {
 		}
 	}
 
-	async list() {
+	async list(params) {
 		try {
 			const user = new UserStore();
 			const entries = await user.loadAll();

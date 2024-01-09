@@ -8,15 +8,15 @@ export const insertUsers = async () => {
 		driver: sqlite3.Database,
 	});
 
-	const insertQuery = `INSERT INTO users (id, name, deleted, lastnames, instance_id,  time_updated) VALUES (?, ?, ?, ?, ?, ?)`;
+	const insertQuery = `INSERT INTO users (id, name, deleted, lastnames, instanceId,  time_updated) VALUES (?, ?, ?, ?, ?, ?)`;
 	for (let i = 1; i <= 20; i++) {
 		const id = i;
 		const name = `User${i}`;
 		const deleted = 0;
 		const lastnames = `Lastname${i}`;
 		const time_updated = Math.floor(Date.now() / 1000);
-		const instance_id = 4;
-		await db.run(insertQuery, id, name, deleted, lastnames, instance_id, time_updated);
+		const instanceId = 4;
+		await db.run(insertQuery, id, name, deleted, lastnames, instanceId, time_updated);
 	}
 	await db.close();
 };
