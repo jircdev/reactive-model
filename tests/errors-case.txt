@@ -58,3 +58,19 @@ collection.load({instanceId: 1});
 
 //////////////////////////////////////////////////////////
 
+m = await bimport('@beyond-js/reactive-tests@0.0.1/examples/models');
+const collection = new m.Users();
+collection.bind('change', () => console.log('change', collection.fetching));
+collection.load({instanceId: 1});
+
+const record = new m.User({id:10});
+await record.load();
+await record.delete();
+
+const record2 = new m.User({id:11});
+await record2.load();
+await record2.delete();
+
+const record1 = new m.User(); 
+record1.set({name: 'UserMoi1', instanceId: 4});
+await record1.publish();
