@@ -23,7 +23,7 @@ export const createDatabase = async () => {
     
     DROP TABLE IF EXISTS books;
     CREATE TABLE books (
-      id VARCHAR(50) PRIMARY KEY,
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
       title TEXT,
       year INTEGER,
       author TEXT,

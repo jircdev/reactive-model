@@ -1,4 +1,4 @@
-import { UserStore } from '@beyond-js/reactive-tests/backend/database';
+import { BookStore } from '@beyond-js/reactive-tests/backend/database';
 import { Server, Socket } from 'socket.io';
 
 export /*actions*/ /*bundle*/ class BooksProvider {
@@ -8,8 +8,8 @@ export /*actions*/ /*bundle*/ class BooksProvider {
 	}
 	async save(data) {
 		try {
-			const user = new UserStore();
-			await user.storeUser(data);
+			const books = new BookStore();
+			await books.storebooks(data);
 			return { status: true };
 		} catch (e) {
 			return { error: true, message: e.message };
@@ -18,8 +18,8 @@ export /*actions*/ /*bundle*/ class BooksProvider {
 
 	async load({ id }) {
 		try {
-			const user = new UserStore();
-			const data = await user.loadUser(id);
+			const books = new BookStore();
+			const data = await books.loadbooks(id);
 
 			return { status: true, data };
 		} catch (e) {
@@ -29,8 +29,8 @@ export /*actions*/ /*bundle*/ class BooksProvider {
 
 	async list() {
 		try {
-			const user = new UserStore();
-			const entries = await user.loadAll();
+			const books = new BookStore();
+			const entries = await books.loadAll();
 			return { status: true, data: { entries } };
 		} catch (e) {
 			return { error: true, message: e.message };
@@ -38,6 +38,6 @@ export /*actions*/ /*bundle*/ class BooksProvider {
 	}
 
 	send() {
-		this.socket.emit('user', { name: 'algo' });
+		this.socket.emit('books', { name: 'algo' });
 	}
 }
