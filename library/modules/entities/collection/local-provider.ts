@@ -148,7 +148,6 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 			/**
 			 * @todo: the isDeleted field must be set as 0 by default.
 			 */
-			console.log(1, specs, collection);
 
 			if (sortBy) {
 				await collection.sortBy(sortBy);
