@@ -12,9 +12,10 @@ interface IItemValues {
 	instanceId: string;
 }
 export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
+	declare triggerEvent: (event?: string) => void;
+
 	#isOnline = globalThis.navigator.onLine;
 
-	#batches = 200;
 	#offline: boolean;
 	#database!: DatabaseManager;
 	#storeName!: string;
@@ -26,12 +27,15 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 	#db: Dexie;
 	#registryFactory: RegistryFactory;
 	#parent;
+	#saveManager: LocalProviderSaver;
 	#bridge;
 	#localdb: boolean;
-	/**
-	 *
-	 */
+
 	#apply: boolean = true;
+	get apply() {
+		return this.#apply;
+	}
+
 	#store!: Dexie.Table<any, any>;
 	get store() {
 		return this.#store;
@@ -69,6 +73,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 
 		this.#databaseName = db;
 		this.#storeName = storeName;
+
 		globalThis.addEventListener('online', this.handleConnection);
 		globalThis.addEventListener('offline', this.handleConnection);
 	}
@@ -99,6 +104,13 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 			if (!this.#store) {
 				throw new Error(`The store ${this.#storeName} does not exists in the database ${this.#databaseName}`);
 			}
+
+			this.#saveManager = new LocalProviderSaver(this, {
+				registryFactory: this.#registryFactory,
+				storeName: this.#storeName,
+				database: this.#database,
+			});
+
 			this.ready = true;
 			this.#promiseInit.resolve();
 		} catch (e) {
@@ -295,4 +307,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 			return { status: false, error: error.message };
 		}
 	}
+
+	save = data => this.#saveManager.save(data);
+	saveAll = (items, storeName) => this.#saveManager.saveAll(items, storeName);
 }

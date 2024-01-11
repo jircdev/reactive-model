@@ -1,4 +1,24 @@
+import { CollectionLocalProvider } from '.';
+import { Registry } from '../../registry';
+import { RegistryFactory } from '../../registry/factory';
+
 export class LocalProviderSaver {
+	#batches = 200;
+	#parent: CollectionLocalProvider;
+	#bridge;
+	#registryFactory: RegistryFactory;
+	#storeName: string;
+	#database;
+	constructor(parent: CollectionLocalProvider, parentBridge) {
+		this.#parent = parent;
+		this.#bridge = parentBridge;
+
+		this.#registryFactory = parentBridge.registryFactory;
+		console.log('VALUE => ', this.#registryFactory);
+		this.#storeName = parentBridge.storeName;
+		this.#database = parentBridge.database;
+	}
+
 	/**
 	 *
 	 * @param data
@@ -14,9 +34,9 @@ export class LocalProviderSaver {
 			});
 		};
 
-		data = process(data, this.isOnline ? 0 : 1);
+		data = process(data, this.#parent.isOnline ? 0 : 1);
 
-		if (!this.#apply) return;
+		if (!this.#parent.apply) return;
 		await this.#registryFactory.init();
 		await this.saveAll(data, this.#storeName);
 	}
@@ -33,7 +53,7 @@ export class LocalProviderSaver {
 	 */
 
 	async saveAll(items, storeName) {
-		if (!this.#apply) return;
+		if (!this.#parent.apply) return;
 		const elements = items.map(item => {
 			const registry = new Registry(storeName);
 			if (item.deleted) {
