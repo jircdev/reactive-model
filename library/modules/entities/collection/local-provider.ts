@@ -35,6 +35,11 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 	 */
 	#apply: boolean = true;
 	#store;
+	/**
+	 * This property is used to registry the number of times the collection executes the live next method.
+	 * @todo: review if is necessary to use this property.
+	 */
+	#quantity = 0;
 	get store() {
 		return this.#store;
 	}
@@ -169,7 +174,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 		this.#customWhere = callback;
 		return this.#parent;
 	};
-	#cantidad = 0;
+
 	async load(params) {
 		if (!this.#apply) return;
 		if (this.#promiseLoad) return this.#promiseLoad;
@@ -209,7 +214,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 			live.subscribe({
 				next: async items => {
 					let sameQuery;
-					this.#cantidad++;
+					this.#quantity++;
 					items.forEach(item => {
 						// console.log(item.id, item.role, item.content?.substring(0, 40));
 					});
