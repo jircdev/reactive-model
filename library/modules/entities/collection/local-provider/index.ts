@@ -1,10 +1,10 @@
 import { ReactiveModel } from '@beyond-js/reactive/model';
-import { liveQuery } from 'dexie';
 import { PendingPromise } from '@beyond-js/kernel/core';
 import { DBManager, DatabaseManager } from '@beyond-js/reactive/database';
 import Dexie from 'dexie';
 import { RegistryFactory } from '../../registry/factory';
 import { LocalProviderSaver } from './saver';
+import { LocalProviderLoader } from './loader';
 
 interface IItemValues {
 	[key: string]: any;
@@ -20,10 +20,9 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<Collection
 	#database!: DatabaseManager;
 	#storeName!: string;
 	#databaseName!: string;
-	#listItems = new Map();
+	#loadManager: LocalProviderLoader;
 	#exists = false;
 	#found = false;
-	#ids = new Set();
 	#db: Dexie;
 	#registryFactory: RegistryFactory;
 	#parent;
@@ -76,6 +75,11 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<Collection
 
 		globalThis.addEventListener('online', this.handleConnection);
 		globalThis.addEventListener('offline', this.handleConnection);
+
+		this.#loadManager = new LocalProviderLoader(this, {
+			store: this.#store,
+			items: this.#items,
+		});
 	}
 
 	setOffline(value) {
@@ -126,164 +130,6 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<Collection
 	 * @returns
 	 */
 	#isUnpublished(data) {}
-	#promiseLoad: PendingPromise<any>;
-	#params;
-
-	#total;
-	#page = 0;
-
-	#customWhere;
-	#defaultWhere = store => store.orderBy('id');
-
-	#currentLimit;
-	#currentOffset;
-	where = (params, limit) => {
-		return async () => {
-			let store = this.#store;
-			const { sortBy, sortDirection } = params;
-			const offset = (this.#page - 1) * limit;
-			const specs = { ...params };
-			Object.keys(specs).forEach(key => {
-				['and', 'or', 'limit', 'sortBy', 'sortDirection'].includes(key) && delete specs[key];
-			});
-
-			let collection = Object.keys(specs).length === 0 ? store : store.where(specs);
-
-			//const filter = this.#customWhere ?? this.#defaultWhere;
-
-			this.#currentLimit = limit;
-			this.#currentOffset = offset;
-			/**
-			 * @todo: the isDeleted field must be set as 0 by default.
-			 */
-
-			if (sortBy) {
-				await collection.sortBy(sortBy);
-			}
-			collection = collection.filter(i => i.isDeleted !== 1);
-
-			return collection
-				.offset(offset)
-				.limit(limit)
-
-				.toArray();
-		};
-	};
-
-	customFilter = callback => {
-		this.#customWhere = callback;
-		return this.#parent;
-	};
-	#quantity = 0;
-	async load(params) {
-		if (!this.#apply) return;
-		if (this.#promiseLoad) return this.#promiseLoad;
-		if (JSON.stringify(this.#params) === JSON.stringify(params)) {
-			return this.#promiseLoad;
-		}
-		this.#promiseLoad = new PendingPromise();
-		await this.init();
-		this.#processConditions(params);
-		const r = await this.#performLoad(params);
-		console.log('this.#performLoad(params);', r);
-		return this.#performLoad(params);
-	}
-
-	#processConditions(params) {
-		const conditions = Object.keys(params);
-		const controls = ['and', 'or'];
-		conditions.forEach(condition => {
-			if (controls.includes(condition)) {
-				this.#processControl(condition, params[condition]);
-			}
-		});
-	}
-
-	async #performLoad(params) {
-		try {
-			if (!this.#total) this.#total = await this.#store.count();
-			let limit = params.limit ?? 30;
-			const totalPages = Math.ceil(this.#total / limit);
-			if (totalPages < this.#page) return;
-			const live = liveQuery(this.where(params, limit));
-			this.#page++;
-			return this.#subscribeToQuery(live, params, totalPages);
-		} catch (error) {
-			console.error('Error al cargar los elementos del store:', error);
-			return { status: false, data: [] };
-		}
-	}
-
-	async #subscribeToQuery(liveQuery, params, totalPages) {
-		let first = true;
-		let currentPage;
-		try {
-			liveQuery.subscribe({
-				next: async items => {
-					const response = await this.#handleQueryResponse(items, params, totalPages, currentPage);
-					currentPage = this.#page;
-					first = false;
-					if (response) this.#resolvePromiseLoad(response);
-				},
-				error: err => {
-					console.error(err);
-					this.#resolvePromiseLoad({ status: false, error: err });
-				},
-			});
-			return this.#promiseLoad;
-		} catch (error) {
-			console.error('Error al cargar los elementos del store:', error);
-			return { status: false, data: [] };
-		}
-	}
-
-	async #handleQueryResponse(items, params, totalPages, currentPage) {
-		let sameQuery;
-		this.#quantity++;
-		const currentMap = new Set();
-		items.forEach(item => {
-			this.#listItems.set(item.id, item);
-			currentMap.add(item.id);
-		});
-		if (currentPage == this.#page) {
-			sameQuery = true;
-		} else {
-			currentPage = this.#page;
-		}
-
-		if (sameQuery && items.length === this.#parent.items.length) return null;
-
-		this.#cleanupItems(currentMap);
-		this.#items = [...this.#listItems.values()];
-		items.forEach(item => this.#ids.add(item.id));
-		this.trigger('items.changed');
-
-		return {
-			status: true,
-			data: items,
-			total: this.#total,
-			next: this.#page + 1 < totalPages,
-		};
-	}
-
-	#cleanupItems(currentMap) {
-		[...this.#listItems.keys()].forEach(id => {
-			if (!currentMap.has(id)) {
-				this.#listItems.delete(id);
-			}
-		});
-	}
-
-	#processControl(control, conditions) {
-		this.#store[control];
-	}
-
-	#resolvePromiseLoad(response) {
-		if (this.#promiseLoad) {
-			this.#promiseLoad.resolve(response);
-			this.#promiseLoad = null;
-		}
-	}
 
 	async upsert(data: IItemValues[], originalData: any[]): Promise<void> {
 		if (!this.#apply) return;
@@ -321,4 +167,5 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<Collection
 
 	save = data => this.#saveManager.save(data);
 	saveAll = (items, storeName) => this.#saveManager.saveAll(items, storeName);
+	load = params => this.#loadManager.load(params);
 }

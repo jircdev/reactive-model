@@ -14,7 +14,6 @@ export class LocalProviderSaver {
 		this.#bridge = parentBridge;
 
 		this.#registryFactory = parentBridge.registryFactory;
-		console.log('VALUE => ', this.#registryFactory);
 		this.#storeName = parentBridge.storeName;
 		this.#database = parentBridge.database;
 	}
