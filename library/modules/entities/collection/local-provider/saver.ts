@@ -1,14 +1,18 @@
 import { CollectionLocalProvider } from '.';
 import { Registry } from '../../registry';
 import { RegistryFactory } from '../../registry/factory';
+import { DatabaseManager } from '@beyond-js/reactive/database';
 
 export class LocalProviderSaver {
 	#batches = 200;
 	#parent: CollectionLocalProvider;
-	#bridge;
+	#bridge: {
+		get: (property: string) => any;
+		set: (property: string, value: any) => void;
+	};
 	#registryFactory: RegistryFactory;
 	#storeName: string;
-	#database;
+	#database: DatabaseManager;
 	constructor(parent: CollectionLocalProvider, parentBridge) {
 		this.#parent = parent;
 		this.#bridge = parentBridge;
@@ -18,13 +22,8 @@ export class LocalProviderSaver {
 		this.#database = parentBridge.database;
 	}
 
-	/**
-	 *
-	 * @param data
-	 * @returns
-	 */
-	async save(data): Promise<any> {
-		const process = (entries, offline = 0) => {
+	async save(data: { [key: string]: any }): Promise<any> {
+		const process = (entries: { [key: string]: any }, offline = 0) => {
 			return entries.map(item => {
 				const record =
 					item.getProperties && typeof item.getProperties === 'function' ? item.getProperties() : item;
@@ -51,7 +50,7 @@ export class LocalProviderSaver {
 	 * @throws Will throw an error if there's an issue with the Promise.allSettled() call itself.
 	 */
 
-	async saveAll(items, storeName) {
+	async saveAll(items, storeName: string) {
 		if (!this.#parent.apply) return;
 		const elements = items.map(item => {
 			const registry = new Registry(storeName);

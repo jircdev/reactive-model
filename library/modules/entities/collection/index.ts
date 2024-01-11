@@ -6,10 +6,19 @@ import { IProvider } from '../interfaces/provider';
 import { ICollectionSpecs, ICollection } from './interfaces/ICollection';
 import { ResponseAdapter } from '../adapter';
 import { IResponseAdapter } from '../adapter/interface';
+import { Item } from '../item';
 
 export /*bundle */ class Collection extends ReactiveModel<Collection> {
+	declare triggerEvent: (event?: string) => void;
+	declare storeName: string;
+	declare trigger: (event?: string) => void;
+	declare reactiveProps: <T>(props: Array<keyof T>) => void;
+	db: string;
+	item: typeof Item;
+
 	#items: Array<any | undefined> = [];
-	protected localdb = true;
+	protected localdb: boolean = true;
+
 	#elements = new Map();
 	get elements() {
 		return this.#elements;
@@ -31,9 +40,6 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 	}
 
 	counters: any = {};
-	/**
-	 * Represents the number of elements in the collection
-	 */
 	total: number = 0;
 	next: number | undefined;
 	#localProvider: CollectionLocalProvider;

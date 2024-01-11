@@ -5,6 +5,7 @@ import Dexie from 'dexie';
 import { RegistryFactory } from '../../registry/factory';
 import { LocalProviderSaver } from './saver';
 import { LocalProviderLoader } from './loader';
+import { Collection } from '..';
 
 interface IItemValues {
 	[key: string]: any;
@@ -13,6 +14,8 @@ interface IItemValues {
 }
 export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<CollectionLocalProvider> {
 	declare triggerEvent: (event?: string) => void;
+	declare ready: boolean;
+	declare localdb: boolean;
 
 	#isOnline = globalThis.navigator.onLine;
 
@@ -25,9 +28,12 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<Collection
 	#found = false;
 	#db: Dexie;
 	#registryFactory: RegistryFactory;
-	#parent;
+	#parent: Collection;
 	#saveManager: LocalProviderSaver;
-	#bridge;
+	#bridge: {
+		get: (property: string) => any;
+		set: (property: string, value: any) => void;
+	};
 	#localdb: boolean;
 
 	#apply: boolean = true;
@@ -42,7 +48,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<Collection
 	/**
 	 * Defines if the collection is using a local database or not.
 	 */
-	#active;
+	#active: boolean;
 	get active() {
 		return this.#active;
 	}
@@ -66,9 +72,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<Collection
 			this.#apply = false;
 			return;
 		}
-		if (db) {
-			this.#registryFactory = RegistryFactory.get(db);
-		}
+		if (db) this.#registryFactory = RegistryFactory.get(db);
 
 		this.#databaseName = db;
 		this.#storeName = storeName;
@@ -82,10 +86,11 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<Collection
 		});
 	}
 
-	setOffline(value) {
+	setOffline(value: boolean) {
 		this.#offline = value;
 		this.triggerEvent();
 	}
+
 	#promiseInit: PendingPromise<void>;
 	init = async () => {
 		try {
@@ -123,13 +128,6 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<Collection
 	};
 
 	private handleConnection = () => this.triggerEvent();
-
-	/**
-	 * @todo: Must validated if some item in the collection is not sync.
-	 * @param data
-	 * @returns
-	 */
-	#isUnpublished(data) {}
 
 	async upsert(data: IItemValues[], originalData: any[]): Promise<void> {
 		if (!this.#apply) return;

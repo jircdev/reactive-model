@@ -1,17 +1,28 @@
-import type { ResponseAdapter } from '../adapter';
+import { Collection } from '.';
 import { IResponseAdapter } from '../adapter/interface';
+import { IProvider } from '../interfaces/provider';
+import { Item } from '../item';
 import type { LocalProvider } from '../item/local-provider';
 
 export class CollectionSaveManager {
-	#parent;
-	#bridge;
+	#parent: Collection;
+	#bridge: {
+		get: (property: string) => any;
+		set: (property: string, value: any) => void;
+	};
 	#localProvider: LocalProvider;
-	#provider;
-	#localdb;
+	#provider: IProvider;
+	#localdb: boolean;
 	protected MAX_RETRIES = 3;
 	protected CHUNK_SIZE = 200;
 	#adapter: IResponseAdapter;
-	constructor(parent, bridge) {
+	constructor(
+		parent: Collection,
+		bridge: {
+			get: (property: string) => any;
+			set: (property: string, value: any) => void;
+		}
+	) {
 		this.#parent = parent;
 		this.#bridge = bridge;
 		this.#adapter = this.#parent.responseAdapter;
@@ -23,7 +34,7 @@ export class CollectionSaveManager {
 		if (this.#localdb) {
 			this.#localProvider = this.#bridge.get('localProvider');
 		} else {
-			console.warn('la colleccion no usa indexeddb');
+			console.warn('The collection doesnt use LocalDB');
 		}
 
 		this.#provider = this.#bridge.get('provider');
@@ -35,14 +46,14 @@ export class CollectionSaveManager {
 	 * @param init  lets define if the elements to save will work as a list of elements in the collection when is instanced
 	 * @returns
 	 */
-	save = async (data = [], init = false): Promise<any> => {
+	save = async (data = [], init = false): Promise<boolean | void> => {
 		if (!this.#localdb) return true;
 		await this.#localProvider.init();
 
 		await this.#localProvider.save(data);
 	};
 
-	publish = async (data = []): Promise<any> => {
+	publish = async (data = []): Promise<unknown> => {
 		try {
 			await this.save(data);
 			if (!this.#provider || this.#bridge.get('isOffline')) return;
@@ -58,7 +69,7 @@ export class CollectionSaveManager {
 	};
 
 	// Send chunks with retries
-	sendChunk = async chunk => {
+	sendChunk = async (chunk: (typeof Item)[]) => {
 		const response = await this.#provider.bulkSave(chunk);
 
 		// Esto es lo que aveces no se ejecuta (el metodo bulkSave del provider tampoco)
@@ -90,7 +101,7 @@ export class CollectionSaveManager {
 		const failedChunks = [];
 		const successChunks = [];
 
-		for (const [index, chunk] of chunks.entries()) {
+		for (const [, chunk] of chunks.entries()) {
 			const result = await this.sendChunk(chunk);
 			if (!result.success) {
 				failedChunks.push(result);

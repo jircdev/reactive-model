@@ -1,36 +1,39 @@
 import type { Collection } from '.';
 import type { CollectionLocalProvider } from './local-provider';
 import { RegistryFactory } from '../registry/factory';
-import type { ResponseAdapter } from '../adapter';
 import { IResponseAdapter } from '../adapter/interface';
 import { Item } from '../item';
+import { IProvider } from '../interfaces/provider';
 interface ILoadResponse {
 	localLoaded: true;
 	fetching: false;
 	total: number;
 	next?: boolean | number | string;
-	items?: any[];
+	items?: (typeof Item)[];
 }
 export class CollectionLoadManager {
 	filter: any;
 	#localProvider: CollectionLocalProvider;
-	#provider;
-	#parentBridge;
+	#provider: IProvider;
+	#parentBridge: {
+		get: (property: string) => any;
+		set: (property: string, value: any) => void;
+	};
 	#parent: Collection;
 	#registry: RegistryFactory;
 	#adapter: IResponseAdapter;
 	get parent() {
 		return this.#parent;
 	}
-	/**
-	 * Original data obtained in provider.load
-	 *
-	 * This property lets the developer access to the original data obtained from the provider in the children object.
-	 * Only contains the data from the last load.
-	 *
-	 */
+
 	protected remoteData = [];
-	constructor(parent, parentBridge) {
+	constructor(
+		parent: Collection,
+		parentBridge: {
+			get: (property: string) => any;
+			set: (property: string, value: any) => void;
+		}
+	) {
 		this.#parent = parent;
 		this.#parentBridge = parentBridge;
 		this.#adapter = this.#parent.responseAdapter;
@@ -45,31 +48,6 @@ export class CollectionLoadManager {
 		this.#registry = RegistryFactory.get(this.#parentBridge.get('storeName'));
 		if (this.#localProvider) this.#parent.customFilter = this.#localProvider?.customFilter;
 	}
-
-	/**
-	 * metodo general para las consultas de tipo lista para las colecciones
-	 * @param params Object filters and configuration
-	 * parameters:
-	 *  - next
-	 *  - limit
-	 *  - update // siguiente pagina de misma consulta
-	 *
-	 *
-	 * - status // 1, 0, -1
-	 *  {user: [10,30]}
-	 *
-	 * {and: [{user:10}, {user:30}]]}
-	 *
-	 *  {user: 10}
-	 *  {user: [10,30,40,50]}
-	 * {or: [{user:10}, {user:30}]]}
-	 * {and: [{user:10}, {user:30}]]}
-	 *  el provider debe devolver:
-	 *    - next
-	 *    - entries
-	 *  - total
-	 * load({status:1})
-	 */
 
 	#localLoad = async params => {
 		if (!this.#localProvider) return;
@@ -105,7 +83,7 @@ export class CollectionLoadManager {
 	};
 	load = async (params: any = {}) => {
 		try {
-			this.parent.fetching = true;
+			this.#parent.fetching = true;
 			const { next } = this.parent;
 			let { start = 0, update } = params;
 			params.limit = params.limit ?? 30;
@@ -121,7 +99,7 @@ export class CollectionLoadManager {
 			const response = await this.#provider.list(params);
 			const data = this.#adapter.fromRemote(response);
 
-			const items: any[] = await this.processRemoteEntries(data);
+			const items: (typeof Item)[] = await this.processRemoteEntries(data);
 
 			this.remoteData = response;
 
@@ -148,7 +126,7 @@ export class CollectionLoadManager {
 		}
 	};
 
-	async processRemoteEntries(data): Promise<any[]> {
+	async processRemoteEntries(data: { [key: string]: any }): Promise<any[]> {
 		if (!data.entries && !data.items) {
 			throw new Error('The list method must return an object with an entries property');
 		}
@@ -163,7 +141,7 @@ export class CollectionLoadManager {
 		return this.setItems(elements);
 	}
 
-	async setItems(entries) {
+	async setItems(entries: (typeof Item)[]) {
 		const promises = [];
 		const items = entries.map(record => {
 			const item = new this.parent.item({ id: record.id, properties: record });
@@ -185,7 +163,7 @@ export class CollectionLoadManager {
 	 * @param updateLocalItems
 	 * @returns
 	 */
-	processEntries = async (entries, updateLocalItems = false): Promise<Item<any>[]> => {
+	processEntries = async (entries: (typeof Item)[], updateLocalItems = false): Promise<Item<any>[]> => {
 		//	this.#registry.registerList(this.#parentBridge.get('storeName'), entries);
 		const promises = [];
 		const items = entries.map(record => {
