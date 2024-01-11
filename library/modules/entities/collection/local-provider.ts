@@ -172,14 +172,13 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 	#cantidad = 0;
 	async load(params) {
 		if (!this.#apply) return;
-		console.log(0.2, this.#promiseLoad, this.#parent);
 		if (this.#promiseLoad) return this.#promiseLoad;
 		if (JSON.stringify(this.#params) === JSON.stringify(params)) {
 			return this.#promiseLoad;
 		}
 		this.#promiseLoad = new PendingPromise();
 		await this.init();
-		console.log(0.3, this.#parent.constructor.name);
+
 		const conditions = Object.keys(params);
 		const controls = ['and', 'or'];
 
@@ -198,7 +197,6 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 				if (this.#promiseLoad) {
 					this.#promiseLoad.resolve();
 					this.#promiseLoad = undefined;
-					return;
 				}
 				return;
 			}
