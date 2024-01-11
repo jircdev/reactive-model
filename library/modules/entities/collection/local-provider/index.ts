@@ -11,7 +11,7 @@ interface IItemValues {
 	offline: number;
 	instanceId: string;
 }
-export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
+export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<CollectionLocalProvider> {
 	declare triggerEvent: (event?: string) => void;
 
 	#isOnline = globalThis.navigator.onLine;
@@ -118,9 +118,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 		}
 	};
 
-	private handleConnection = () => {
-		this.triggerEvent();
-	};
+	private handleConnection = () => this.triggerEvent();
 
 	/**
 	 * @todo: Must validated if some item in the collection is not sync.
@@ -176,7 +174,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 		this.#customWhere = callback;
 		return this.#parent;
 	};
-	#cantidad = 0;
+	#quantity = 0;
 	async load(params) {
 		if (!this.#apply) return;
 		if (this.#promiseLoad) return this.#promiseLoad;
@@ -185,93 +183,106 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 		}
 		this.#promiseLoad = new PendingPromise();
 		await this.init();
+		this.#processConditions(params);
+		const r = await this.#performLoad(params);
+		console.log('this.#performLoad(params);', r);
+		return this.#performLoad(params);
+	}
+
+	#processConditions(params) {
 		const conditions = Object.keys(params);
 		const controls = ['and', 'or'];
-
 		conditions.forEach(condition => {
 			if (controls.includes(condition)) {
 				this.#processControl(condition, params[condition]);
 			}
 		});
+	}
 
+	async #performLoad(params) {
 		try {
 			if (!this.#total) this.#total = await this.#store.count();
 			let limit = params.limit ?? 30;
 			const totalPages = Math.ceil(this.#total / limit);
-
 			if (totalPages < this.#page) return;
-			let first = true;
 			const live = liveQuery(this.where(params, limit));
 			this.#page++;
-			let currentPage;
-
-			live.subscribe({
-				next: async items => {
-					let sameQuery;
-					this.#cantidad++;
-					items.forEach(item => {
-						// console.log(item.id, item.role, item.content?.substring(0, 40));
-					});
-
-					if (params.sortBy) {
-						items.sort((a, b) => {
-							return a[params.sortBy] - b[params.sortBy];
-						});
-					}
-
-					if (!globalThis.data) globalThis.data = [];
-					//globalThis.data.push([...items]);
-
-					if (currentPage == this.#page) {
-						sameQuery = true;
-					} else {
-						currentPage = this.#page;
-					}
-
-					if (sameQuery && items.length === this.#parent.items.length) {
-						return;
-					}
-
-					const currentMap = new Set();
-					items.forEach(item => {
-						this.#listItems.set(item.id, item);
-						currentMap.add(item.id);
-					});
-					if (sameQuery) {
-						[...this.#listItems.keys()].forEach(id => {
-							if (!currentMap.has(id)) {
-								this.#listItems.delete(id);
-							}
-						});
-					}
-					this.#items = [...this.#listItems.values()];
-
-					items.forEach(item => this.#ids.add(item.id));
-					this.trigger('items.changed');
-
-					if (this.#promiseLoad) {
-						first = false;
-
-						const response = { status: true, data: items, total: this.#total, next: true };
-						if (this.#page + 1 >= totalPages) delete response.next;
-						this.#promiseLoad.resolve(response);
-						this.#promiseLoad = null;
-					}
-				},
-				error: err => {
-					console.error(err);
-				},
-			});
-			return this.#promiseLoad;
-			//return await this.live.toArray();
+			return this.#subscribeToQuery(live, params, totalPages);
 		} catch (error) {
 			console.error('Error al cargar los elementos del store:', error);
 			return { status: false, data: [] };
 		}
 	}
 
+	async #subscribeToQuery(liveQuery, params, totalPages) {
+		let first = true;
+		let currentPage;
+		try {
+			liveQuery.subscribe({
+				next: async items => {
+					const response = await this.#handleQueryResponse(items, params, totalPages, currentPage);
+					currentPage = this.#page;
+					first = false;
+					if (response) this.#resolvePromiseLoad(response);
+				},
+				error: err => {
+					console.error(err);
+					this.#resolvePromiseLoad({ status: false, error: err });
+				},
+			});
+			return this.#promiseLoad;
+		} catch (error) {
+			console.error('Error al cargar los elementos del store:', error);
+			return { status: false, data: [] };
+		}
+	}
+
+	async #handleQueryResponse(items, params, totalPages, currentPage) {
+		let sameQuery;
+		this.#quantity++;
+		const currentMap = new Set();
+		items.forEach(item => {
+			this.#listItems.set(item.id, item);
+			currentMap.add(item.id);
+		});
+		if (currentPage == this.#page) {
+			sameQuery = true;
+		} else {
+			currentPage = this.#page;
+		}
+
+		if (sameQuery && items.length === this.#parent.items.length) return null;
+
+		this.#cleanupItems(currentMap);
+		this.#items = [...this.#listItems.values()];
+		items.forEach(item => this.#ids.add(item.id));
+		this.trigger('items.changed');
+
+		return {
+			status: true,
+			data: items,
+			total: this.#total,
+			next: this.#page + 1 < totalPages,
+		};
+	}
+
+	#cleanupItems(currentMap) {
+		[...this.#listItems.keys()].forEach(id => {
+			if (!currentMap.has(id)) {
+				this.#listItems.delete(id);
+			}
+		});
+	}
+
 	#processControl(control, conditions) {
 		this.#store[control];
+	}
+
+	#resolvePromiseLoad(response) {
+		if (this.#promiseLoad) {
+			this.#promiseLoad.resolve(response);
+			this.#promiseLoad = null;
+		}
 	}
 
 	async upsert(data: IItemValues[], originalData: any[]): Promise<void> {
