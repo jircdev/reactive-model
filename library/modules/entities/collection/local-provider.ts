@@ -172,12 +172,14 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 	#cantidad = 0;
 	async load(params) {
 		if (!this.#apply) return;
+		console.log(0.2, this.#promiseLoad, this.#parent);
 		if (this.#promiseLoad) return this.#promiseLoad;
 		if (JSON.stringify(this.#params) === JSON.stringify(params)) {
 			return this.#promiseLoad;
 		}
 		this.#promiseLoad = new PendingPromise();
 		await this.init();
+		console.log(0.3, this.#parent.constructor.name);
 		const conditions = Object.keys(params);
 		const controls = ['and', 'or'];
 
@@ -192,7 +194,14 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 			let limit = params.limit ?? 30;
 			const totalPages = Math.ceil(this.#total / limit);
 
-			if (totalPages < this.#page) return;
+			if (totalPages < this.#page) {
+				if (this.#promiseLoad) {
+					this.#promiseLoad.resolve();
+					this.#promiseLoad = undefined;
+					return;
+				}
+				return;
+			}
 			let first = true;
 			const specs = params.where ?? {};
 			const live = liveQuery(this.where(specs, limit));
@@ -223,7 +232,11 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<any> {
 					}
 
 					if (sameQuery && items.length === this.#parent.items.length) {
-						return;
+						if (this.#promiseLoad) {
+							this.#promiseLoad.resolve();
+							this.#promiseLoad = undefined;
+							return;
+						}
 					}
 
 					const currentMap = new Set();
