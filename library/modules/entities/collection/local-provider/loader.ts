@@ -60,8 +60,8 @@ export class LocalProviderLoader {
 	#quantity = 0;
 	async load(params: { [key: string]: any }) {
 		if (!this.#parent.apply) return;
-		if (this.#promiseLoad) return this.#promiseLoad;
-		if (JSON.stringify(this.#params) === JSON.stringify(params)) return this.#promiseLoad;
+		const isSame = JSON.stringify(this.#params) === JSON.stringify(params);
+		if (isSame || this.#promiseLoad) return this.#promiseLoad;
 
 		this.#promiseLoad = new PendingPromise();
 		await this.#parent.init();
@@ -74,13 +74,10 @@ export class LocalProviderLoader {
 		const conditions = Object.keys(params);
 		conditions.forEach(condition => {
 			if (this.#controls.includes(condition)) {
-				this.#processControl(condition, params[condition]);
+				this.#parent.store[control];
+				//@todo: implement logic
 			}
 		});
-	}
-
-	#processControl(control: string, conditions: unknown) {
-		this.#parent.store[control];
 	}
 
 	async #performLoad(params: { [key: string]: any }) {
@@ -88,7 +85,10 @@ export class LocalProviderLoader {
 			if (!this.#total) this.#total = await this.#parent.store.count();
 			let limit = params.limit ?? 30;
 			const totalPages = Math.ceil(this.#total / limit);
-			if (totalPages < this.#page) return;
+			if (totalPages < this.#page) {
+				this.#resolvePromiseLoad();
+				return;
+			}
 			const live = liveQuery(this.where(params, limit));
 			this.#page++;
 
@@ -100,12 +100,10 @@ export class LocalProviderLoader {
 	}
 
 	async #subscribeToQuery(liveQuery: Observable<any>, params: { [key: string]: any }, totalPages: number) {
-		let first = true;
 		let currentPage: number;
 		liveQuery.subscribe({
 			next: async items => {
 				const response = await this.#handleQueryResponse(items, params, totalPages, currentPage);
-				first = false;
 				this.#resolvePromiseLoad(response);
 			},
 			error: err => {
@@ -116,6 +114,14 @@ export class LocalProviderLoader {
 		return this.#promiseLoad;
 	}
 
+	/**
+	 *
+	 * @param items
+	 * @param params
+	 * @param totalPages
+	 * @param currentPage
+	 * @returns
+	 */
 	async #handleQueryResponse(
 		items: [{ [key: string]: any }],
 		params: { [key: string]: any },
@@ -161,7 +167,7 @@ export class LocalProviderLoader {
 		});
 	}
 
-	#resolvePromiseLoad(response) {
+	#resolvePromiseLoad(response = {}) {
 		if (!this.#promiseLoad) return;
 		this.#promiseLoad.resolve(response);
 		this.#promiseLoad = null;
