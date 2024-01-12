@@ -7,11 +7,11 @@ export class LocalProviderLoader {
 	#promiseLoad: PendingPromise<any>;
 	#params: { [key: string]: any };
 	#listItems = new Map();
-	#items = [];
 	#total: number;
 	#page = 0;
 	#ids = new Set();
 	#controls: string[] = ['or', 'and'];
+	#setItems: (items) => void;
 
 	#customWhere: Function;
 	#defaultWhere = store => store.orderBy('id');
@@ -20,7 +20,7 @@ export class LocalProviderLoader {
 
 	constructor(parent: CollectionLocalProvider, parentPrivateProps) {
 		this.#parent = parent;
-		this.#items = parentPrivateProps.items;
+		this.#setItems = parentPrivateProps.setItems;
 	}
 
 	#quantity = 0;
@@ -88,6 +88,7 @@ export class LocalProviderLoader {
 			if (sortBy) await query.sortBy(sortBy);
 			query = query.filter(i => i.isDeleted !== 1);
 			const values = await query.offset(offset).limit(limit).toArray();
+			console.log('VALUES= > ', values);
 			return values;
 		};
 	};
@@ -145,7 +146,7 @@ export class LocalProviderLoader {
 
 		if (sameQuery) this.#cleanupItems(currentMap);
 
-		this.#items = [...this.#listItems.values()];
+		this.#setItems([...this.#listItems.values()]);
 		items.forEach(item => this.#ids.add(item.id));
 		this.#parent.trigger('items.changed');
 

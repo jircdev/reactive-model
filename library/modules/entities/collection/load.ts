@@ -96,6 +96,7 @@ export class CollectionLoadManager {
 			const localResponse = await this.#localLoad(params);
 
 			if (!this.#parent.isOnline || !this.#provider) return localResponse;
+			console.log('A => ', localResponse);
 			const response = await this.#provider.list(params);
 			const data = this.#adapter.fromRemote(response);
 
