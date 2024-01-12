@@ -1,6 +1,6 @@
 import { PendingPromise } from '@beyond-js/kernel/core';
 import { CollectionLocalProvider } from '.';
-import { Observable, liveQuery } from 'dexie';
+import { Collection, Observable, liveQuery } from 'dexie';
 
 export class LocalProviderLoader {
 	#parent: CollectionLocalProvider;
@@ -23,42 +23,9 @@ export class LocalProviderLoader {
 		this.#items = parentPrivateProps.items;
 	}
 
-	where = (params, limit) => {
-		return async () => {
-			let store = this.#parent.store;
-			const { sortBy } = params;
-			const offset = (this.#page - 1) * limit;
-			const specs = { ...params };
-			Object.keys(specs).forEach(key => {
-				['and', 'or', 'limit', 'sortBy', 'sortDirection'].includes(key) && delete specs[key];
-			});
-
-			let collection = Object.keys(specs).length === 0 ? store : store.where(specs);
-
-			//const filter = this.#customWhere ?? this.#defaultWhere;
-
-			this.#currentLimit = limit;
-			this.#currentOffset = offset;
-			/**
-			 * @todo: the isDeleted field must be set as 0 by default.
-			 */
-
-			if (sortBy) {
-				await collection.sortBy(sortBy);
-			}
-			collection = collection.filter(i => i.isDeleted !== 1);
-
-			return collection.offset(offset).limit(limit).toArray();
-		};
-	};
-
-	customFilter = (callback: Function) => {
-		this.#customWhere = callback;
-		return this.#parent;
-	};
-
 	#quantity = 0;
-	async load(params: { [key: string]: any }) {
+	async load(params: Record<string, any>) {
+		console.log(0.1, params);
 		if (!this.#parent.apply) return;
 		const isSame = JSON.stringify(this.#params) === JSON.stringify(params);
 		if (isSame || this.#promiseLoad) return this.#promiseLoad;
@@ -98,6 +65,40 @@ export class LocalProviderLoader {
 			return { status: false, data: [] };
 		}
 	}
+
+	where = (params, limit) => {
+		return async () => {
+			let store = this.#parent.store;
+			const { sortBy } = params;
+			const offset = (this.#page - 1) * limit;
+			const specs = { ...params };
+			Object.keys(specs).forEach(key => {
+				['and', 'or', 'limit', 'sortBy', 'sortDirection'].includes(key) && delete specs[key];
+			});
+			console.log(0.2, params, specs);
+			let collection: Collection = Object.keys(specs).length === 0 ? store : store.where(specs);
+
+			//const filter = this.#customWhere ?? this.#defaultWhere;
+
+			this.#currentLimit = limit;
+			this.#currentOffset = offset;
+			/**
+			 * @todo: the isDeleted field must be set as 0 by default.
+			 */
+
+			if (sortBy) {
+				await collection.sortBy(sortBy);
+			}
+			collection = collection.filter(i => i.isDeleted !== 1);
+
+			return collection.offset(offset).limit(limit).toArray();
+		};
+	};
+
+	customFilter = (callback: Function) => {
+		this.#customWhere = callback;
+		return this.#parent;
+	};
 
 	async #subscribeToQuery(liveQuery: Observable<any>, params: { [key: string]: any }, totalPages: number) {
 		let currentPage: number;

@@ -41,7 +41,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<Collection
 		return this.#apply;
 	}
 
-	#store!: Dexie.Table<any, any>;
+	#store!: Collection;
 	get store() {
 		return this.#store;
 	}
