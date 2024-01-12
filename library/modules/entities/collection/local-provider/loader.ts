@@ -1,6 +1,6 @@
 import { PendingPromise } from '@beyond-js/kernel/core';
 import { CollectionLocalProvider } from '.';
-import { Collection, Observable, Table, liveQuery } from 'dexie';
+import { Collection, Observable, liveQuery } from 'dexie';
 
 export class LocalProviderLoader {
 	#parent: CollectionLocalProvider;
@@ -10,7 +10,7 @@ export class LocalProviderLoader {
 	#total: number;
 	#page = 0;
 	#ids = new Set();
-	#controls: string[] = ['or', 'and'];
+	#conditions: string[] = ['or'];
 	#setItems: (items) => void;
 
 	#customWhere: Function;
@@ -32,18 +32,7 @@ export class LocalProviderLoader {
 		this.#promiseLoad = new PendingPromise();
 		await this.#parent.init();
 
-		this.#processConditions(params);
 		return this.#performLoad(params);
-	}
-
-	#processConditions(params: { [key: string]: any }) {
-		const conditions = Object.keys(params);
-		conditions.forEach(condition => {
-			if (this.#controls.includes(condition)) {
-				this.#parent.store[control];
-				//@todo: implement logic
-			}
-		});
 	}
 
 	async #performLoad(params: { [key: string]: any }) {
@@ -72,13 +61,18 @@ export class LocalProviderLoader {
 			const offset = (this.#page - 1) * limit;
 			let specs = { ...params };
 
+			if (specs.hasOwnProperty('where')) {
+				specs = { ...specs, ...specs.where };
+				delete specs.where;
+			}
+
+			const indexes = store.schema.indexes.map(index => index.name);
 			Object.keys(specs).forEach(key => {
-				['and', 'or', 'limit', 'sortBy', 'sortDirection'].includes(key) && delete specs[key];
+				!indexes.includes(key) && delete specs[key];
 			});
 
 			const collection = Object.keys(specs).length === 0 ? store : (store.where(specs) as unknown);
 			let query = collection as Collection;
-			//const filter = this.#customWhere ?? this.#defaultWhere;
 
 			this.#currentLimit = limit;
 			this.#currentOffset = offset;
@@ -89,7 +83,6 @@ export class LocalProviderLoader {
 			if (sortBy) await query.sortBy(sortBy);
 			query = query.filter(i => i.isDeleted !== 1);
 			const values = await query.offset(offset).limit(limit).toArray();
-			console.log('VALUES= > ', values);
 			return values;
 		};
 	};

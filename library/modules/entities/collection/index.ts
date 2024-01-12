@@ -124,7 +124,6 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 		items.forEach(item => {
 			if (item.id) this.#elements.set(item.id, item);
 		});
-		console.log('elements => ', this.#elements);
 	}
 	async delete(ids) {
 		try {

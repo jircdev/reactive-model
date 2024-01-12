@@ -51,7 +51,6 @@ export class CollectionLoadManager {
 
 	#localLoad = async params => {
 		if (!this.#localProvider) return;
-		//if (this.parent.sOnline || this.#provider) return;
 		const localData = (await this.#localProvider.load(params)) ?? { data: [] };
 
 		const newItems = await this.processEntries(localData.data);
@@ -97,22 +96,7 @@ export class CollectionLoadManager {
 			const localResponse = await this.#localLoad(params);
 
 			if (!this.#parent.isOnline || !this.#provider) return localResponse;
-			const response = await this.#provider.list(params);
-			const data = this.#adapter.fromRemote(response);
-
-			const items: (typeof Item)[] = await this.processRemoteEntries(data);
-
-			this.remoteData = response;
-
-			this.#remoteElements = params.update === true ? this.#remoteElements.concat(items) : items;
-
-			const properties = {
-				items: this.#remoteElements,
-				next: data.next,
-				loaded: true,
-				fetching: false,
-				total: data.total ?? 0,
-			};
+			const { properties, items } = await this.#remoteLoad(params);
 
 			this.parent.set(properties);
 			this.parent.triggerEvent();
@@ -127,6 +111,26 @@ export class CollectionLoadManager {
 			this.#parent.fetched = true;
 			this.#parent.landed = true;
 		}
+	};
+
+	#remoteLoad = async (params: Record<string, any>) => {
+		const response = await this.#provider.list(params);
+		const data = this.#adapter.fromRemote(response);
+
+		const items: (typeof Item)[] = await this.processRemoteEntries(data);
+
+		this.remoteData = response;
+
+		this.#remoteElements = params.update === true ? this.#remoteElements.concat(items) : items;
+
+		const properties = {
+			items: this.#remoteElements,
+			next: data.next,
+			loaded: true,
+			fetching: false,
+			total: data.total ?? 0,
+		};
+		return { properties, items };
 	};
 
 	async processRemoteEntries(data: { [key: string]: any }): Promise<any[]> {

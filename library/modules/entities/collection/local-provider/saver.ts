@@ -6,16 +6,12 @@ import { DatabaseManager } from '@beyond-js/reactive/database';
 export class LocalProviderSaver {
 	#batches = 200;
 	#parent: CollectionLocalProvider;
-	#bridge: {
-		get: (property: string) => any;
-		set: (property: string, value: any) => void;
-	};
+
 	#registryFactory: RegistryFactory;
 	#storeName: string;
 	#database: DatabaseManager;
 	constructor(parent: CollectionLocalProvider, parentBridge) {
 		this.#parent = parent;
-		this.#bridge = parentBridge;
 
 		this.#registryFactory = parentBridge.registryFactory;
 		this.#storeName = parentBridge.storeName;
