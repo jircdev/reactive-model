@@ -49,9 +49,9 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<Collection
 	get active() {
 		return this.#active;
 	}
-	#items = [];
+
 	get items() {
-		return this.#items;
+		return this.#loadManager?.items ?? [];
 	}
 
 	get isOnline() {
@@ -78,7 +78,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<Collection
 
 		this.#loadManager = new LocalProviderLoader(this, {
 			store: this.#store,
-			items: this.#items,
+			items: this.items,
 		});
 	}
 

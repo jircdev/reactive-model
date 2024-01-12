@@ -8,6 +8,9 @@ export class LocalProviderLoader {
 	#params: { [key: string]: any };
 	#listItems = new Map();
 	#items = [];
+	get items() {
+		return this.#items;
+	}
 	#total: number;
 	#page = 0;
 	#ids = new Set();
@@ -70,7 +73,8 @@ export class LocalProviderLoader {
 			let store = this.#parent.store;
 			const { sortBy } = params;
 			const offset = (this.#page - 1) * limit;
-			const specs = { ...params };
+			let specs = { ...params };
+
 			Object.keys(specs).forEach(key => {
 				['and', 'or', 'limit', 'sortBy', 'sortDirection'].includes(key) && delete specs[key];
 			});
@@ -138,6 +142,7 @@ export class LocalProviderLoader {
 		if (sameQuery && items.length === this.#parent.items.length) return;
 
 		const currentMap = new Set<string | number>();
+
 		items.forEach(item => {
 			this.#listItems.set(item.id, item);
 			currentMap.add(item.id);
@@ -147,6 +152,7 @@ export class LocalProviderLoader {
 
 		this.#items = [...this.#listItems.values()];
 		items.forEach(item => this.#ids.add(item.id));
+		console.log(99, this.#items);
 		this.#parent.trigger('items.changed');
 
 		return {
@@ -167,6 +173,7 @@ export class LocalProviderLoader {
 
 	#resolvePromiseLoad(response = {}) {
 		if (!this.#promiseLoad) return;
+
 		this.#promiseLoad.resolve(response);
 		this.#promiseLoad = null;
 	}

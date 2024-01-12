@@ -69,6 +69,7 @@ export class CollectionLoadManager {
 		this.#parent.loaded = true;
 
 		this.parent.set(properties);
+
 		return this.#adapter.toClient({ data: items });
 	};
 
@@ -96,6 +97,7 @@ export class CollectionLoadManager {
 			const localResponse = await this.#localLoad(params);
 
 			if (!this.#parent.isOnline || !this.#provider) return localResponse;
+
 			const response = await this.#provider.list(params);
 			const data = this.#adapter.fromRemote(response);
 
@@ -112,8 +114,10 @@ export class CollectionLoadManager {
 				fetching: false,
 				total: data.total ?? 0,
 			};
+
 			this.parent.set(properties);
 			this.parent.triggerEvent();
+
 			return this.#adapter.toClient({ data: items });
 		} catch (exc) {
 			this.parent.triggerEvent();

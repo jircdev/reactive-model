@@ -116,6 +116,7 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 	async set(data) {
 		const { items } = data;
 		delete data.item;
+
 		await super.set(data);
 
 		if (!items) return;
@@ -123,6 +124,7 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 		items.forEach(item => {
 			if (item.id) this.#elements.set(item.id, item);
 		});
+		console.log('elements => ', this.#elements);
 	}
 	async delete(ids) {
 		try {
