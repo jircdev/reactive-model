@@ -75,7 +75,7 @@ export class LocalProviderLoader {
 			Object.keys(specs).forEach(key => {
 				['and', 'or', 'limit', 'sortBy', 'sortDirection'].includes(key) && delete specs[key];
 			});
-			console.log(0.2, params, specs);
+
 			let collection: Collection = Object.keys(specs).length === 0 ? store : store.where(specs);
 
 			//const filter = this.#customWhere ?? this.#defaultWhere;
