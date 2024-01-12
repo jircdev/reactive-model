@@ -1,11 +1,12 @@
 import { ReactiveModel } from '@beyond-js/reactive/model';
 import { PendingPromise } from '@beyond-js/kernel/core';
 import { DBManager, DatabaseManager } from '@beyond-js/reactive/database';
-import Dexie from 'dexie';
+import Dexie, { Table } from 'dexie';
 import { RegistryFactory } from '../../registry/factory';
 import { LocalProviderSaver } from './saver';
 import { LocalProviderLoader } from './loader';
 import { Collection } from '..';
+import { Collection as DexieCollection } from 'dexie';
 
 interface IItemValues {
 	[key: string]: any;
@@ -14,6 +15,7 @@ interface IItemValues {
 }
 export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<CollectionLocalProvider> {
 	declare triggerEvent: (event?: string) => void;
+	declare trigger: (event?: string) => void;
 	declare ready: boolean;
 	declare localdb: boolean;
 
@@ -30,21 +32,16 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<Collection
 	#registryFactory: RegistryFactory;
 	#parent: Collection;
 	#saveManager: LocalProviderSaver;
-	#bridge: {
-		get: (property: string) => any;
-		set: (property: string, value: any) => void;
-	};
 	#localdb: boolean;
-
+	#store!: Table;
+	get store() {
+		return this.#store;
+	}
 	#apply: boolean = true;
 	get apply() {
 		return this.#apply;
 	}
 
-	#store!: Collection;
-	get store() {
-		return this.#store;
-	}
 	/**
 	 * Defines if the collection is using a local database or not.
 	 */
@@ -61,11 +58,10 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<Collection
 		return this.#isOnline && !this.#offline && !localStorage.getItem('reactive.offline');
 	}
 
-	constructor(parent, bridge: any) {
+	constructor(parent: Collection) {
 		super();
 		const { db, storeName } = parent;
 		this.#parent = parent;
-		this.#bridge = bridge;
 		this.localdb = this.#parent.localdb;
 
 		if (!this.localdb) {
@@ -110,6 +106,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<Collection
 			const database: DatabaseManager = await DBManager.get(this.#databaseName);
 			this.#database = database;
 			this.#store = database.db[this.#storeName];
+			console.log('store= > ', this.#store);
 			if (!this.#store) {
 				throw new Error(`The store ${this.#storeName} does not exists in the database ${this.#databaseName}`);
 			}

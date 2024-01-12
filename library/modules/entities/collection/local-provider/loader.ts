@@ -1,6 +1,6 @@
 import { PendingPromise } from '@beyond-js/kernel/core';
 import { CollectionLocalProvider } from '.';
-import { Collection, Observable, liveQuery } from 'dexie';
+import { Collection, Observable, Table, liveQuery } from 'dexie';
 
 export class LocalProviderLoader {
 	#parent: CollectionLocalProvider;
@@ -25,7 +25,6 @@ export class LocalProviderLoader {
 
 	#quantity = 0;
 	async load(params: Record<string, any>) {
-		console.log(0.1, params);
 		if (!this.#parent.apply) return;
 		const isSame = JSON.stringify(this.#params) === JSON.stringify(params);
 		if (isSame || this.#promiseLoad) return this.#promiseLoad;
@@ -76,8 +75,8 @@ export class LocalProviderLoader {
 				['and', 'or', 'limit', 'sortBy', 'sortDirection'].includes(key) && delete specs[key];
 			});
 
-			let collection: Collection = Object.keys(specs).length === 0 ? store : store.where(specs);
-
+			const collection = Object.keys(specs).length === 0 ? store : (store.where(specs) as unknown);
+			let query = collection as Collection;
 			//const filter = this.#customWhere ?? this.#defaultWhere;
 
 			this.#currentLimit = limit;
@@ -86,12 +85,10 @@ export class LocalProviderLoader {
 			 * @todo: the isDeleted field must be set as 0 by default.
 			 */
 
-			if (sortBy) {
-				await collection.sortBy(sortBy);
-			}
-			collection = collection.filter(i => i.isDeleted !== 1);
-
-			return collection.offset(offset).limit(limit).toArray();
+			if (sortBy) await query.sortBy(sortBy);
+			query = query.filter(i => i.isDeleted !== 1);
+			const values = await query.offset(offset).limit(limit).toArray();
+			return values;
 		};
 	};
 
