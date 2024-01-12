@@ -51,7 +51,6 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<Collection
 	}
 	#items = [];
 	get items() {
-		console.log('ITEMS => ', this.#items);
 		return this.#items;
 	}
 
