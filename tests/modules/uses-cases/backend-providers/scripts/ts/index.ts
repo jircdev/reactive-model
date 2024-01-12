@@ -24,8 +24,8 @@ export /*bundle*/ async function updateACollection() {
 	const itemA = new Book();
 	const itemB = new Book();
 
-	itemA.set({ title: 'Book A' });
-	itemB.set({ title: 'Book B' });
+	await itemA.set({ title: 'Book A' });
+	await itemB.set({ title: 'Book B' });
 
 	const responseA = await itemA.publish();
 	const responseB = await itemB.publish();
