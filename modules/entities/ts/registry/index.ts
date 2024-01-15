@@ -1,5 +1,5 @@
 import { PendingPromise } from '@beyond-js/kernel/core';
-import { ReactiveModel } from '@beyond-js/reactive-2/model';
+import { ReactiveModel } from '@beyond-js/reactive/model';
 import { v4 as uuidv4 } from 'uuid';
 interface IRegistry {
 	values?: object;

@@ -1,4 +1,4 @@
-import { ReactiveModel, reactiveProps } from '@beyond-js/reactive-2/model';
+import { ReactiveModel, reactiveProps } from '@beyond-js/reactive/model';
 
 import { LocalProvider } from './local-provider';
 import { ItemSaveManager } from './save';

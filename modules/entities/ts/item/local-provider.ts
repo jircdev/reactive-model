@@ -1,5 +1,5 @@
-import { ReactiveModel } from '@beyond-js/reactive-2/model';
-import { DBManager, DatabaseManager } from '@beyond-js/reactive-2/database';
+import { ReactiveModel } from '@beyond-js/reactive/model';
+import { DBManager, DatabaseManager } from '@beyond-js/reactive/database';
 import Dexie from 'dexie';
 import { RegistryFactory } from '../registry/factory';
 import type { Registry } from '../registry';

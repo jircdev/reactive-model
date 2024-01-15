@@ -1,4 +1,4 @@
-import { ReactiveModel } from '@beyond-js/reactive-2/model';
+import { ReactiveModel } from '@beyond-js/reactive/model';
 
 interface IStoreRecords {}
 export class /*bundle */ StoreRecords extends ReactiveModel<IStoreRecords> {}
