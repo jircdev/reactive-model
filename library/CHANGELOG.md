@@ -1,5 +1,10 @@
 # CHANGELOG
 
+# 1.1.9
+
+-   feat: enhance collections to support arbitrary 'where' params for server-side queries and client-side indexeddb
+    lookups
+
 # 1.1.7
 
 #### Enhancements

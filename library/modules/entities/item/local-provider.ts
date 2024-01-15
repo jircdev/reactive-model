@@ -1,6 +1,6 @@
 import { ReactiveModel } from '@beyond-js/reactive/model';
 import { DBManager, DatabaseManager } from '@beyond-js/reactive/database';
-import Dexie, { Collection } from 'dexie';
+import Dexie, { Collection, Table } from 'dexie';
 import { RegistryFactory } from '../registry/factory';
 import type { Registry } from '../registry';
 import { PendingPromise } from '@beyond-js/kernel/core';
@@ -8,7 +8,7 @@ import { PendingPromise } from '@beyond-js/kernel/core';
 export /*bundle*/
 class LocalProvider extends ReactiveModel<any> {
 	#isOnline = globalThis.navigator.onLine;
-	#store!: Collection;
+	#store!: Table<any, any>;
 	get store() {
 		return this.#store;
 	}
