@@ -1,5 +1,5 @@
 import type { Item } from '../../item';
-import { IProvider, IProviderConstructor } from '../../interfaces/provider';
+import { IProviderConstructor } from '../../interfaces/provider';
 import { TAdapters } from '../../adapter';
 
 export type TItemConstructor<T extends object = any> = new (args?: { id?: any }) => Item<T>;

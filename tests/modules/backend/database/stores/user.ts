@@ -7,7 +7,8 @@ export /*bundle*/ interface IUser {
 }
 
 interface LoadAllOptions {
-	filter?: string;
+	name?: string;
+	lastnames?: string;
 	limit?: number;
 }
 
@@ -51,17 +52,17 @@ export /*bundle*/ class UserStore {
 		await this.conn.connect();
 		const db = this.conn.connection;
 		let filter = 'WHERE deleted = 0';
-		let limit = 30;
-		if (options) {
-			if (options.filter) {
-				filter += ` AND ${options.filter}`;
-			}
-			if (options.limit) {
-				limit = options.limit;
-			}
+
+		let limitToApply = options?.limit || 30;
+		if (options && options.hasOwnProperty('limit')) delete options.limit;
+
+		if (options && Object.keys(options).length) {
+			Object.entries(options).forEach(([key, value]) => {
+				filter += ` AND ${key} = ${value}`;
+			});
 		}
 
-		const query = `SELECT * FROM users ${filter} LIMIT ${limit}`;
+		const query = `SELECT * FROM users ${filter} LIMIT ${limitToApply}`;
 		const users = await db.all(query);
 
 		const deletedUsersQuery = `SELECT id FROM users WHERE deleted = 1`;

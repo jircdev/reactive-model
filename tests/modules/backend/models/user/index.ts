@@ -34,10 +34,10 @@ export /*actions*/ /*bundle*/ class Users {
 		}
 	}
 
-	async list() {
+	async list(params) {
 		try {
 			const user = new UserStore();
-			const { entries, deletedIds } = await user.loadAll();
+			const { entries, deletedIds } = await user.loadAll(params);
 
 			return { entries, deletedEntries: deletedIds };
 		} catch (e) {

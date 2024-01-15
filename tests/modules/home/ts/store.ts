@@ -15,11 +15,12 @@ export class Store extends ReactiveModel<Store> {
 		this.#users = new Users();
 		// this.#users.setOffline(true);
 		this.#users.on('change', this.triggerEvent.bind(this));
+		globalThis.u = this.#users;
 		this.load();
 	}
 
 	async load() {
-		await this.#users.load();
+		// await this.#users.load();
 
 		this.ready = true;
 	}

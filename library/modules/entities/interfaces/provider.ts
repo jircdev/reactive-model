@@ -8,6 +8,7 @@ export interface IProvider {
 	list?: (params: any) => Promise<any>;
 	delete?: (id: string) => Promise<any>;
 	deleteItems?: (id: string) => Promise<any>;
+	[propName: string]: ((...args: any[]) => Promise<any>) | undefined;
 }
 
 export interface IProviderConstructor {
