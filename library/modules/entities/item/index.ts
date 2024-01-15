@@ -1,5 +1,4 @@
-import { ReactiveModel, reactiveProps } from '@beyond-js/reactive/model';
-
+import { ReactiveModel } from '@beyond-js/reactive/model';
 import { LocalProvider } from './local-provider';
 import { ItemSaveManager } from './save';
 import { ItemLoadManager } from './load';
@@ -8,7 +7,15 @@ import { IItem } from './interfaces/item';
 import { IItemConfig } from './interfaces/config';
 import { ResponseAdapter } from '../adapter';
 import { IResponseAdapter } from '../adapter/interface';
+import { ListenerFunction } from '@beyond-js/events/events';
+
 export /*bundle*/ class Item<Item> extends ReactiveModel<IItem> {
+	declare trigger: (event?: string) => void;
+	declare triggerEvent: (event?: string) => void;
+	declare getProperties: () => any;
+	declare on: (event: string, listener: ListenerFunction, priority?: number) => this;
+
+	id: string | number;
 	#info = new Map();
 	/**
 	 * Represent the data that is stored in the local database

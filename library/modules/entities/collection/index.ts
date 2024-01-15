@@ -88,7 +88,7 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 		const setProperty = (property, value) => (this[property] = value);
 		const bridge = { get: getProperty, set: setProperty };
 		this.#responseAdapter = ResponseAdapter.get(this, this.#initialSpecs?.adapter);
-		this.#localProvider = new CollectionLocalProvider(this);
+		this.#localProvider = new CollectionLocalProvider(this, bridge);
 		this.#saveManager = new CollectionSaveManager(this, bridge);
 		this.#loadManager = new CollectionLoadManager(this, bridge);
 		this.#localProvider.on('items.changed', this.#listenItems);
