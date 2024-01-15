@@ -148,7 +148,7 @@ export class CollectionLoadManager {
 		return this.setItems(elements);
 	}
 
-	async setItems(entries: (typeof Item)[]) {
+	async setItems(entries: Item<any>[]) {
 		const promises = [];
 		const items = entries.map(record => {
 			const item = new this.parent.item({ id: record.id, properties: record });
@@ -170,11 +170,11 @@ export class CollectionLoadManager {
 	 * @param updateLocalItems
 	 * @returns
 	 */
-	processEntries = async (entries: (typeof Item)[], updateLocalItems = false): Promise<Item<any>[]> => {
+	processEntries = async (entries: Item<any>[], updateLocalItems = false): Promise<Item<any>[]> => {
 		//	this.#registry.registerList(this.#parentBridge.get('storeName'), entries);
 		const promises = [];
 		const items = entries.map(record => {
-			const specs: { id: string; properties?: any } = { id: record.id };
+			const specs: { id: string | number; properties?: any } = { id: record.id };
 			if (updateLocalItems) specs.properties = record;
 
 			const item = new this.parent.item(specs);

@@ -122,7 +122,7 @@ export class ItemSaveManager {
 			if (this.#localProvider) {
 				// Update the local data without setting it as 'unpublished'
 				// (thus, it won't be queued for syncing)
-				await this.#localProvider.save(properties, false);
+				await this.#localProvider.save(properties);
 			}
 
 			this.#parent.triggerEvent();

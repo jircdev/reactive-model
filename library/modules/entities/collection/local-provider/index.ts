@@ -62,11 +62,18 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<Collection
 		return this.#isOnline && !this.#offline && !localStorage.getItem('reactive.offline');
 	}
 
-	constructor(parent: Collection) {
+	constructor(
+		parent: Collection,
+		bridge: {
+			get: (property: string) => any;
+			set: (property: string, value: any) => void;
+		}
+	) {
 		super();
 		const { db, storeName } = parent;
 		this.#parent = parent;
-		this.localdb = this.#parent.localdb;
+		this.localdb = bridge.get('localdb');
+		console.log('THIS LOCALDB => ', this.localdb);
 
 		if (!this.localdb) {
 			this.#apply = false;

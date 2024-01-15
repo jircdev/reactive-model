@@ -79,7 +79,9 @@ export class ItemLoadManager {
 				});
 
 				if (!same) {
-					const id = !isNaN(this.#parent.id) ? parseInt(this.#parent.id) : this.#parent.id;
+					const id = !isNaN(this.#parent.id as number)
+						? parseInt(this.#parent.id as string)
+						: this.#parent.id;
 					await this.#localProvider.save({
 						...remoteData,
 						id,
