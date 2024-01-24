@@ -37,6 +37,15 @@
 				"ports": {
 					"bundles": 8530
 				}
+			},
+			{
+				"name": "node",
+				"environment": "development",
+				"backend": "backend",
+				"platform": "node",
+				"ports": {
+					"bundles": 8630
+				}
 			}
 		]
 	},

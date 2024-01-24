@@ -55,7 +55,6 @@ export class ItemSaveManager {
 
 			return this.#adapter.toClient();
 		} catch (e) {
-			console.error('error saving', e);
 			return e;
 		}
 	};
