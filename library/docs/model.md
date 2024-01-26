@@ -86,6 +86,9 @@ This class is an abstract one. Meaning it should be extended before being used. 
 (fetching, fetched, processing, processed, loaded, ready) represent different states of data handling and processing.
 Users can use the state that suits their needs while processing data.
 
+## Properties
+
+- isUnpublished
 ## API
 
 `constructor(initialValues?: T)` Creates a new ReactiveModel instance with the initial values.

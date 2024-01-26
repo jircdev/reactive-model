@@ -27,12 +27,14 @@ export class ItemSaveManager {
 
 	save = async (data?) => {
 		try {
+			console.log(0.1);
 			await this.#getProperty('checkReady')();
+			console.log(0.2);
 
 			if (data) {
 				await this.#parent.set(data);
 			}
-
+			console.log(0.3, this.#parent.isUnpublished);
 			if (!this.#parent.isUnpublished) return;
 
 			const properties = { ...data, ...this.#parent.getProperties() };
@@ -61,9 +63,10 @@ export class ItemSaveManager {
 	publish = this.save;
 	#publish = async (properties?) => {
 		try {
+			console.log(0.1);
 			if (!this.#provider || !this.#bridge.get('isOnline')) return;
-
 			let props = { ...properties };
+			console.log(2, props);
 			this.#parent.localFields.forEach(field => {
 				delete props[field];
 			});

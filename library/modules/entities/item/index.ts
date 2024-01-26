@@ -84,7 +84,6 @@ export /*bundle*/ class Item<Item> extends ReactiveModel<IItem> {
 	}
 	constructor(config: IItemConfig = {}) {
 		super();
-
 		const { db, storeName, localdb = true } = config;
 		this.#config = config;
 		this.localdb = localdb;

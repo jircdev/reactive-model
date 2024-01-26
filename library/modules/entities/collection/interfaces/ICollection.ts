@@ -12,9 +12,9 @@ export interface ICollection {
 }
 
 export interface ICollectionSpecs {
-	provider: IProviderConstructor;
-	storeName: string;
-	db: string;
+	provider?: IProviderConstructor;
+	storeName?: string;
+	db?: string;
 	localdb?: boolean;
 	item: TItemConstructor<any>;
 	adapter?: TAdapters;

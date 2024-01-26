@@ -13,6 +13,9 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 	declare storeName: string;
 	declare trigger: (event?: string) => void;
 	declare reactiveProps: <T>(props: Array<keyof T>) => void;
+	counters: any = {};
+	total: number = 0;
+	next: number | undefined;
 	db: string;
 	item: typeof Item;
 
@@ -39,9 +42,6 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 		this.triggerEvent();
 	}
 
-	counters: any = {};
-	total: number = 0;
-	next: number | undefined;
 	#localProvider: CollectionLocalProvider;
 	get localProvider() {
 		return this.#localProvider;
@@ -91,8 +91,11 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 		this.#localProvider = new CollectionLocalProvider(this, bridge);
 		this.#saveManager = new CollectionSaveManager(this, bridge);
 		this.#loadManager = new CollectionLoadManager(this, bridge);
-		this.#localProvider.on('items.changed', this.#listenItems);
+		this.#localProvider.on('items.changed', () => {
+			this.#listenItems();
+		});
 		this.localProvider.init();
+		super.initialise();
 	}
 
 	#listenItems = async () => {

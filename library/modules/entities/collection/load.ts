@@ -97,13 +97,9 @@ export class CollectionLoadManager {
 
 			if (!this.#parent.isOnline || !this.#provider) return localResponse;
 			const { properties, items } = await this.#remoteLoad(params);
-
 			this.parent.set(properties);
-			this.parent.triggerEvent();
-
 			return this.#adapter.toClient({ data: items });
 		} catch (exc) {
-			this.parent.triggerEvent();
 			console.error(exc);
 			return this.#adapter.toClient({ error: exc });
 		} finally {

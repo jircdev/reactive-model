@@ -1,7 +1,9 @@
 import { Events } from '@beyond-js/events/events';
-import { reactiveProps } from './property';
 import { IReactiveProperties } from './interfaces/reactive-props';
 import { ReactiveModelPublic } from './interfaces/reactive-public-props';
+import { ReactiveProperties } from './interfaces/types';
+import { ModelProperties } from './properties';
+import { IReactiveModelSpecs } from './interfaces/model-specs';
 
 /**
  * The `ReactiveModel` class is a subclass of the `Events` class that provides a simple way to create
@@ -24,10 +26,32 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 	processing: boolean = false;
 	ready: boolean = false;
 	processed: boolean = false;
-	protected properties: string[];
 	loaded: boolean = false;
-
+	/**
+	 * An array of property names or objects defining properties to be treated as reactive.
+	 * String values represent the names of the properties. Object values follow the IPropertyObject
+	 * interface, allowing for more detailed property definitions.
+	 *
+	 * @type {(string | IPropertyObject)[]}
+	 */
+	protected properties: ReactiveProperties = [];
+	/**
+	 * Initializes the model with given values. This method sets the initial state of the model's properties.
+	 * If no values are provided, it returns the current initial values.
+	 *
+	 * @param {Partial<ReactiveModelPublic<T>> | null} values - An object containing initial values for the model's properties.
+	 * @returns {Record<string, any>} The initial values of the model's properties.
+	 */
 	#initialValues: Record<string, any> = {};
+
+	/**
+	 * Checks if there are any changes to the reactive properties of the model that haven't been published yet.
+	 * It compares the current property values with their initial values. If any property value has changed
+	 * (except for properties named 'id' or properties of type 'object'), this getter returns true, indicating
+	 * that there are unpublished changes.
+	 *
+	 * @returns {boolean} True if there are unpublished changes, otherwise false.
+	 */
 	get isUnpublished() {
 		const properties = this.getProperties();
 
@@ -36,10 +60,43 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 			return properties[prop] !== this.#initialValues[prop];
 		});
 	}
-	constructor(properties?) {
+	#properties: ModelProperties;
+	constructor(specs?: IReactiveModelSpecs) {
 		super();
-		this.reactiveProps<IReactiveProperties>(['fetching', 'fetched', 'processing', 'processed', 'loaded', 'ready']);
-		if (properties) this.initialValues(properties);
+
+		this.#properties = new ModelProperties(this);
+		if (specs?.properties) {
+			this.properties = specs.properties;
+			this.initialise();
+		}
+		this.initialValues(specs);
+	}
+	/**
+	 * Initializes reactive properties for the model. This method should be called in child classes
+	 * of the ReactiveModel after defining their specific `properties`. The `initialise` method
+	 * sets up the reactive behavior for each property listed in the `properties` array. It ensures
+	 * that any changes to these properties will correctly trigger events as defined in the reactive
+	 * model structure.
+	 *
+	 * This method is essential for the proper functioning of the reactive model in child classes, as
+	 * it dynamically assigns reactive characteristics to the properties defined by them. It should be
+	 * called once during the initialization phase of the child class instance.
+	 *
+	 * Usage in a child class:
+	 * ```
+	 * class MyModel extends ReactiveModel<MyType> {
+	 *     constructor() {
+	 *         super();
+	 *         this.properties = ['prop1', 'prop2', ...];
+	 *         this.initialise(); // Initializes reactive properties
+	 *     }
+	 * }
+	 * ```
+	 */
+
+	protected initialise() {
+		this.reactiveProps(this.properties);
+		this.reactiveProps(['fetching', 'fetched', 'processing', 'processed', 'loaded', 'ready']);
 	}
 
 	initialValues(values?) {
@@ -48,47 +105,10 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 		this.#initialValues = values;
 	}
 
-	protected reactiveProps<T>(props: Array<keyof T>): void {
-		for (const propKey of props) {
-			const descriptor = Object.getOwnPropertyDescriptor(this, propKey);
-			const initialValue = descriptor ? descriptor.value : undefined;
-
-			this.defineReactiveProp(propKey, initialValue);
-		}
+	protected reactiveProps(props: ReactiveProperties): void {
+		this.#properties.reactiveProps(props);
 	}
 
-	protected defineReactiveProp<T>(propKey: keyof T, initialValue: T[keyof T]): void {
-		const privatePropKey = `__${String(propKey)}`;
-
-		Object.defineProperty(this, propKey, {
-			get(): T[keyof T] {
-				if (!this.hasOwnProperty(privatePropKey)) {
-					this[privatePropKey] = initialValue;
-				}
-				return this[privatePropKey];
-			},
-			set(newVal: T[keyof T]): void {
-				if (newVal === this[privatePropKey]) return;
-				this[privatePropKey] = newVal;
-				this.triggerEvent();
-			},
-			enumerable: true,
-			configurable: true,
-		});
-	}
-
-	/**
-	 * The `triggerEvent` method triggers a change event on the model, which can be used to notify
-	 * subscribers of changes to the model's properties.
-	 *
-	 * @param {string} event - The name of the event to trigger.
-	 * @returns {void}
-	 */
-	triggerEvent = (event: string = 'change'): void => {
-		globalThis.setTimeout(() => {
-			this.trigger(event);
-		}, 0);
-	};
 	/**
 	 * The `set` method sets one or more properties on the model.
 	 *
@@ -97,26 +117,23 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 	 * @returns {void}
 	 */
 	set(properties: Partial<ReactiveModelPublic<T>>): void {
-		let props: Partial<ReactiveModelPublic<T>> = Object.keys(properties);
-		let updated = false;
-
 		try {
 			Object.keys(properties).forEach(prop => {
-				const sameObject =
-					typeof properties[prop] === 'object' &&
-					JSON.stringify(properties[prop]) === JSON.stringify(this[prop]);
-
-				if (this[prop] === properties[prop] || sameObject) return;
-				const descriptor = Object.getOwnPropertyDescriptor(this, prop);
-				if (descriptor?.set) return;
-
+				this.#properties.multipleSet = true;
+				if (!this.#properties.items.includes(prop)) {
+					return;
+				}
 				this[prop] = properties[prop];
-				updated = true;
 			});
 		} catch (e) {
 			throw new Error(`Error setting properties: ${e}`);
 		} finally {
-			if (updated) this.triggerEvent();
+			if (this.#properties.hasChanges) {
+				console.log('hubo cambios');
+				this.triggerEvent();
+			}
+			this.#properties.multipleSet = false;
+			this.#properties.hasChanges = false;
 		}
 	}
 
@@ -144,9 +161,21 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 				props[property.name] = this[property.name];
 			}
 			let name = property as string;
-
 			props[name] = this[name];
 		});
 		return props;
 	}
+
+	/**
+	 * The `triggerEvent` method triggers a change event on the model, which can be used to notify
+	 * subscribers of changes to the model's properties.
+	 *
+	 * @param {string} event - The name of the event to trigger.
+	 * @returns {void}
+	 */
+	triggerEvent = (event: string = 'change'): void => {
+		globalThis.setTimeout(() => {
+			this.trigger(event);
+		}, 0);
+	};
 }
