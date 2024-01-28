@@ -21,12 +21,12 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 		return this.#isReactive;
 	}
 	[key: string]: any;
-	fetching!: boolean;
-	fetched: boolean = false;
-	processing: boolean = false;
-	ready: boolean = false;
-	processed: boolean = false;
-	loaded: boolean = false;
+	declare fetching: boolean;
+	declare fetched: boolean;
+	declare processing: boolean;
+	declare ready: boolean;
+	declare processed: boolean;
+	declare loaded: boolean;
 	/**
 	 * An array of property names or objects defining properties to be treated as reactive.
 	 * String values represent the names of the properties. Object values follow the IPropertyObject

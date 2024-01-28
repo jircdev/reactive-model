@@ -14,7 +14,9 @@ export class ModelProperties {
 
 	constructor(parent) {
 		this.#parent = parent;
+		this.reactiveProps(this.#reactiveProperties);
 	}
+
 	reactiveProps(props: ReactiveProperties): void {
 		if (!props) return;
 		for (const propKey of props) {
@@ -22,12 +24,13 @@ export class ModelProperties {
 				console.log(`the props is an object`, propKey);
 				continue;
 			}
+
 			if (!this.#reactiveProperties.includes(propKey)) {
 				this.#items.add(propKey);
 			}
+
 			const descriptor = Object.getOwnPropertyDescriptor(this.#parent, propKey);
 			const initialValue = descriptor ? descriptor.value : undefined;
-
 			this.defineReactiveProp(propKey, initialValue);
 		}
 	}
@@ -53,7 +56,9 @@ export class ModelProperties {
 				this.hasChanges = true;
 				this[privatePropKey] = newVal;
 
-				if (this.multipleSet === false) this.#parent.triggerEvent();
+				if (!this.multipleSet) {
+					this.#parent.triggerEvent();
+				}
 			},
 		});
 	}
