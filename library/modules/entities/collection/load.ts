@@ -16,6 +16,7 @@ export class CollectionLoadManager {
 	filter: any;
 	#localProvider: CollectionLocalProvider;
 	#provider: IProvider;
+	#loaded: Map<string | number, any> = new Map();
 	#parentBridge: {
 		get: (property: string) => any;
 		set: (property: string, value: any) => void;
@@ -48,10 +49,9 @@ export class CollectionLoadManager {
 
 	#localLoad = async params => {
 		if (!this.#localProvider) return;
+
 		const localData = (await this.#localProvider.load(params)) ?? { data: [] };
-
 		const newItems = await this.processEntries(localData.data);
-
 		let items = params.update === true ? this.parent.items.concat(newItems) : newItems;
 
 		const properties: ILoadResponse = {
@@ -61,9 +61,10 @@ export class CollectionLoadManager {
 			next: !!localData.next,
 			items,
 		};
-		if (localData.next) properties.next = localData.next;
-		this.#parent.loaded = true;
 
+		if (localData.next) properties.next = localData.next;
+
+		this.#parent.loaded = true;
 		this.parent.set(properties);
 
 		return this.#adapter.toClient({ data: items });
@@ -78,6 +79,7 @@ export class CollectionLoadManager {
 			console.error(e);
 		}
 	};
+
 	load = async (params: any = {}) => {
 		try {
 			this.#parent.fetching = true;
@@ -144,26 +146,12 @@ export class CollectionLoadManager {
 		}
 
 		if (this.#localdb) await this.#localProvider.save(elements);
-		return this.setItems(elements);
-	}
-
-	async setItems(entries: Item<any>[]) {
-		const promises = [];
-		const items = entries.map(record => {
-			const item = new this.parent.item({ id: record.id, properties: record });
-			promises.push(item.set(record));
-			return item;
-		});
-
-		await Promise.all(promises);
-		items.forEach((item, index) => {
-			item.set(entries[index], true);
-		});
-
-		return items;
+		return this.processEntries(elements);
 	}
 
 	/**
+	 *
+	 * This method is used to process the "local entries"
 	 *
 	 * @param entries
 	 * @param updateLocalItems
@@ -173,11 +161,21 @@ export class CollectionLoadManager {
 		//	this.#registry.registerList(this.#parentBridge.get('storeName'), entries);
 		const promises = [];
 		const items = entries.map(record => {
-			const specs: { id: string | number; properties?: any } = { id: record.id };
+			/**
+			 * Already loaded
+			 */
+			if (this.#loaded.has(record.id)) {
+				const item = (this.#loaded = this.#loaded.get(record.id));
+				promises.push(item.isReady);
+				return item;
+			}
+
+			const specs: { id: string | number; properties?: any } = { id: record.id, ...record };
 			if (updateLocalItems) specs.properties = record;
 
 			const item = new this.parent.item(specs);
-			promises.push(item.set(record));
+			promises.push(item.isReady);
+			this.#loaded.set(record.id, item);
 			return item;
 		});
 

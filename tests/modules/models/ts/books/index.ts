@@ -19,6 +19,6 @@ class Book extends Item<IBook, IProvider> {
 	];
 
 	constructor({ id = undefined, localdb = true }: { id?: string | undefined; localdb?: boolean } = {}) {
-		super({ id, storeName: 'book', db: 'test', localdb });
+		super({ id });
 	}
 }

@@ -14,6 +14,6 @@ class User extends Item<IUser> {
 	protected properties = ['id', 'name', 'lastnames'];
 
 	constructor({ id = undefined }: ISpecs = {}) {
-		super({ storeName: 'user', db: 'test', id, provider: UserProvider });
+		super({ id, provider: UserProvider, properties: ['id', 'name', 'lastnames'] });
 	}
 }

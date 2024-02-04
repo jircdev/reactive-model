@@ -9,7 +9,7 @@ import { ResponseAdapter } from '../adapter';
 import { IResponseAdapter } from '../adapter/interface';
 import { ListenerFunction } from '@beyond-js/events/events';
 
-export /*bundle*/ class Item<Item> extends ReactiveModel<IItem> {
+export /*bundle*/ class Item<T> extends ReactiveModel<IItem> {
 	declare trigger: (event?: string) => void;
 	declare triggerEvent: (event?: string) => void;
 	declare getProperties: () => any;
@@ -18,12 +18,15 @@ export /*bundle*/ class Item<Item> extends ReactiveModel<IItem> {
 	id: string | number;
 
 	declare localUpdate: (data) => Promise<any>;
-	protected localdb = true;
+	protected localdb: boolean;
 	#provider: any;
 	protected storeName: string;
 	protected db: string;
 	localFields = [];
-
+	#localData;
+	/**
+	 * @todo: Check if this is used and the purpose of it
+	 */
 	#skeleton: Array<string> = [];
 	localProvider: LocalProvider;
 
@@ -81,13 +84,14 @@ export /*bundle*/ class Item<Item> extends ReactiveModel<IItem> {
 	constructor(config: IItemConfig = {}) {
 		super();
 
-		const { db, storeName, localdb = true } = config;
+		const { db, storeName, localdb } = config;
 		this.#config = config;
-		this.localdb = localdb;
+
 		this.#responseAdapter = ResponseAdapter.get(this, this.#config?.adapter);
 
 		if (db) this.db = db;
 		if (storeName) this.storeName = storeName;
+		this.localdb = localdb || !!(db && storeName);
 		if (config.provider) {
 			if (typeof config.provider !== 'function') {
 				throw new Error('Provider must be an function');
@@ -104,42 +108,16 @@ export /*bundle*/ class Item<Item> extends ReactiveModel<IItem> {
 		const getProperty = property => this.__get(property);
 		const setProperty = (property, value) => (this[property] = value);
 		const bridge = { get: getProperty, set: setProperty };
-		this.localProvider = new LocalProvider(this, bridge);
-		this.#saveManager = new ItemSaveManager(this, bridge);
-		this.#loadManager = new ItemLoadManager(this, bridge);
+		const spcs = { parent: this, bridge, localdb: this.localdb };
+		this.localProvider = new LocalProvider(spcs);
+		this.#saveManager = new ItemSaveManager(spcs);
+		this.#loadManager = new ItemLoadManager(spcs);
 		this.save = this.save.bind(this);
-		if (this.db && this.storeName) this.init(config);
+		this.init(config);
 	}
 
 	protected async initialise() {
 		this.init(this.#config);
-	}
-
-	protected async init(config: IItemConfig) {
-		try {
-			let id;
-
-			if (this.#initPromise) return this.#initPromise;
-
-			this.#initPromise = new PendingPromise();
-
-			if (config.id) id = config.id;
-
-			await this.localProvider.init(id);
-
-			if (this.#skeleton && this.#skeleton.length > 0) {
-				this.properties = this.#skeleton;
-			}
-
-			if (config.properties) this.set(config.properties, true);
-
-			this.ready = true;
-			this.#initPromise.resolve(true);
-			this.trigger('object.loaded');
-			this.set(this.localProvider.registry.values);
-		} catch (e) {
-			console.error('error initializing', e);
-		}
 	}
 
 	/**
@@ -168,6 +146,35 @@ export /*bundle*/ class Item<Item> extends ReactiveModel<IItem> {
 		return this.#promiseReady;
 	};
 
+	protected async init(config: IItemConfig) {
+		try {
+			let id;
+
+			if (this.#initPromise) return this.#initPromise;
+
+			this.#initPromise = new PendingPromise();
+
+			if (config.id) id = config.id;
+			this.id = config.id;
+			if (this.localdb) {
+				await this.localProvider.init(id);
+				this.set(this.localProvider.registry.values);
+			}
+
+			if (this.#skeleton && this.#skeleton.length > 0) {
+				this.properties = this.#skeleton;
+			}
+
+			if (config.properties) this.set(config.properties, true);
+
+			this.ready = true;
+			this.#initPromise.resolve(true);
+			this.trigger('object.loaded');
+		} catch (e) {
+			console.error('error initializing', e);
+		}
+	}
+
 	setOffline = value => this.localProvider.setOffline(value);
 
 	/**
@@ -177,7 +184,13 @@ export /*bundle*/ class Item<Item> extends ReactiveModel<IItem> {
 	 * @param init If true, the data will be stored in the local database
 	 */ x;
 	async set(data, init = false) {
-		await this.isReady;
+		if (!init) {
+			/**
+			 * init is passed as true when it is called by the init method or collections objects,
+			 * the isReady promise needs to be validated when the method is called by the user
+			 */
+			await this.isReady;
+		}
 
 		if (init && this.localdb) {
 			this.#localData = new Map(Object.entries(data));

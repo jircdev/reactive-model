@@ -10,12 +10,14 @@ export class ItemLoadManager {
 	#getProperty;
 	#bridge;
 	#adapter: IResponseAdapter;
+	#localdb;
 	ready: boolean;
 
-	constructor(parent, bridge) {
+	constructor({ parent, bridge, localdb }) {
 		this.#parent = parent;
 		this.#getProperty = bridge.get;
 		this.#bridge = bridge;
+		this.#localdb = localdb;
 		this.#adapter = this.#parent.responseAdapter;
 		this.init();
 	}
@@ -59,16 +61,19 @@ export class ItemLoadManager {
 			}
 
 			if (localProvider && !localProvider.isOnline) return { status: true };
+
 			if (!this.#provider) return;
 			const remoteData = await this.remoteLoad(params);
 			if (!remoteData) {
 				this.#parent.found = false;
+
 				return this.#adapter.toClient();
 			}
 
 			this.#parent.found = true;
-
+			this.#parent.fetched = true;
 			this.#parent.set(remoteData);
+
 			if (localdb) {
 				let same = true;
 				this.#parent.landed = true;
@@ -92,6 +97,7 @@ export class ItemLoadManager {
 
 			return this.#adapter.toClient({ data: remoteData });
 		} catch (exc) {
+			console.log(20, exc);
 			throw exc;
 		} finally {
 			this.#parent.fetching = false;
@@ -115,6 +121,7 @@ export class ItemLoadManager {
 
 		const response = await loadMethod(params);
 
+		console.log(3, this.#adapter);
 		return this.#adapter.fromRemote(response);
 	};
 }
