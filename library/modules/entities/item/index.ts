@@ -16,18 +16,14 @@ export /*bundle*/ class Item<Item> extends ReactiveModel<IItem> {
 	declare on: (event: string, listener: ListenerFunction, priority?: number) => this;
 
 	id: string | number;
-	#info = new Map();
-	/**
-	 * Represent the data that is stored in the local database
-	 */
-	#localData = new Map();
+
 	declare localUpdate: (data) => Promise<any>;
 	protected localdb = true;
 	#provider: any;
 	protected storeName: string;
 	protected db: string;
 	localFields = [];
-	#ignoredFields: Array<string> = [];
+
 	#skeleton: Array<string> = [];
 	localProvider: LocalProvider;
 
@@ -99,8 +95,11 @@ export /*bundle*/ class Item<Item> extends ReactiveModel<IItem> {
 
 			this.#provider = new config.provider(this);
 		}
-
+		this.#start(config);
 		this.on('object.loaded', this.checkReady);
+	}
+
+	#start(config) {
 		this.reactiveProps(['found', 'landed']);
 		const getProperty = property => this.__get(property);
 		const setProperty = (property, value) => (this[property] = value);

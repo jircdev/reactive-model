@@ -4,6 +4,7 @@ import { RegistryFactory } from '../registry/factory';
 import { IResponseAdapter } from '../adapter/interface';
 import { Item } from '../item';
 import { IProvider } from '../interfaces/provider';
+import { IInternalCollectionParams } from './interfaces/children-constructor-props';
 interface ILoadResponse {
 	localLoaded: true;
 	fetching: false;
@@ -22,20 +23,17 @@ export class CollectionLoadManager {
 	#parent: Collection;
 	#registry: RegistryFactory;
 	#adapter: IResponseAdapter;
+	#localdb: boolean;
+
 	get parent() {
 		return this.#parent;
 	}
 
 	protected remoteData = [];
-	constructor(
-		parent: Collection,
-		parentBridge: {
-			get: (property: string) => any;
-			set: (property: string, value: any) => void;
-		}
-	) {
+	constructor({ parent, bridge, localdb }: IInternalCollectionParams) {
 		this.#parent = parent;
-		this.#parentBridge = parentBridge;
+		this.#parentBridge = bridge;
+		this.#localdb = localdb;
 		this.#adapter = this.#parent.responseAdapter;
 
 		this.init();
@@ -46,7 +44,6 @@ export class CollectionLoadManager {
 		this.#provider = this.#parentBridge.get('provider');
 
 		this.#registry = RegistryFactory.get(this.#parentBridge.get('storeName'));
-		if (this.#localProvider) this.#parent.customFilter = this.#localProvider?.customFilter;
 	}
 
 	#localLoad = async params => {
@@ -93,9 +90,11 @@ export class CollectionLoadManager {
 				params.start = start;
 			}
 
-			const localResponse = await this.#localLoad(params);
+			if (this.#parentBridge.get('localdb')) {
+				const localResponse = await this.#localLoad(params);
+				if (!this.#parent.isOnline || !this.#provider) return localResponse;
+			}
 
-			if (!this.#parent.isOnline || !this.#provider) return localResponse;
 			const { properties, items } = await this.#remoteLoad(params);
 
 			this.parent.set(properties);
@@ -144,7 +143,7 @@ export class CollectionLoadManager {
 			this.#localProvider.softDelete(data.deletedEntries);
 		}
 
-		await this.#localProvider.save(elements);
+		if (this.#localdb) await this.#localProvider.save(elements);
 		return this.setItems(elements);
 	}
 

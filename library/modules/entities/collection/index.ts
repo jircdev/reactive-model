@@ -3,7 +3,7 @@ import { CollectionLocalProvider } from './local-provider';
 import { CollectionSaveManager } from './publish';
 import { CollectionLoadManager } from './load';
 import { IProvider } from '../interfaces/provider';
-import { ICollectionSpecs, ICollection } from './interfaces/ICollection';
+import { ICollectionSpecs, ICollection } from './interfaces/collection';
 import { ResponseAdapter } from '../adapter';
 import { IResponseAdapter } from '../adapter/interface';
 import { Item } from '../item';
@@ -90,7 +90,7 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 		this.#responseAdapter = ResponseAdapter.get(this, this.#initialSpecs?.adapter);
 		this.#localProvider = new CollectionLocalProvider(this, bridge);
 		this.#saveManager = new CollectionSaveManager(this, bridge);
-		this.#loadManager = new CollectionLoadManager(this, bridge);
+		this.#loadManager = new CollectionLoadManager({ parent: this, bridge, localdb: this.localdb });
 		this.#localProvider.on('items.changed', this.#listenItems);
 		this.localProvider.init();
 	}
@@ -116,7 +116,6 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 	async set(data) {
 		const { items } = data;
 		delete data.item;
-
 		await super.set(data);
 
 		if (!items) return;
