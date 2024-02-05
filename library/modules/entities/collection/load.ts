@@ -164,8 +164,9 @@ export class CollectionLoadManager {
 			/**
 			 * Already loaded
 			 */
+
 			if (this.#loaded.has(record.id)) {
-				const item = (this.#loaded = this.#loaded.get(record.id));
+				const item = this.#loaded.get(record.id);
 				promises.push(item.isReady);
 				return item;
 			}

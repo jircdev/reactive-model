@@ -73,7 +73,6 @@ export class ItemLoadManager {
 			this.#parent.found = true;
 			this.#parent.fetched = true;
 			this.#parent.set(remoteData);
-
 			if (localdb) {
 				let same = true;
 				this.#parent.landed = true;
@@ -121,7 +120,6 @@ export class ItemLoadManager {
 
 		const response = await loadMethod(params);
 
-		console.log(3, this.#adapter);
 		return this.#adapter.fromRemote(response);
 	};
 }

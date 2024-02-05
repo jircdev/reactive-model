@@ -31,7 +31,7 @@ export class LegacyAdapter implements IResponseAdapter {
 
 	fromRemote(response: IParams) {
 		const { status, data, error, message } = response;
-		console.log(22, response, status, error);
+
 		if (!status) {
 			if (message) throw message;
 			throw typeof error === 'string' ? error : 'ERROR_DATA_QUERY';
