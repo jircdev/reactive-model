@@ -87,6 +87,7 @@ export class ItemLoadManager {
 						? parseInt(this.#parent.id as string)
 						: this.#parent.id;
 					await this.#localProvider.save({
+						...this.#parent.getProperties(),
 						...remoteData,
 						id,
 						__instanceId: this.#localProvider.__instanceId,
