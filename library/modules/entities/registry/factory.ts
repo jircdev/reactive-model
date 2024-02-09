@@ -100,7 +100,7 @@ export class /*bundle*/ RegistryFactory extends ReactiveModel<IRecords> {
 	 * @param dbName IndexedDB database name
 	 * @returns
 	 */
-	static get(dbName, localdb?) {
+	static get(dbName, localdb?): RegistryFactory {
 		if (this.#dbs.has(dbName)) return this.#dbs.get(dbName);
 		const db = new RegistryFactory(dbName, localdb);
 		this.#dbs.set(dbName, db);

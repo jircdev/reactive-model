@@ -51,8 +51,9 @@ class LocalProvider extends ReactiveModel<any> {
 	get registry() {
 		return this.#registry;
 	}
+
 	#apply: boolean;
-	constructor(parent, bridge) {
+	constructor({ parent, bridge, localdb }) {
 		super();
 
 		this.#getProperty = bridge.get;
@@ -63,7 +64,7 @@ class LocalProvider extends ReactiveModel<any> {
 		this.#databaseName = db;
 		this.#storeName = storeName;
 		this.#bridge = bridge;
-		this.#localdb = bridge.get('localdb');
+		this.#localdb = localdb;
 		this.#factoryRegistry = RegistryFactory.get(db, this.#localdb);
 		this.load = this.load.bind(this);
 	}

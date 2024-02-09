@@ -16,7 +16,7 @@ export /*actions*/ /*bundle*/ class Users {
 	async load({ id }) {
 		try {
 			if (!id) {
-				return { status: false, error: true, message: 'id is required' };
+				return { status: false, error: 'id is required' };
 			}
 
 			const user = new UserStore();

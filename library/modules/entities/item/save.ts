@@ -9,12 +9,13 @@ export class ItemSaveManager {
 	#bridge;
 	#provider;
 	#localProvider: LocalProvider;
-
+	#localdb;
 	#adapter: IResponseAdapter;
-	constructor(parent: Item<any>, bridge) {
+	constructor({ parent, bridge, localdb }) {
 		this.#parent = parent;
 		this.#getProperty = bridge.get;
 		this.#bridge = bridge;
+		this.#localdb = localdb;
 		this.#adapter = this.#parent.responseAdapter;
 		this.init();
 	}

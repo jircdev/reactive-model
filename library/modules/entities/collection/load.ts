@@ -4,6 +4,7 @@ import { RegistryFactory } from '../registry/factory';
 import { IResponseAdapter } from '../adapter/interface';
 import { Item } from '../item';
 import { IProvider } from '../interfaces/provider';
+import { IInternalCollectionParams } from './interfaces/children-constructor-props';
 interface ILoadResponse {
 	localLoaded: true;
 	fetching: false;
@@ -15,6 +16,7 @@ export class CollectionLoadManager {
 	filter: any;
 	#localProvider: CollectionLocalProvider;
 	#provider: IProvider;
+	#loaded: Map<string | number, any> = new Map();
 	#parentBridge: {
 		get: (property: string) => any;
 		set: (property: string, value: any) => void;
@@ -22,20 +24,17 @@ export class CollectionLoadManager {
 	#parent: Collection;
 	#registry: RegistryFactory;
 	#adapter: IResponseAdapter;
+	#localdb: boolean;
+
 	get parent() {
 		return this.#parent;
 	}
 
 	protected remoteData = [];
-	constructor(
-		parent: Collection,
-		parentBridge: {
-			get: (property: string) => any;
-			set: (property: string, value: any) => void;
-		}
-	) {
+	constructor({ parent, bridge, localdb }: IInternalCollectionParams) {
 		this.#parent = parent;
-		this.#parentBridge = parentBridge;
+		this.#parentBridge = bridge;
+		this.#localdb = localdb;
 		this.#adapter = this.#parent.responseAdapter;
 
 		this.init();
@@ -46,15 +45,13 @@ export class CollectionLoadManager {
 		this.#provider = this.#parentBridge.get('provider');
 
 		this.#registry = RegistryFactory.get(this.#parentBridge.get('storeName'));
-		if (this.#localProvider) this.#parent.customFilter = this.#localProvider?.customFilter;
 	}
 
 	#localLoad = async params => {
 		if (!this.#localProvider) return;
+
 		const localData = (await this.#localProvider.load(params)) ?? { data: [] };
-
 		const newItems = await this.processEntries(localData.data);
-
 		let items = params.update === true ? this.parent.items.concat(newItems) : newItems;
 
 		const properties: ILoadResponse = {
@@ -64,9 +61,10 @@ export class CollectionLoadManager {
 			next: !!localData.next,
 			items,
 		};
-		if (localData.next) properties.next = localData.next;
-		this.#parent.loaded = true;
 
+		if (localData.next) properties.next = localData.next;
+
+		this.#parent.loaded = true;
 		this.parent.set(properties);
 
 		return this.#adapter.toClient({ data: items });
@@ -81,6 +79,7 @@ export class CollectionLoadManager {
 			console.error(e);
 		}
 	};
+
 	load = async (params: any = {}) => {
 		try {
 			this.#parent.fetching = true;
@@ -93,9 +92,11 @@ export class CollectionLoadManager {
 				params.start = start;
 			}
 
-			const localResponse = await this.#localLoad(params);
+			if (this.#parentBridge.get('localdb')) {
+				const localResponse = await this.#localLoad(params);
+				if (!this.#parent.isOnline || !this.#provider) return localResponse;
+			}
 
-			if (!this.#parent.isOnline || !this.#provider) return localResponse;
 			const { properties, items } = await this.#remoteLoad(params);
 
 			this.parent.set(properties);
@@ -144,27 +145,13 @@ export class CollectionLoadManager {
 			this.#localProvider.softDelete(data.deletedEntries);
 		}
 
-		await this.#localProvider.save(elements);
-		return this.setItems(elements);
-	}
-
-	async setItems(entries: Item<any>[]) {
-		const promises = [];
-		const items = entries.map(record => {
-			const item = new this.parent.item({ id: record.id, properties: record });
-			promises.push(item.set(record));
-			return item;
-		});
-
-		await Promise.all(promises);
-		items.forEach((item, index) => {
-			item.set(entries[index], true);
-		});
-
-		return items;
+		if (this.#localdb) await this.#localProvider.save(elements);
+		return this.processEntries(elements);
 	}
 
 	/**
+	 *
+	 * This method is used to process the "local entries"
 	 *
 	 * @param entries
 	 * @param updateLocalItems
@@ -174,11 +161,22 @@ export class CollectionLoadManager {
 		//	this.#registry.registerList(this.#parentBridge.get('storeName'), entries);
 		const promises = [];
 		const items = entries.map(record => {
-			const specs: { id: string | number; properties?: any } = { id: record.id };
+			/**
+			 * Already loaded
+			 */
+
+			if (this.#loaded.has(record.id)) {
+				const item = this.#loaded.get(record.id);
+				promises.push(item.isReady);
+				return item;
+			}
+
+			const specs: { id: string | number; properties?: any } = { id: record.id, ...record };
 			if (updateLocalItems) specs.properties = record;
 
 			const item = new this.parent.item(specs);
-			promises.push(item.set(record));
+			promises.push(item.isReady);
+			this.#loaded.set(record.id, item);
 			return item;
 		});
 
