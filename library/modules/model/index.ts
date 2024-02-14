@@ -2,6 +2,7 @@ import { Events } from '@beyond-js/events/events';
 import { reactiveProps } from './property';
 import { IReactiveProperties } from './interfaces/reactive-props';
 import { ReactiveModelPublic } from './interfaces/reactive-public-props';
+import { IReactiveConstructorSpecs } from './interfaces/reactive-constructor-specs';
 
 /**
  * The `ReactiveModel` class is a subclass of the `Events` class that provides a simple way to create
@@ -30,22 +31,27 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 	#initialValues: Record<string, any> = {};
 	get isUnpublished() {
 		const properties = this.getProperties();
-
 		return Object.keys(properties).some(prop => {
 			if (prop === 'id' || typeof prop === 'object') return false;
 			return properties[prop] !== this.#initialValues[prop];
 		});
 	}
-	constructor(properties?) {
+	constructor(specs: IReactiveConstructorSpecs = {}) {
 		super();
 		this.reactiveProps<IReactiveProperties>(['fetching', 'fetched', 'processing', 'processed', 'loaded', 'ready']);
-		if (properties) this.initialValues(properties);
+
+		if (specs.properties && Array.isArray(specs.properties)) {
+			this.properties = specs.properties;
+		}
+		if (specs) this.initialValues(specs);
 	}
 
 	initialValues(values?) {
 		if (!values) return this.#initialValues;
-		this.set(values);
-		this.#initialValues = values;
+		let data = { ...values };
+		delete data.properties;
+		this.set(data);
+		this.#initialValues = data;
 	}
 
 	protected reactiveProps<T>(props: Array<keyof T>): void {
@@ -97,7 +103,6 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 	 * @returns {void}
 	 */
 	set(properties: Partial<ReactiveModelPublic<T>>): void {
-		let props: Partial<ReactiveModelPublic<T>> = Object.keys(properties);
 		let updated = false;
 
 		try {
