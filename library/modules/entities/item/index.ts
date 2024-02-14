@@ -64,6 +64,11 @@ export /*bundle*/ class Item<T> extends ReactiveModel<IItem> {
 	}
 
 	get isReady() {
+		if (typeof this.checkReady !== 'function') {
+			console.warn('is not a function', this.checkReady, this.constructor.name);
+			return;
+		}
+
 		return this.checkReady();
 	}
 
@@ -86,7 +91,6 @@ export /*bundle*/ class Item<T> extends ReactiveModel<IItem> {
 
 		const { db, storeName, localdb } = config;
 		this.#config = config;
-
 		this.#responseAdapter = ResponseAdapter.get(this, this.#config?.adapter);
 
 		if (db) this.db = db;
@@ -96,7 +100,6 @@ export /*bundle*/ class Item<T> extends ReactiveModel<IItem> {
 			if (typeof config.provider !== 'function') {
 				throw new Error('Provider must be an function');
 			}
-
 			this.#provider = new config.provider(this);
 		}
 		this.#start(config);
@@ -105,6 +108,8 @@ export /*bundle*/ class Item<T> extends ReactiveModel<IItem> {
 
 	#start(config) {
 		this.reactiveProps(['found', 'landed']);
+		this.save = this.save.bind(this);
+		this.checkReady = this.checkReady.bind(this);
 		const getProperty = property => this.__get(property);
 		const setProperty = (property, value) => (this[property] = value);
 		const bridge = { get: getProperty, set: setProperty };
@@ -112,7 +117,6 @@ export /*bundle*/ class Item<T> extends ReactiveModel<IItem> {
 		this.localProvider = new LocalProvider(spcs);
 		this.#saveManager = new ItemSaveManager(spcs);
 		this.#loadManager = new ItemLoadManager(spcs);
-		this.save = this.save.bind(this);
 		this.init(config);
 	}
 
@@ -128,10 +132,11 @@ export /*bundle*/ class Item<T> extends ReactiveModel<IItem> {
 	 *
 	 * @returns {Promise<boolean>} A promise that resolves when the object is ready
 	 */
-	protected checkReady = () => {
+	protected checkReady() {
 		if (this.ready) {
 			return this.ready;
 		}
+
 		if (this.#promiseReady) return this.#promiseReady;
 
 		this.#promiseReady = new PendingPromise();
@@ -144,7 +149,7 @@ export /*bundle*/ class Item<T> extends ReactiveModel<IItem> {
 		};
 		this.on('object.loaded', onReady);
 		return this.#promiseReady;
-	};
+	}
 
 	protected async init(config: IItemConfig) {
 		try {
@@ -182,7 +187,7 @@ export /*bundle*/ class Item<T> extends ReactiveModel<IItem> {
 	 *
 	 * @param data The data to set
 	 * @param init If true, the data will be stored in the local database
-	 */ x;
+	 */
 	async set(data, init = false) {
 		if (!init) {
 			/**

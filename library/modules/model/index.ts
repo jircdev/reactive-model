@@ -50,7 +50,8 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 		if (!values) return this.#initialValues;
 		let data = { ...values };
 		delete data.properties;
-		this.set(data);
+
+		this.#set(data);
 		this.#initialValues = data;
 	}
 
@@ -102,11 +103,11 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 	 * @param {*} value - The value to set the property to.
 	 * @returns {void}
 	 */
-	set(properties: Partial<ReactiveModelPublic<T>>): void {
+	#set(properties: Partial<ReactiveModelPublic<T>>): void {
 		let updated = false;
-
 		try {
 			Object.keys(properties).forEach(prop => {
+				if (!this.properties || !this.properties.includes(prop)) return;
 				const sameObject =
 					typeof properties[prop] === 'object' &&
 					JSON.stringify(properties[prop]) === JSON.stringify(this[prop]);
@@ -123,6 +124,10 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 		} finally {
 			if (updated) this.triggerEvent();
 		}
+	}
+
+	set(properties: Partial<ReactiveModelPublic<T>>): void {
+		this.#set(properties);
 	}
 
 	getProperties(): Record<string, any> {

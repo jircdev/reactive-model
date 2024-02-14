@@ -1,6 +1,12 @@
 # CHANGELOG
 
-### 1.1.10
+## 1.1.11
+
+#### Fixed
+
+-   Solve problem when a item is initialized directly. Now the set method only set defined properties
+
+## 1.1.10
 
 #### Fixed
 
@@ -18,12 +24,12 @@ interface IReactiveConstructorSpecs {
 }
 ```
 
-# 1.1.9
+## 1.1.9
 
 -   feat: enhance collections to support arbitrary 'where' params for server-side queries and client-side indexeddb
     lookups
 
-# 1.1.7
+## 1.1.7
 
 #### Enhancements
 
@@ -60,7 +66,7 @@ interface IReactiveConstructorSpecs {
 -   Added a validation in the localProvider of the Collection class to check if the specified store exists in the
     database. If the store does not exist, an error will be thrown to handle the situation appropriately.
 
-## 1.1.2
+### 1.1.2
 
 -   Bug fix: Fixed error when passing parameters in the Item post method.
 
