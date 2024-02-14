@@ -1,5 +1,23 @@
 # CHANGELOG
 
+### 1.1.10
+
+#### Fixed
+
+-   Simplified event handling in the collection loading process to fix the issue of multiple event generation.
+
+#### Added
+
+-   Now, ReactiveModel objects can receive an array of properties in the constructor, following the
+    `IReactiveConstructorSpecs` interface:
+
+```typescript
+interface IReactiveConstructorSpecs {
+	properties?: string[];
+	[key: string]: any;
+}
+```
+
 # 1.1.9
 
 -   feat: enhance collections to support arbitrary 'where' params for server-side queries and client-side indexeddb
