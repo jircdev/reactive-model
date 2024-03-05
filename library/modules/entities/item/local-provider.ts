@@ -219,7 +219,7 @@ class LocalProvider extends ReactiveModel<any> {
 						return field;
 					}
 					return null;
-				})
+				}),
 		);
 
 		const duplicateFields = (await Promise.all(checkPromises)).filter(field => field !== null);
@@ -240,10 +240,28 @@ class LocalProvider extends ReactiveModel<any> {
 		return true;
 	};
 
+	isPlainObject(obj) {
+		if (typeof obj !== 'object' || obj === null) return false;
+
+		for (const key in obj) {
+			if (typeof obj[key] === 'function') {
+				return false; // Tiene al menos un método, por lo tanto no es un objeto plano
+			}
+		}
+
+		return true;
+	}
+
 	async #update(data) {
 		const updated = this.#registry.setValues(data);
+
 		if (!updated) return;
 		const store = this.#database.db[this.#storeName];
+		const plain = this.isPlainObject(data);
+		if (!plain) {
+			console.warn('Data needs to be a plain object to be saved', data);
+			throw new Error('Data needs to be a plain object to be saved');
+		}
 		await store.put({ ...this.#registry.values, ...data });
 		this.triggerEvent();
 		return true;

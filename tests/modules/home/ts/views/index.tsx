@@ -3,44 +3,39 @@ import { useBinder } from '@beyond-js/react-18-widgets/hooks';
 import { Item } from './items';
 import { TestContext } from './context';
 import { Link } from 'pragmate-ui/components';
+import { Users } from '@beyond-js/reactive-tests/examples/models';
+import { List } from './list';
 
 export /*bundle*/
 function Page({ store }): JSX.Element {
 	const ref = React.useRef<HTMLButtonElement>(null);
+	const [users, setUsers] = React.useState<Users>();
+	const [fetching, setFetching] = React.useState(false);
+	const [fetched, setFetched] = React.useState(false);
 
-	const [ready, setReady] = React.useState(false);
-	const [selected, setSelected] = React.useState(new Set());
-	const [count, setCount] = React.useState(store.users?.items?.length ?? 0);
-	useBinder([store], () => {
-		setReady(store.ready);
+	const load = () => {
+		console.log(0.2);
 
-		setCount(store.users?.items?.length ?? 0);
-	});
+		const users = new Users();
+		setUsers(users);
+		const onChange = () => {
+			setFetching(users.fetching);
+			setFetched(users.fetched);
+		};
+		users.on('change', onChange);
+	};
+	React.useEffect(load, []);
+
+	const onClick = async () => {
+		await users.load();
+	};
 
 	return (
-		<TestContext.Provider
-			value={{ total: store.users.items?.length, totalSelected: selected.size, selected, store }}
-		>
-			<div className='page__container'>
-				<header>
-					<h1>Use cases</h1>
-					<ul>
-						<li>
-							<Link href='/tests?case=backend-providers'>Backend providers</Link>
-						</li>
-						<li>
-							<Link href='/tests?case=no-providers'>No providers</Link>
-						</li>
-
-						<li>
-							<Link href='/tests?case=only-local'>Local data</Link>
-						</li>
-						<li>
-							<Link href='/tests?case=local-and-remote'>Local and remote data</Link>
-						</li>
-					</ul>
-				</header>
-			</div>
-		</TestContext.Provider>
+		<>
+			<button onClick={onClick}>Cargar</button>
+			{fetching && <div>Cargando...</div>}
+			
+			{fetched && <div>Datos Cargados... total elementos: {users.items.length}</div>}
+		</>
 	);
 }

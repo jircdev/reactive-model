@@ -6,4 +6,8 @@ export /*bundle*/ class Books extends Collection {
 	constructor() {
 		super({ storeName: 'books', db: 'test', item: Book });
 	}
+
+	testing() {
+		console.log('hola daniel');
+	}
 }
