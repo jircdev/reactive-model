@@ -116,7 +116,6 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 	async set(data) {
 		const { items } = data;
 		delete data.item;
-		console.log('SET => ', data);
 		await super.set(data);
 
 		if (!items) return;
