@@ -63,7 +63,7 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 	}
 	#initialSpecs: ICollectionSpecs;
 	constructor(specs: ICollectionSpecs) {
-		super();
+		super({ properties: ['total', 'next'] });
 
 		const { provider, storeName, db, localdb, item } = specs;
 		this.#initialSpecs = specs;
@@ -116,6 +116,7 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 	async set(data) {
 		const { items } = data;
 		delete data.item;
+		console.log('SET => ', data);
 		await super.set(data);
 
 		if (!items) return;
