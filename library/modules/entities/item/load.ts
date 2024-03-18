@@ -97,7 +97,6 @@ export class ItemLoadManager {
 
 			return this.#adapter.toClient({ data: remoteData });
 		} catch (exc) {
-			console.log(20, exc);
 			throw exc;
 		} finally {
 			this.#parent.fetching = false;

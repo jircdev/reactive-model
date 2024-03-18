@@ -37,7 +37,6 @@ export class ItemSaveManager {
 			if (!this.#parent.isUnpublished) return;
 
 			const properties = { ...data, ...this.#parent.getProperties() };
-
 			properties.isNew = this.#localProvider.registry.isNew;
 			properties.__instanceId = this.#localProvider.registry.__instanceId;
 
