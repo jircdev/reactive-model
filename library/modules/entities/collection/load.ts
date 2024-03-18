@@ -129,7 +129,7 @@ export class CollectionLoadManager {
 			next: data.next,
 			loaded: true,
 			fetching: false,
-			total: data.total ?? 0,
+			total: data.total || 0,
 		};
 		return { properties, items };
 	};

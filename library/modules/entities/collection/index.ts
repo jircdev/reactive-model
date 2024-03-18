@@ -63,7 +63,7 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 	}
 	#initialSpecs: ICollectionSpecs;
 	constructor(specs: ICollectionSpecs) {
-		super();
+		super({ properties: ['total', 'next'] });
 
 		const { provider, storeName, db, localdb, item } = specs;
 		this.#initialSpecs = specs;
