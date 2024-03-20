@@ -40,11 +40,12 @@ export class ItemSaveManager {
 			properties.isNew = this.#localProvider.registry.isNew;
 			properties.__instanceId = this.#localProvider.registry.__instanceId;
 
+			let remoteResponse;
 			if (this.#parent.isOnline && this.#provider) {
 				const response = await this.#publish(properties);
 				this.#localProvider.registry.setValues(response.data);
 				properties.id = response?.data?.id;
-				this.#adapter.fromRemote(response);
+				remoteResponse = this.#adapter.fromRemote(response);
 				this.#localProvider.registry.isNew = false;
 			}
 
@@ -53,7 +54,7 @@ export class ItemSaveManager {
 			}
 			this.#parent.triggerEvent();
 
-			return this.#adapter.toClient();
+			return this.#adapter.toClient({ data: remoteResponse });
 		} catch (e) {
 			return e;
 		}
