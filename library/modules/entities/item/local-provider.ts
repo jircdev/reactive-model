@@ -9,10 +9,6 @@ export /*bundle*/
 class LocalProvider extends ReactiveModel<any> {
 	#isOnline = globalThis.navigator.onLine;
 	#store!: Table<any, any>;
-	get store() {
-		return this.#store;
-	}
-
 	#offline: boolean;
 	#isNew: boolean = false;
 	#database!: DatabaseManager;
@@ -20,6 +16,10 @@ class LocalProvider extends ReactiveModel<any> {
 	#databaseName!: string;
 	#originalData: {};
 	#exists = false;
+	get store() {
+		return this.#store;
+	}
+
 	__instanceId: string;
 	get originalData() {
 		return this.#originalData;
@@ -268,7 +268,7 @@ class LocalProvider extends ReactiveModel<any> {
 			console.warn('Data needs to be a plain object to be saved', data);
 			throw new Error('Data needs to be a plain object to be saved');
 		}
-		console.log('hacemos el cambio', this.#registry.values);
+
 		await store.put({ ...this.#registry.values, ...data });
 		this.triggerEvent();
 		return true;

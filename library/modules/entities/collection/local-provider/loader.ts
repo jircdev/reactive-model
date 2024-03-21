@@ -127,10 +127,9 @@ export class LocalProviderLoader {
 		if (params.sortBy) items.sort((a, b) => a[params.sortBy] - b[params.sortBy]);
 		if (!globalThis.data) globalThis.data = []; // ?
 
-		if (currentPage == this.#page) sameQuery = true;
+		if (currentPage === this.#page) sameQuery = true;
 		else currentPage = this.#page;
-		console.log(0.2, currentPage, this.#page);
-		console.log(0.1, 'total items', items.length, this.#parent.items.length);
+
 		if (sameQuery && items.length === this.#parent.items.length) return;
 
 		const currentMap = new Set<string | number>();
@@ -140,13 +139,13 @@ export class LocalProviderLoader {
 			currentMap.add(item.id);
 		});
 
-		if (sameQuery) this.#cleanupItems(currentMap);
+		this.#cleanupItems(currentMap);
 
 		this.#setItems([...this.#listItems.values()]);
 		items.forEach(item => this.#ids.add(item.id));
 		this.#parent.trigger('items.changed');
 		this.#parent.trigger('change');
-		console.log('cambio', this.#parent);
+
 		return {
 			status: true,
 			data: items,
