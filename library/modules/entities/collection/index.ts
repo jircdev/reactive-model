@@ -96,6 +96,7 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 	}
 
 	#listenItems = async () => {
+		console.log('vamooo', this.#localProvider.items.length);
 		if (!this.localdb) return;
 
 		this.#items = await this.#loadManager.processEntries(this.#localProvider.items);

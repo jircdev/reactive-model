@@ -119,7 +119,7 @@ export class LocalProviderLoader {
 		items: [{ [key: string]: any }],
 		params: { [key: string]: any },
 		totalPages: number,
-		currentPage: number
+		currentPage: number,
 	) {
 		let sameQuery: boolean;
 		this.#quantity++;
@@ -129,7 +129,8 @@ export class LocalProviderLoader {
 
 		if (currentPage == this.#page) sameQuery = true;
 		else currentPage = this.#page;
-
+		console.log(0.2, currentPage, this.#page);
+		console.log(0.1, 'total items', items.length, this.#parent.items.length);
 		if (sameQuery && items.length === this.#parent.items.length) return;
 
 		const currentMap = new Set<string | number>();
@@ -144,7 +145,8 @@ export class LocalProviderLoader {
 		this.#setItems([...this.#listItems.values()]);
 		items.forEach(item => this.#ids.add(item.id));
 		this.#parent.trigger('items.changed');
-
+		this.#parent.trigger('change');
+		console.log('cambio', this.#parent);
 		return {
 			status: true,
 			data: items,

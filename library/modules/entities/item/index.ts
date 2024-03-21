@@ -87,8 +87,8 @@ export /*bundle*/ class Item<T> extends ReactiveModel<IItem> {
 		return this.#responseAdapter;
 	}
 	constructor(config: IItemConfig = {}) {
-		super((()=>config?.properties ? { properties: config.properties } : {})());
-
+		super((() => (config?.properties ? { properties: config.properties } : {}))());
+		
 		const { db, storeName, localdb } = config;
 		this.#config = config;
 		this.#responseAdapter = ResponseAdapter.get(this, this.#config?.adapter);
@@ -189,6 +189,7 @@ export /*bundle*/ class Item<T> extends ReactiveModel<IItem> {
 	 * @param init If true, the data will be stored in the local database
 	 */
 	async set(data, init = false) {
+		if (typeof data !== 'object') console.trace(data);
 		if (!init) {
 			/**
 			 * init is passed as true when it is called by the init method or collections objects,
@@ -207,7 +208,7 @@ export /*bundle*/ class Item<T> extends ReactiveModel<IItem> {
 			name: string;
 		};
 
-		this.properties.forEach((property: string | IProperty) => {
+		this.properties?.forEach((property: string | IProperty) => {
 			if (typeof property === 'object') {
 				if (data.hasOwnProperty(property.name)) {
 				}
