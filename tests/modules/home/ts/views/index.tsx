@@ -13,6 +13,11 @@ function Page({ store }): JSX.Element {
 	const [fetching, setFetching] = React.useState(false);
 	const [fetched, setFetched] = React.useState(false);
 
+
+	useBinder([store], ()=> {
+
+	})
+
 	const load = () => {
 		console.log(0.2);
 
