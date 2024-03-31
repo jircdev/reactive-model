@@ -103,7 +103,7 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 	 * @param {*} value - The value to set the property to.
 	 * @returns {void}
 	 */
-	#set(properties: Partial<ReactiveModelPublic<T>>): void {
+	#set(properties: Partial<T>): void {
 		let updated = false;
 		try {
 			Object.keys(properties).forEach(prop => {

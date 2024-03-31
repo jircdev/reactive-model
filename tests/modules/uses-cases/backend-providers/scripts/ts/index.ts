@@ -19,7 +19,8 @@ import { Books, Book } from '@beyond-js/reactive-tests/uses-cases/backend-provid
 
 export /*bundle*/ async function updateACollection() {
 	const collection = new Books();
-
+	globalThis.collection = collection;
+	collection.on('change', () => console.log('🔄 Collection changed', [...collection.items]));
 	console.log('🔄 Two items are being instantiated, one with the title: Book A and the other as Book B...');
 	const itemA = new Book();
 	const itemB = new Book();
@@ -34,7 +35,7 @@ export /*bundle*/ async function updateACollection() {
 
 	if (!responseA.status || !responseB.status)
 		return console.error(
-			'❌ Something happened while trying to publish one of the items and the publication could not be done.'
+			'❌ Something happened while trying to publish one of the items and the publication could not be done.',
 		);
 
 	console.log('🔄 The collection is being loaded...');
