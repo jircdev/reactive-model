@@ -126,7 +126,7 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 		}
 	}
 
-	set(properties: Partial<ReactiveModelPublic<T>>): void {
+	set(properties: Partial<T>): void {
 		this.#set(properties);
 	}
 

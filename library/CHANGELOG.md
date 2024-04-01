@@ -1,5 +1,22 @@
 # CHANGELOG
 
+## 1.1.12
+
+### Enhancements
+
+-   **Types and Interfaces Improvement:** Enhanced the ReactiveModel codebase with more explicit types and corrected
+    interfaces, significantly improving TypeScript compatibility and developer experience. This update ensures that
+    developers leveraging TypeScript can work more efficiently with the ReactiveModel, benefiting from stronger type
+    checks and more predictable behavior.
+
+### Fixes
+
+-   **Publish Item Remote Response Handling (#29):** Addressed an issue where the response from publishing an item
+    remotely was not being correctly returned. The issue has been resolved by fine-tuning the response handling
+    mechanism. Now, responses from the remote provider are accurately captured and relayed back to the client through
+    the adapter mechanism. This fix ensures that the Item entity's `response` method faithfully represents the data
+    provided by the remote service, enhancing reliability and data integrity in client-server communications.
+
 ## 1.1.11
 
 #### Fixed
