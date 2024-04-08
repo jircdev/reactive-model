@@ -13,14 +13,9 @@ function Page({ store }): JSX.Element {
 	const [fetching, setFetching] = React.useState(false);
 	const [fetched, setFetched] = React.useState(false);
 
-
-	useBinder([store], ()=> {
-
-	})
+	useBinder([store], () => {});
 
 	const load = () => {
-		console.log(0.2);
-
 		const users = new Users();
 		setUsers(users);
 		const onChange = () => {
@@ -39,8 +34,9 @@ function Page({ store }): JSX.Element {
 		<>
 			<button onClick={onClick}>Cargar</button>
 			{fetching && <div>Cargando...</div>}
-			
+
 			{fetched && <div>Datos Cargados... total elementos: {users.items.length}</div>}
+			<List items={users?.items} />
 		</>
 	);
 }

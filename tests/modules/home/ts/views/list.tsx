@@ -9,8 +9,6 @@ export /*bundle*/
 function List({ items }): JSX.Element {
 	if (!items) return null;
 
-	const output = items.map((item, index) => {
-		return <li>{item.name}</li>;
-	});
+	const output = items.map((item, index) => <li key={item.id}>{item.name}</li>);
 	return <ul>{output}</ul>;
 }

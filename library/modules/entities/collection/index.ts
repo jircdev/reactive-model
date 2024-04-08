@@ -86,7 +86,7 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 			return this[property];
 		};
 		const setProperty = (property, value) => (this[property] = value);
-		const bridge = { get: getProperty, set: setProperty };
+		const bridge = { get: getProperty, set: setProperty, clear: this.#clear.bind(this) };
 		this.#responseAdapter = ResponseAdapter.get(this, this.#initialSpecs?.adapter);
 		this.#localProvider = new CollectionLocalProvider(this, bridge);
 		this.#saveManager = new CollectionSaveManager(this, bridge);
@@ -118,11 +118,14 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 		delete data.item;
 		await super.set(data);
 
-		if (!items) return;
-
 		items.forEach(item => {
 			if (item.id) this.#elements.set(item.id, item);
 		});
+	}
+
+	#clear() {
+		this.#items = [];
+		this.#elements.clear();
 	}
 	async delete(ids) {
 		try {

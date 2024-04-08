@@ -16,6 +16,7 @@ export class Store extends ReactiveModel<Store> {
 		// this.#users.setOffline(true);
 		this.#users.on('change', this.triggerEvent.bind(this));
 		globalThis.u = this.#users;
+		
 		this.load();
 	}
 
@@ -29,6 +30,7 @@ export class Store extends ReactiveModel<Store> {
 		const user = new User({ id });
 		await user.load();
 		await user.delete();
+
 		this.triggerEvent();
 	}
 

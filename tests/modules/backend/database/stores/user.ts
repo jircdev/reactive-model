@@ -134,4 +134,12 @@ export /*bundle*/ class UserStore {
 	async delete(id) {
 		return this.deleteItems([id]);
 	}
+
+	async deleteAll() {
+		await this.conn.connect();
+		const db = this.conn.connection;
+		const query = `DELETE FROM users`;
+		await db.run(query);
+		await this.conn.disconnect();
+	}
 }

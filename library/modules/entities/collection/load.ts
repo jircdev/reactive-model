@@ -20,6 +20,7 @@ export class CollectionLoadManager {
 	#parentBridge: {
 		get: (property: string) => any;
 		set: (property: string, value: any) => void;
+		clear: () => void;
 	};
 	#parent: Collection;
 	#registry: RegistryFactory;
@@ -134,8 +135,21 @@ export class CollectionLoadManager {
 		return { properties, items };
 	};
 
+	/**
+	 *
+	 * @param data
+	 * @returns
+	 */
 	async processRemoteEntries(data: { [key: string]: any }): Promise<any[]> {
+		if (!data.entries.length) {
+			this.#parentBridge.clear();
+			this.parent.triggerEvent();
+		}
 		if (!data.entries && !data.items) {
+			/**
+			 * the items property is not used in the current version, but it is still supported
+			 * it will be removed in the future
+			 */
 			throw new Error('The list method must return an object with an entries property');
 		}
 

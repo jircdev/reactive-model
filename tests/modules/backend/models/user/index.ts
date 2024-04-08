@@ -83,6 +83,10 @@ export /*actions*/ /*bundle*/ class Users {
 		}
 	}
 
+	async deleteAll() {
+		
+	}
+
 	prueba() {
 		return { data: 'prueba' };
 	}
