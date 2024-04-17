@@ -192,6 +192,13 @@ export class CollectionLoadManager {
 			const specs: { id: string | number; properties?: any } = { id: record.id, ...record };
 			if (updateLocalItems) specs.properties = record;
 
+			const ids = entries.map(i => i.id);
+			const notExits = [...this.#parent.elements.values()].map(item => !ids.includes(item.id));
+			notExits.forEach(id => {
+				console.log(6, 'eliminamos a', id);
+				this.#parent.elements.delete(id);
+			});
+
 			const item = new this.parent.item(specs);
 			promises.push(item.isReady);
 			this.#loaded.set(record.id, item);
@@ -199,6 +206,7 @@ export class CollectionLoadManager {
 		});
 
 		await Promise.all(promises);
+
 		items.forEach((item, index) => {
 			item.set(entries[index], updateLocalItems);
 		});

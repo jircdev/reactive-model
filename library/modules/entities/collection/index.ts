@@ -16,7 +16,6 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 	db: string;
 	item: typeof Item;
 
-	#items: Array<any | undefined> = [];
 	protected localdb: boolean = true;
 
 	#elements = new Map();
@@ -35,7 +34,8 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 		if (!Array.isArray(value)) {
 			return;
 		}
-		this.#items = value;
+		this.#elements.clear();
+		value.forEach(item => this.#elements.set(item.id, item));
 		this.triggerEvent();
 	}
 
@@ -98,14 +98,15 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 	#listenItems = async () => {
 		if (!this.localdb) return;
 
-		this.#items = await this.#loadManager.processEntries(this.#localProvider.items);
+		this.items = await this.#loadManager.processEntries(this.#localProvider.items);
+
 		this.trigger('change');
 	};
 
 	setOffline = value => this.localProvider.setOffline(value);
 
 	protected setItems(values) {
-		this.#items = values;
+		this.items = values;
 	}
 
 	async store() {
@@ -124,8 +125,7 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 	}
 
 	#clear() {
-		this.#items = [];
-		this.#elements.clear();
+		this.items = [];
 	}
 	async delete(ids) {
 		try {
@@ -155,7 +155,7 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 		const items = await this.#loadManager.processEntries(entries, true);
 
 		items.forEach(item => this.#elements.set(item.id, item));
-		this.#items = items;
+		this.items = items;
 		this.trigger('change');
 		return items;
 	}
