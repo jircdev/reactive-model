@@ -67,7 +67,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<Collection
 		bridge: {
 			get: (property: string) => any;
 			set: (property: string, value: any) => void;
-		}
+		},
 	) {
 		super();
 		const { db, storeName } = parent;
@@ -166,6 +166,15 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<Collection
 		} catch (error) {
 			console.error('Error occurred while performing a soft delete:', error);
 			return { status: false, error: error.message };
+		}
+	}
+
+	// Method to delete multiple items by their IDs using an existing Dexie store
+	async deleteItems(ids) {
+		try {
+			await this.store.bulkDelete(ids);
+		} catch (error) {
+			console.error('Failed to delete items:', error);
 		}
 	}
 

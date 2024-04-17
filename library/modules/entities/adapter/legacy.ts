@@ -7,6 +7,7 @@ interface Iresponse {
 }
 type ErrorApi = {
 	message?: string;
+	text?: string;
 	id: string | number;
 };
 type ErrorMessage = string;
@@ -34,7 +35,11 @@ export class LegacyAdapter implements IResponseAdapter {
 
 		if (!status) {
 			if (message) throw message;
-			throw typeof error === 'string' ? error : 'ERROR_DATA_QUERY';
+			if (typeof error === 'object') {
+				throw new Error(error?.text || error?.message || 'ERROR_DATA_QUERY');
+			}
+
+			typeof error === 'string' ? error : 'ERROR_DATA_QUERY';
 		}
 
 		return data;

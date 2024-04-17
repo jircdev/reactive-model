@@ -25,7 +25,7 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 	}
 
 	get items() {
-		return this.#items;
+		return [...this.#elements.values()];
 	}
 
 	get isOnline() {

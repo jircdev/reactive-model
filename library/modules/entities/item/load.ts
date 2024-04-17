@@ -63,7 +63,9 @@ export class ItemLoadManager {
 			if (localProvider && !localProvider.isOnline) return { status: true };
 
 			if (!this.#provider) return;
+
 			const remoteData = await this.remoteLoad(params);
+
 			if (!remoteData) {
 				this.#parent.found = false;
 
@@ -104,22 +106,27 @@ export class ItemLoadManager {
 	};
 
 	remoteLoad = async params => {
-		// TODO: CHANGE TO LOAD
-		if (!this.#parent.isOnline) return;
-		/**
-		 * The data method is validated to support old providers.
-		 */
-		let loadMethod = this.#provider.data
-			? this.#provider.data.bind(this.#provider)
-			: this.#provider.load.bind(this.#provider);
+		try {
+			// TODO: CHANGE TO LOAD
+			if (!this.#parent.isOnline) return;
+			/**
+			 * The data method is validated to support old providers.
+			 */
+			let loadMethod = this.#provider.data
+				? this.#provider.data.bind(this.#provider)
+				: this.#provider.load.bind(this.#provider);
 
-		if (typeof loadMethod !== 'function') {
-			console.error('The provider object is not defined correctly. It must have a data method');
-			return;
+			if (typeof loadMethod !== 'function') {
+				console.error('The provider object is not defined correctly. It must have a data method');
+				return;
+			}
+
+			const response = await loadMethod(params);
+
+			return this.#adapter.fromRemote(response);
+		} catch (e) {
+			this.#parent.found = false;
+			this.#parent.fetching = false;
 		}
-
-		const response = await loadMethod(params);
-
-		return this.#adapter.fromRemote(response);
 	};
 }

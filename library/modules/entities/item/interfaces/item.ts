@@ -1,4 +1,5 @@
 export /*bundle*/ interface IItem {
+	id: string | number;
 	provider?: any;
 	skeleton?: Array<string>;
 	isUnpublished: boolean;

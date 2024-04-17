@@ -5,6 +5,7 @@ import { IResponseAdapter } from '../adapter/interface';
 import { Item } from '../item';
 import { IProvider } from '../interfaces/provider';
 import { IInternalCollectionParams } from './interfaces/children-constructor-props';
+import { IItem } from '../item/interfaces/item';
 interface ILoadResponse {
 	localLoaded: true;
 	fetching: false;
@@ -26,7 +27,7 @@ export class CollectionLoadManager {
 	#registry: RegistryFactory;
 	#adapter: IResponseAdapter;
 	#localdb: boolean;
-
+	#localIds = new Set<string | number>();
 	get parent() {
 		return this.#parent;
 	}
@@ -54,7 +55,7 @@ export class CollectionLoadManager {
 		const localData = (await this.#localProvider.load(params)) ?? { data: [] };
 		const newItems = await this.processEntries(localData.data);
 		let items = params.update === true ? this.parent.items.concat(newItems) : newItems;
-
+		items.forEach(item => this.#localIds.add(item.id));
 		const properties: ILoadResponse = {
 			localLoaded: true,
 			fetching: false,
@@ -119,12 +120,15 @@ export class CollectionLoadManager {
 		const response = await this.#provider.list(params);
 		const data = this.#adapter.fromRemote(response);
 
-		const items: (typeof Item)[] = await this.processRemoteEntries(data);
+		const items = await this.processRemoteEntries(data);
 
 		this.remoteData = response;
 
 		this.#remoteElements = params.update === true ? this.#remoteElements.concat(items) : items;
-
+		const fromBackend = this.#remoteElements.map(item => item.id);
+		const notInBack = [...this.#localIds].filter(id => !fromBackend.includes(id));
+		if (notInBack.length) this.#localProvider.deleteItems(notInBack);
+		notInBack.forEach(id => this.#parent.elements.delete(id));
 		const properties = {
 			items: this.#remoteElements,
 			next: data.next,
@@ -140,8 +144,8 @@ export class CollectionLoadManager {
 	 * @param data
 	 * @returns
 	 */
-	async processRemoteEntries(data: { [key: string]: any }): Promise<any[]> {
-		if (!data.entries.length) {
+	async processRemoteEntries(data: { [key: string]: any }): Promise<Item<IItem>[]> {
+		if (!data.entries?.length) {
 			this.#parentBridge.clear();
 			this.parent.triggerEvent();
 		}
@@ -204,7 +208,7 @@ export class CollectionLoadManager {
 
 	remoteLoad = async params => {
 		const response = await this.#provider.load(params);
-		if (!response.status) throw 'ERROR_DATA_QUERY';
+		if (!response.status) throw response.error;
 		return response.data;
 	};
 }
