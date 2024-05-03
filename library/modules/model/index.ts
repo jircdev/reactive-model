@@ -1,7 +1,5 @@
 import { Events } from '@beyond-js/events/events';
-import { reactiveProps } from './property';
 import { IReactiveProperties } from './interfaces/reactive-props';
-import { ReactiveModelPublic } from './interfaces/reactive-public-props';
 import { IReactiveConstructorSpecs } from './interfaces/reactive-constructor-specs';
 
 /**
@@ -23,8 +21,21 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 	fetching!: boolean;
 	fetched: boolean = false;
 	processing: boolean = false;
-	ready: boolean = false;
+
 	processed: boolean = false;
+	/**
+	 * The ready property is defined as getter and not as ReactiveProperty to be able to override it
+	 */
+	#ready: boolean = false;
+	get ready(): boolean {
+		return this.#ready;
+	}
+
+	set ready(value: boolean) {
+		if (value === this.#ready) return;
+		this.#ready = value;
+		this.triggerEvent();
+	}
 	protected properties: string[];
 	loaded: boolean = false;
 
@@ -38,7 +49,7 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 	}
 	constructor(specs: IReactiveConstructorSpecs = {}) {
 		super();
-		this.reactiveProps<IReactiveProperties>(['fetching', 'fetched', 'processing', 'processed', 'loaded', 'ready']);
+		this.reactiveProps<IReactiveProperties>(['fetching', 'fetched', 'processing', 'processed', 'loaded']);
 
 		if (specs.properties && Array.isArray(specs.properties)) {
 			this.properties = specs.properties;

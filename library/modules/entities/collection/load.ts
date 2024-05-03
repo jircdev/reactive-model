@@ -193,9 +193,8 @@ export class CollectionLoadManager {
 			if (updateLocalItems) specs.properties = record;
 
 			const ids = entries.map(i => i.id);
-			const notExits = [...this.#parent.elements.values()].map(item => !ids.includes(item.id));
+			const notExits = [...this.#parent.elements.values()].filter(item => !ids.includes(item.id));
 			notExits.forEach(id => {
-				console.log(6, 'eliminamos a', id);
 				this.#parent.elements.delete(id);
 			});
 

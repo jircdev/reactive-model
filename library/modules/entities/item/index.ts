@@ -8,6 +8,7 @@ import { IItemConfig } from './interfaces/config';
 import { ResponseAdapter } from '../adapter';
 import { IResponseAdapter } from '../adapter/interface';
 import { ListenerFunction } from '@beyond-js/events/events';
+import { IItemProvider, IProvider } from '../interfaces/provider';
 
 export /*bundle*/ class Item<T> extends ReactiveModel<IItem> {
 	declare trigger: (event?: string) => void;
@@ -19,7 +20,7 @@ export /*bundle*/ class Item<T> extends ReactiveModel<IItem> {
 
 	declare localUpdate: (data) => Promise<any>;
 	protected localdb: boolean;
-	#provider: any;
+	#provider: IItemProvider;
 	protected storeName: string;
 	protected db: string;
 	localFields = [];
