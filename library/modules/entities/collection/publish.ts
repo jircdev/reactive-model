@@ -21,7 +21,7 @@ export class CollectionSaveManager {
 		bridge: {
 			get: (property: string) => any;
 			set: (property: string, value: any) => void;
-		}
+		},
 	) {
 		this.#parent = parent;
 		this.#bridge = bridge;
@@ -34,7 +34,7 @@ export class CollectionSaveManager {
 		if (this.#localdb) {
 			this.#localProvider = this.#bridge.get('localProvider');
 		} else {
-			console.warn('The collection doesnt use LocalDB');
+			// console.warn('The collection doesnt use LocalDB');
 		}
 
 		this.#provider = this.#bridge.get('provider');

@@ -24,6 +24,18 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 	}
 
 	get items() {
+		if (this.orderBy) {
+			return [...this.#elements.values()].sort((a, b) => {
+				if (a[this.orderBy] > b[this.orderBy]) {
+					return -1;
+				}
+				if (a[this.orderBy] < b[this.orderBy]) {
+					return 1;
+				}
+				return 0;
+			});
+		}
+		console.log(3);
 		return [...this.#elements.values()];
 	}
 
@@ -55,6 +67,7 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 	}
 
 	protected sortBy: string = 'id';
+	protected orderBy: string = 'timeCreated';
 	protected sortDirection: 'asc' | 'desc' = 'asc';
 
 	#responseAdapter: IResponseAdapter;
@@ -69,7 +82,7 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 		this.#initialSpecs = specs;
 		if (storeName) this.storeName = storeName;
 		if (db) this.db = db;
-		if (localdb) this.localdb = localdb;
+		this.localdb = localdb !== undefined ? localdb : true;
 		if (item) this.item = item;
 		if (provider) {
 			if (typeof provider !== 'function') {
