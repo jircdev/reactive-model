@@ -16,7 +16,7 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 	db: string;
 	item: typeof Item;
 
-	protected localdb: boolean = true;
+	protected localdb: boolean = true;p
 
 	#elements = new Map();
 	get elements() {
@@ -35,7 +35,7 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 				return 0;
 			});
 		}
-		console.log(3);
+
 		return [...this.#elements.values()];
 	}
 
