@@ -171,6 +171,7 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<Collection
 
 	// Method to delete multiple items by their IDs using an existing Dexie store
 	async deleteItems(ids) {
+		if (!this.#apply || !this.#localdb) return;
 		try {
 			await this.store.bulkDelete(ids);
 		} catch (error) {

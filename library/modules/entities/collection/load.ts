@@ -129,6 +129,8 @@ export class CollectionLoadManager {
 		const notInBack = [...this.#localIds].filter(id => !fromBackend.includes(id));
 		if (notInBack.length) this.#localProvider.deleteItems(notInBack);
 		notInBack.forEach(id => this.#parent.elements.delete(id));
+
+		this.#localIds = new Set(fromBackend);
 		const properties = {
 			items: this.#remoteElements,
 			next: data.next,
