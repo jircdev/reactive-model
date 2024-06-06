@@ -20,7 +20,7 @@ export /*bundle*/ class Item<T> extends ReactiveModel<IItem> {
 
 	declare localUpdate: (data) => Promise<any>;
 	protected localdb: boolean;
-	#provider: IItemProvider;
+	#provider: IItemProvider<IItem>;
 	protected storeName: string;
 	protected db: string;
 	localFields = [];

@@ -27,37 +27,37 @@ export class ItemSaveManager {
 	}
 
 	save = async (data?) => {
-		try {
-			await this.#getProperty('checkReady')();
+		await this.#getProperty('checkReady')();
 
-			if (data) {
-				await this.#parent.set(data);
-			}
+		if (data) {
+			await this.#parent.set(data);
+		}
 
-			if (!this.#parent.isUnpublished) return;
+		if (!this.#parent.isUnpublished) return;
 
-			const properties = { ...data, ...this.#parent.getProperties() };
-			properties.isNew = this.#localProvider.registry.isNew;
-			properties.__instanceId = this.#localProvider.registry.__instanceId;
+		const properties = { ...data, ...this.#parent.getProperties() };
+		if (this.#localdb) {
+			//todo: @julio review it
+			properties.isNew = this.#localProvider.registry?.isNew;
+			properties.__instanceId = this.#localProvider?.registry.__instanceId;
+		}
 
-			let remoteResponse;
-			if (this.#parent.isOnline && this.#provider) {
-				const response = await this.#publish(properties);
+		let remoteResponse;
+		if (this.#parent.isOnline && this.#provider) {
+			const response = await this.#publish(properties);
+			remoteResponse = this.#adapter.fromRemote(response);
+			if (this.#localdb) {
 				this.#localProvider.registry.setValues(response.data);
 				properties.id = response?.data?.id;
-				remoteResponse = this.#adapter.fromRemote(response);
 				this.#localProvider.registry.isNew = false;
-			}
-
-			if (this.#localProvider) {
 				await this.#localProvider.save(properties);
 			}
-			this.#parent.triggerEvent();
-
-			return this.#adapter.toClient({ data: remoteResponse });
-		} catch (e) {
-			return e;
+		} else if (this.#localProvider) {
+			await this.#localProvider.save(properties);
 		}
+		this.#parent.triggerEvent();
+
+		return this.#adapter.toClient({ data: remoteResponse });
 	};
 	publish = this.save;
 	#publish = async (properties?) => {
@@ -72,7 +72,7 @@ export class ItemSaveManager {
 
 			const data = this.#adapter.fromRemote(response);
 			await this.#parent.set(data);
-			if (this.#localProvider) {
+			if (this.#localProvider && this.#localdb) {
 				this.#localProvider.save(data);
 				if (props.id === this.#localProvider.registry.__instanceId) {
 					this.#localProvider.deleteRegistry(props.id);
@@ -119,7 +119,7 @@ export class ItemSaveManager {
 
 			const properties = this.#parent.getProperties();
 
-			if (this.#localProvider) {
+			if (this.#localdb) {
 				// Update the local data without setting it as 'unpublished'
 				// (thus, it won't be queued for syncing)
 				await this.#localProvider.save(properties);

@@ -21,7 +21,7 @@ export class CollectionLoadManager {
 	#parentBridge: {
 		get: (property: string) => any;
 		set: (property: string, value: any) => void;
-		clear: () => void;
+		clear?: () => void;
 	};
 	#parent: Collection;
 	#registry: RegistryFactory;
@@ -119,11 +119,9 @@ export class CollectionLoadManager {
 	#remoteLoad = async (params: Record<string, any>) => {
 		const response = await this.#provider.list(params);
 		const data = this.#adapter.fromRemote(response);
-
 		const items = await this.processRemoteEntries(data);
 
 		this.remoteData = response;
-
 		this.#remoteElements = params.update === true ? this.#remoteElements.concat(items) : items;
 		const fromBackend = this.#remoteElements.map(item => item.id);
 		const notInBack = [...this.#localIds].filter(id => !fromBackend.includes(id));

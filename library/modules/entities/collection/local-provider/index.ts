@@ -14,13 +14,7 @@ interface IItemValues {
 	instanceId: string;
 }
 export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<CollectionLocalProvider> {
-	declare triggerEvent: (event?: string) => void;
-	declare trigger: (event?: string) => void;
-	declare ready: boolean;
-	declare localdb: boolean;
-
 	#isOnline = globalThis.navigator.onLine;
-
 	#offline: boolean;
 	#database!: DatabaseManager;
 	#storeName!: string;
