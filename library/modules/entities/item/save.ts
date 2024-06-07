@@ -36,11 +36,6 @@ export class ItemSaveManager {
 		if (!this.#parent.isUnpublished) return;
 
 		const properties = { ...data, ...this.#parent.getProperties() };
-		if (this.#localdb) {
-			//todo: @julio review it
-			properties.isNew = this.#localProvider.registry?.isNew;
-			properties.__instanceId = this.#localProvider?.registry.__instanceId;
-		}
 
 		let remoteResponse;
 		if (this.#parent.isOnline && this.#provider) {
@@ -57,7 +52,7 @@ export class ItemSaveManager {
 		}
 		this.#parent.triggerEvent();
 
-		return this.#adapter.toClient({ data: remoteResponse });
+		return this.#adapter.toClient(remoteResponse);
 	};
 	publish = this.save;
 	#publish = async (properties?) => {
