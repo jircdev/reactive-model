@@ -64,12 +64,13 @@ export class ItemLoadManager {
 
 			if (!this.#provider) return;
 
-			const remoteData = await this.remoteLoad(params);
+			const response = await this.remoteLoad(params);
+			const remoteData = response?.data;
 
 			if (!remoteData) {
 				this.#parent.found = false;
 
-				return this.#adapter.toClient();
+				return this.#adapter.toClient(response);
 			}
 
 			this.#parent.found = true;
@@ -97,7 +98,7 @@ export class ItemLoadManager {
 				}
 			}
 
-			return this.#adapter.toClient({ data: remoteData });
+			return this.#adapter.toClient(response);
 		} catch (exc) {
 			throw exc;
 		} finally {

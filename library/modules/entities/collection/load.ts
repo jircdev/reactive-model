@@ -118,7 +118,8 @@ export class CollectionLoadManager {
 
 	#remoteLoad = async (params: Record<string, any>) => {
 		const response = await this.#provider.list(params);
-		const data = this.#adapter.fromRemote(response);
+		const remoteResponse = this.#adapter.fromRemote(response);
+		const { data } = remoteResponse;
 		const items = await this.processRemoteEntries(data);
 
 		this.remoteData = response;
@@ -149,6 +150,7 @@ export class CollectionLoadManager {
 			this.#parentBridge.clear();
 			this.parent.triggerEvent();
 		}
+
 		if (!data.entries && !data.items) {
 			/**
 			 * the items property is not used in the current version, but it is still supported
