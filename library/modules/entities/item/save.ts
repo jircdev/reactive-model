@@ -70,7 +70,8 @@ export class ItemSaveManager {
 			});
 			const response = await this.#provider.publish(props);
 
-			const data = this.#adapter.fromRemote(response);
+			const remoteREsponse = this.#adapter.fromRemote(response);
+			const { data } = remoteREsponse;
 			await this.#parent.set(data);
 			if (this.#localProvider && this.#localdb) {
 				this.#localProvider.save(data);
@@ -80,7 +81,7 @@ export class ItemSaveManager {
 
 				this.#localProvider.trigger('change');
 			}
-			return this.#adapter.toClient({ data });
+			return this.#adapter.toClient(response);
 		} catch (error) {
 			console.error('ERROR PUBLISHING', error);
 			return this.#adapter.toClient({ error });

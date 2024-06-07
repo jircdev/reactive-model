@@ -59,6 +59,7 @@ export class CollectionSaveManager {
 			if (!this.#provider || this.#bridge.get('isOffline')) return;
 
 			const response = await this.#provider.bulkSave(data);
+			
 			if (!response.status) throw response.error;
 
 			return this.#adapter.toClient({ status: true });
