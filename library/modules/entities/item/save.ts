@@ -38,6 +38,7 @@ export class ItemSaveManager {
 		const properties = { ...data, ...this.#parent.getProperties() };
 
 		let remoteResponse;
+		console.log(20, this.#parent.isOnline, this.#localdb);
 		if (this.#parent.isOnline && this.#provider) {
 			const response = await this.#publish(properties);
 			remoteResponse = this.#adapter.fromRemote(response);
@@ -47,7 +48,7 @@ export class ItemSaveManager {
 				this.#localProvider.registry.isNew = false;
 				await this.#localProvider.save(properties);
 			}
-		} else if (this.#localProvider) {
+		} else if (this.#localProvider && this.#localdb) {
 			await this.#localProvider.save(properties);
 		}
 		this.#parent.triggerEvent();
