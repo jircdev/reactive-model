@@ -1,5 +1,5 @@
 export interface IRegistry {
-	values?: object;
 	id?: string | number;
-	__instanceId?: string;
+	__instanceId?: string | number;
+	[key: string]: any;
 }

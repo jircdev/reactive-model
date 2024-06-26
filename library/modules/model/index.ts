@@ -1,5 +1,4 @@
 import { Events } from '@beyond-js/events/events';
-import { IReactiveProperties } from './interfaces/reactive-props';
 import { ReactiveProps } from './interfaces/reactive-constructor-specs';
 
 /**

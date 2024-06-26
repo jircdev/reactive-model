@@ -1,70 +1,61 @@
-import { PendingPromise } from '@beyond-js/kernel/core';
 import { ReactiveModel } from '@beyond-js/reactive/model';
 import { v4 as uuidv4 } from 'uuid';
-import { IRegistry } from './types';
+import { IRegistry } from './IRegistry';
 
-export class Registry extends ReactiveModel<IRegistry> {
-	#values: any = {};
-	get values() {
-		return this.#values;
-	}
-	#id;
-
-	#isDeleted;
-	#isNew: boolean;
+/**
+ * Represents a single registry item.
+ */
+export class Registry<T extends IRegistry> extends ReactiveModel<T> {
+	#values: T;
+	#id: IRegistry['id'];
+	#isDeleted: boolean = false;
 	__instanceId: string;
 
-	#keyId;
-	get isDeleted() {
+	get values(): T {
+		return this.#values;
+	}
+
+	get isDeleted(): boolean {
 		return this.#isDeleted;
 	}
-	set isDeleted(value) {
-		if (value === this.#isDeleted) return;
 
+	set isDeleted(value: boolean) {
+		if (value === this.#isDeleted) return;
 		this.#isDeleted = value;
 		this.triggerEvent();
 	}
 
-	constructor(data: IRegistry = { id: undefined }) {
+	constructor(data: T = { id: undefined } as T) {
 		super();
-
 		const { id } = data;
-		this.#isNew = id === undefined;
-		this.#id = id;
-		this.__instanceId = data.__instanceId ?? uuidv4();
-		if (!id) this.#id = this.__instanceId;
-		if (this.#id) this.#values.id = this.#id;
+		this.#id = id ?? uuidv4();
+		this.__instanceId = data.__instanceId ?? this.#id;
+		this.#values = { ...data, id: this.#id } as T;
+		this.setValues(data);
 	}
 
-	setValues = data => {
-		if (!data) {
-			return;
-		}
-		const props = Object.keys(data);
+	private updateValue<K extends keyof T>(key: K, value: T[K]): void {
+		(this.#values[key] as T[K]) = value;
+	}
+
+	setValues(data: Partial<T>): boolean {
+		if (!data) return false;
+		const props = Object.keys(data) as Array<keyof T>;
 		let updated = false;
 
-		if (!data.id) data.id = this.#id;
-
-		const newValues = { ...this.#values };
-
 		props.forEach(property => {
-			if (data[property] === newValues[property]) return;
-			newValues[property] = data[property];
+			if (data[property] === this.#values[property]) return;
+			this.updateValue(property, data[property] as T[keyof T]);
 			updated = true;
 		});
-		if (data.__instanceId) this.__instanceId = data.instanceId;
-		newValues.isDeleleted = this.isDeleted === 1 ?? 0;
-		this.#values = newValues;
-		this.triggerEvent();
 
+		if (updated) {
+			this.triggerEvent();
+		}
 		return updated;
-	};
+	}
 
-	getValues() {
-		const values = { ...this.#values };
-
-		if (this.__instanceId) values.__instanceId = this.__instanceId;
-		//		if (this.offline) values.offline = this.offline; // this line may be removed, the offline value must be set by the localProvider
-		return values;
+	getValues(): T {
+		return { ...this.#values, __instanceId: this.__instanceId };
 	}
 }
