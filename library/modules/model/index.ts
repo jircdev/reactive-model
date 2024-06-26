@@ -92,7 +92,7 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 			set: (newVal: T[keyof T]): void => {
 				if (newVal === this[privatePropKey]) return;
 				this[privatePropKey] = newVal;
-				console.log(20);
+
 				this.triggerEvent();
 			},
 			enumerable: true,
@@ -102,7 +102,7 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 
 	triggerEvent = (event: string = 'change', delay: number = 100): void => {
 		if (this.debounceTimeout !== null) clearTimeout(this.debounceTimeout);
-		console.log(0.1, 'me disparo');
+
 		this.debounceTimeout = globalThis.setTimeout(() => {
 			this.trigger(event);
 			this.debounceTimeout = null;

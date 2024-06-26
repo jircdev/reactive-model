@@ -48,7 +48,7 @@ export class CollectionSaveManager {
 	 */
 	save = async (data = [], init = false): Promise<boolean | void> => {
 		if (!this.#localdb) return true;
-		console.log(0.2, this, this.#localdb, this.#parent);
+
 		await this.#localProvider.init();
 
 		await this.#localProvider.save(data);
