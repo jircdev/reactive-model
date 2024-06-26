@@ -1,9 +1,5 @@
 {
-  "name": "entities/item",
-  "ts": {
-    "path": "ts",
-    "files": [
-      "*"
-    ]
-  }
+	"name": "entities/item",
+	"bundle": "ts",
+	"files": ["*"]
 }
