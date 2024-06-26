@@ -1,6 +1,6 @@
 import { Events } from '@beyond-js/events/events';
 import { IReactiveProperties } from './interfaces/reactive-props';
-import { IReactiveConstructorSpecs } from './interfaces/reactive-constructor-specs';
+import { ReactiveProps } from './interfaces/reactive-constructor-specs';
 
 /**
  * The `ReactiveModel` class is a subclass of the `Events` class that provides a simple way to create
@@ -10,29 +10,21 @@ import { IReactiveConstructorSpecs } from './interfaces/reactive-constructor-spe
  * @template T - The type of the properties that can be defined in the model.
  * @extends Events
  */
-export abstract class ReactiveModel<T> extends Events {
+type Timeout = ReturnType<typeof setTimeout>;
+
+export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 	protected schema: unknown;
 	#isReactive: boolean = true;
-	private debounceTimeout: number | null = null;
+	private debounceTimeout: Timeout | undefined | null;
 	private batchUpdates: boolean = false;
 	#ready: boolean = false;
-	#initialValues: Record<string, any> = {};
+	#initialValues: Partial<T> = {};
 	protected properties: string[] = [];
 	fetching!: boolean;
 	fetched: boolean = false;
 	processing: boolean = false;
 	processed: boolean = false;
 	loaded: boolean = false;
-
-	constructor(specs: IReactiveConstructorSpecs = {}) {
-		super();
-		this.reactiveProps<IReactiveProperties>(['fetching', 'fetched', 'processing', 'processed', 'loaded']);
-
-		if (specs.properties && Array.isArray(specs.properties)) {
-			this.properties = specs.properties;
-		}
-		if (specs) this.initialValues(specs);
-	}
 
 	get isReactive(): boolean {
 		return this.#isReactive;
@@ -56,38 +48,52 @@ export abstract class ReactiveModel<T> extends Events {
 		});
 	}
 
-	initialValues(values?: Partial<T>): Record<string, any> {
+	constructor(specs: ReactiveProps = {}) {
+		super();
+		this.reactiveProps(['fetching', 'fetched', 'processing', 'processed', 'loaded'] as Array<keyof T>);
+
+		if (specs.properties && Array.isArray(specs.properties)) {
+			this.properties = specs.properties;
+			this.reactiveProps(specs.properties, specs);
+		}
+		if (specs) this.initialValues(specs);
+	}
+
+	#setProperties(specs) {}
+	initialValues(values?: Partial<ReactiveProps>): Record<string, any> {
 		if (!values) return this.#initialValues;
 		let data = { ...values };
 		delete data.properties;
 
-		this.#set(data);
+		// this.#set(data as Partial<T>, false);
 		this.#initialValues = data;
-		return this.#initialValues;
+		return this.initialValues;
 	}
 
-	protected reactiveProps<T>(props: Array<keyof T>): void {
+	protected reactiveProps(props: Array<keyof T>, values?: Record<keyof T, any>): void {
 		for (const propKey of props) {
-			const descriptor = Object.getOwnPropertyDescriptor(this, propKey);
-			const initialValue = descriptor ? descriptor.value : undefined;
+			const descriptor = Object.getOwnPropertyDescriptor(this, propKey as string);
+			const initialValue = values?.[propKey] ? values[propKey] : descriptor ? descriptor.value : undefined;
+			console.log(0.1, propKey, descriptor, initialValue, values?.[propKey]);
 
 			this.defineReactiveProp(propKey, initialValue);
 		}
 	}
 
-	protected defineReactiveProp<K extends keyof T>(propKey: K, initialValue: T[K]): void {
-		const privatePropKey = `__${String(propKey)}`;
+	protected defineReactiveProp(propKey: keyof T, initialValue: T[keyof T]): void {
+		const privatePropKey = `#${String(propKey)}`;
 
-		Object.defineProperty(this, propKey, {
-			get(): T[K] {
+		Object.defineProperty(this, propKey as string, {
+			get: (): T[keyof T] => {
 				if (!Object.prototype.hasOwnProperty.call(this, privatePropKey)) {
-					(this as any)[privatePropKey] = initialValue;
+					this[privatePropKey] = initialValue;
 				}
-				return (this as any)[privatePropKey];
+				return this[privatePropKey];
 			},
-			set(newVal: T[K]): void {
-				if (newVal === (this as any)[privatePropKey]) return;
-				(this as any)[privatePropKey] = newVal;
+			set: (newVal: T[keyof T]): void => {
+				if (newVal === this[privatePropKey]) return;
+				this[privatePropKey] = newVal;
+				console.log(20);
 				this.triggerEvent();
 			},
 			enumerable: true,
@@ -97,7 +103,7 @@ export abstract class ReactiveModel<T> extends Events {
 
 	triggerEvent = (event: string = 'change', delay: number = 100): void => {
 		if (this.debounceTimeout !== null) clearTimeout(this.debounceTimeout);
-
+		console.log(0.1, 'me disparo');
 		this.debounceTimeout = globalThis.setTimeout(() => {
 			this.trigger(event);
 			this.debounceTimeout = null;
@@ -117,32 +123,35 @@ export abstract class ReactiveModel<T> extends Events {
 		}
 	}
 
-	#set(properties: Partial<T>): void {
+	isSameObject = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+	#set(properties: Partial<T>, trigger = true): void {
 		let updated = false;
+		if (!properties) return;
+
 		try {
-			Object.keys(properties).forEach(prop => {
+			const keys = Object.keys(properties);
+			keys.forEach(prop => {
 				if (!this.properties || !this.properties.includes(prop)) return;
-				const sameObject =
-					typeof properties[prop] === 'object' &&
-					JSON.stringify(properties[prop]) === JSON.stringify(this[prop]);
+				const isObject = typeof properties[prop] === 'object';
+				const isSameObject = isObject && this.isSameObject(properties[prop], this[prop]);
 
-				if (this[prop] === properties[prop] || sameObject) return;
+				if (this[prop] === properties[prop] || isSameObject) return;
 				const descriptor = Object.getOwnPropertyDescriptor(this, prop);
-				if (descriptor?.set) return;
+				if (!descriptor?.set) return;
 
-				(this as any)[prop] = properties[prop];
+				this[prop] = properties[prop];
 				updated = true;
 			});
 		} catch (e) {
 			throw new Error(`Error setting properties: ${e.message}`);
 		} finally {
-			if (updated && !this.batchUpdates) this.triggerEvent();
+			if (trigger && updated && !this.batchUpdates) this.triggerEvent();
 		}
 	}
 
-	getProperties(): Record<string, any> {
+	getProperties(): ReactiveProps['properties'] {
 		const props: Record<string, any> = {};
-		const properties = this.properties || this.skeleton;
+		const properties = this.properties;
 
 		type IProperty = {
 			name: string;
