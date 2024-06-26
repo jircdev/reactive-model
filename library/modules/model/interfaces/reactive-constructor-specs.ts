@@ -1,5 +1,3 @@
-export /*bundle*/ interface IReactiveConstructorSpecs {
-	properties?: string[];
-	// Add an index signature
-	[key: string]: any;
-}
+type ReactiveProps<T> = Partial<Omit<T, 'properties'>> & {
+	properties: (keyof T)[];
+};
