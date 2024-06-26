@@ -74,7 +74,6 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 		for (const propKey of props) {
 			const descriptor = Object.getOwnPropertyDescriptor(this, propKey as string);
 			const initialValue = values?.[propKey] ? values[propKey] : descriptor ? descriptor.value : undefined;
-			console.log(0.1, propKey, descriptor, initialValue, values?.[propKey]);
 
 			this.defineReactiveProp(propKey, initialValue);
 		}
