@@ -1,0 +1,9 @@
+{
+  "name": "entities/item",
+  "ts": {
+    "path": "ts",
+    "files": [
+      "*"
+    ]
+  }
+}
