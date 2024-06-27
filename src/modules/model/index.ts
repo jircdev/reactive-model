@@ -1,6 +1,7 @@
-import { Events } from '@beyond-js/events/events';
 import { ReactiveProps } from './interfaces/reactive-constructor-specs';
+import { Events } from '@beyond-js/events/events';
 
+// reactive-model
 /**
  * The `ReactiveModel` class is a subclass of the `Events` class that provides a simple way to create
  * reactive properties that can trigger events when they change. It also provides methods for setting
@@ -17,8 +18,8 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 	private debounceTimeout: Timeout | undefined | null;
 	private batchUpdates: boolean = false;
 	#ready: boolean = false;
-	#initialValues: Partial<T> = {};
-	protected properties: string[] = [];
+	#initialValues: Partial<ReactiveProps<T>> = {};
+	protected properties: (keyof T)[] = [];
 	fetching!: boolean;
 	fetched: boolean = false;
 	processing: boolean = false;
@@ -40,14 +41,14 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 	}
 
 	get isUnpublished(): boolean {
-		const properties = this.getProperties();
+		const properties = this.getProperties() ?? {};
 		return Object.keys(properties).some(prop => {
-			if (prop === 'id' || typeof prop === 'object') return false;
+			if (prop === 'id' || typeof properties[prop] === 'object') return false;
 			return properties[prop] !== this.#initialValues[prop];
 		});
 	}
 
-	constructor(specs: ReactiveProps = {}) {
+	constructor(specs: ReactiveProps<T> = {}) {
 		super();
 		this.reactiveProps(['fetching', 'fetched', 'processing', 'processed', 'loaded'] as Array<keyof T>);
 
@@ -58,21 +59,22 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 		if (specs) this.initialValues(specs);
 	}
 
-	#setProperties(specs) {}
-	initialValues(values?: Partial<ReactiveProps>): Record<string, any> {
+	#setProperties(specs: ReactiveProps<T>) {
+		// Implementation of #setProperties
+	}
+	initialValues(values?: Partial<ReactiveProps<T>>): Record<string, any> {
 		if (!values) return this.#initialValues;
 		let data = { ...values };
 		delete data.properties;
 
-		// this.#set(data as Partial<T>, false);
 		this.#initialValues = data;
-		return this.initialValues;
+		return this.#initialValues;
 	}
 
-	protected reactiveProps(props: Array<keyof T>, values?: Record<keyof T, any>): void {
+	protected reactiveProps(props: Array<keyof T>, values?: ReactiveProps<T>): void {
 		for (const propKey of props) {
 			const descriptor = Object.getOwnPropertyDescriptor(this, propKey as string);
-			const initialValue = values?.[propKey] ? values[propKey] : descriptor ? descriptor.value : undefined;
+			const initialValue = values?.[propKey as keyof ReactiveProps<T>] ?? descriptor?.value;
 
 			this.defineReactiveProp(propKey, initialValue);
 		}
@@ -91,7 +93,6 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 			set: (newVal: T[keyof T]): void => {
 				if (newVal === this[privatePropKey]) return;
 				this[privatePropKey] = newVal;
-				console.log(20);
 				this.triggerEvent();
 			},
 			enumerable: true,
@@ -101,7 +102,6 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 
 	triggerEvent = (event: string = 'change', delay: number = 100): void => {
 		if (this.debounceTimeout !== null) clearTimeout(this.debounceTimeout);
-		console.log(0.1, 'me disparo');
 		this.debounceTimeout = globalThis.setTimeout(() => {
 			this.trigger(event);
 			this.debounceTimeout = null;
@@ -121,23 +121,23 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 		}
 	}
 
-	isSameObject = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+	isSameObject = (a: any, b: any) => JSON.stringify(a) === JSON.stringify(b);
 	#set(properties: Partial<T>, trigger = true): void {
 		let updated = false;
 		if (!properties) return;
 
 		try {
-			const keys = Object.keys(properties);
+			const keys = Object.keys(properties) as Array<keyof T>;
 			keys.forEach(prop => {
 				if (!this.properties || !this.properties.includes(prop)) return;
 				const isObject = typeof properties[prop] === 'object';
-				const isSameObject = isObject && this.isSameObject(properties[prop], this[prop]);
+				const isSameObject = isObject && this.isSameObject(properties[prop], this[prop as keyof this]);
 
-				if (this[prop] === properties[prop] || isSameObject) return;
-				const descriptor = Object.getOwnPropertyDescriptor(this, prop);
+				if (this[prop as keyof this] === properties[prop] || isSameObject) return;
+				const descriptor = Object.getOwnPropertyDescriptor(this, prop as string);
 				if (!descriptor?.set) return;
 
-				this[prop] = properties[prop];
+				(this[prop as keyof this] as unknown as T[keyof T]) = properties[prop]!;
 				updated = true;
 			});
 		} catch (e) {
@@ -147,16 +147,11 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 		}
 	}
 
-	getProperties(): ReactiveProps['properties'] {
+	getProperties() {
 		const props: Record<string, any> = {};
 		const properties = this.properties;
 
-		type IProperty = {
-			name: string;
-			type: string;
-		};
-
-		properties.forEach((property: string | IProperty) => {
+		properties.forEach(property => {
 			if (typeof property === 'object') {
 				if (!Object.prototype.hasOwnProperty.call(property, 'name')) return;
 				type ICollection = {
@@ -165,16 +160,14 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 				};
 
 				const collection = property as ICollection;
-				if (collection.type === 'collection') {
-					props[property.name] = this[property.name].items.map((item: any) => item.getProperties());
-					return;
-				}
-				props[property.name] = this[property.name];
+
+				props[collection.name] = this[collection.name];
 			} else {
-				const name = property as string;
-				props[name] = this[name];
+				const name = property;
+				props[String(name)] = this[name];
 			}
 		});
+
 		return props;
 	}
 }
