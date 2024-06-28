@@ -1,7 +1,7 @@
 import { IResponseAdapter } from './interface';
 
 interface Iresponse {
-	status: boolean;
+	status?: boolean;
 	error?: any;
 	data?: any;
 }

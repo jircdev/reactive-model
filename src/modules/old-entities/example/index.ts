@@ -6,6 +6,7 @@ interface IBook extends IItem {
 	name?: string;
 	password: string;
 	lastnames: string;
+	[props: string]: any;
 }
 
 export /*bundle */

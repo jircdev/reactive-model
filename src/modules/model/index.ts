@@ -1,5 +1,5 @@
 import { Events } from '@beyond-js/events/events';
-import { IReactiveProperties } from './interfaces/reactive-props';
+import { IReactiveConstructorSpecs, IReactiveProperties } from './interfaces/reactive-props';
 import { ReactiveProps } from './interfaces/reactive-constructor-specs';
 
 /**
@@ -48,9 +48,10 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 		});
 	}
 
-	constructor(specs: ReactiveProps = {}) {
+	constructor(specs?: ReactiveProps<T>) {
 		super();
-		this.reactiveProps(['fetching', 'fetched', 'processing', 'processed', 'loaded'] as Array<keyof T>);
+		if (!specs) specs = {} as ReactiveProps<T>;
+		this.reactiveProps(['fetching', 'fetched', 'processing', 'processed', 'loaded']);
 
 		if (specs.properties && Array.isArray(specs.properties)) {
 			this.properties = specs.properties;
@@ -60,17 +61,17 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 	}
 
 	#setProperties(specs) {}
-	initialValues(values?: Partial<ReactiveProps>): Record<string, any> {
+	initialValues(values?: Partial<ReactiveProps<T>>): Record<string, any> {
 		if (!values) return this.#initialValues;
 		let data = { ...values };
 		delete data.properties;
 
 		// this.#set(data as Partial<T>, false);
-		this.#initialValues = data;
+		this.#initialValues = data as Partial<T>;
 		return this.initialValues;
 	}
 
-	protected reactiveProps(props: Array<keyof T>, values?: Record<keyof T, any>): void {
+	protected reactiveProps(props: string[], values?: Record<string, any>): void {
 		for (const propKey of props) {
 			const descriptor = Object.getOwnPropertyDescriptor(this, propKey as string);
 			const initialValue = values?.[propKey] ? values[propKey] : descriptor ? descriptor.value : undefined;
@@ -79,7 +80,7 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 		}
 	}
 
-	protected defineReactiveProp(propKey: keyof T, initialValue: T[keyof T]): void {
+	protected defineReactiveProp(propKey: string, initialValue: T[keyof T]): void {
 		const privatePropKey = `#${String(propKey)}`;
 
 		Object.defineProperty(this, propKey as string, {
@@ -100,7 +101,7 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 		});
 	}
 
-	triggerEvent = (event: string = 'change', delay: number = 100): void => {
+	triggerEvent = (event: string = 'change', delay: number = 0): void => {
 		if (this.debounceTimeout !== null) clearTimeout(this.debounceTimeout);
 
 		this.debounceTimeout = globalThis.setTimeout(() => {
@@ -148,7 +149,7 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 		}
 	}
 
-	getProperties(): ReactiveProps['properties'] {
+	getProperties(): Record<string, any> {
 		const props: Record<string, any> = {};
 		const properties = this.properties;
 

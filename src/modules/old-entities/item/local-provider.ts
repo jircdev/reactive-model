@@ -51,14 +51,14 @@ class LocalProvider extends ReactiveModel<any> {
 	get registry() {
 		return this.#registry;
 	}
-
+	__moment: number; // moment
 	#apply: boolean;
 	constructor({ parent, bridge, localdb }) {
 		super();
 
 		this.#getProperty = bridge.get;
 		const { db, storeName } = parent;
-		this.__id = Math.floor(Math.random() * (100000 - 1000 + 1)) + 1000;
+		this.__moment = Math.floor(Math.random() * (100000 - 1000 + 1)) + 1000;
 		this.#parent = parent;
 		this.#apply = db && storeName;
 		this.#databaseName = db;

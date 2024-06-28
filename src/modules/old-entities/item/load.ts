@@ -2,8 +2,8 @@ import type { Item } from '.';
 
 import { IResponseAdapter } from '../adapter/interface';
 import { LocalProvider } from './local-provider';
-export class ItemLoadManager {
-	#parent: Item<any>;
+export class ItemLoadManager<T> {
+	#parent: Item<T>;
 
 	#localProvider: LocalProvider;
 	#provider;
@@ -11,6 +11,7 @@ export class ItemLoadManager {
 	#bridge;
 	#adapter: IResponseAdapter;
 	#localdb;
+
 	ready: boolean;
 
 	constructor({ parent, bridge, localdb }) {

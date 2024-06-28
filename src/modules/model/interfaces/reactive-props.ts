@@ -6,3 +6,8 @@ export /*bundle */ interface IReactiveProperties {
 	loaded: boolean;
 	ready: boolean;
 }
+
+export interface IReactiveConstructorSpecs {
+	properties?: string[];
+	[prop: string]: any;
+}

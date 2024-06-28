@@ -66,9 +66,9 @@ export /*bundle*/ class CollectionLocalProvider extends ReactiveModel<Collection
 		super();
 		const { db, storeName } = parent;
 		this.#parent = parent;
-		this.localdb = bridge.get('localdb');
+		this.#localdb = bridge.get('localdb');
 
-		if (!this.localdb) {
+		if (!this.#localdb) {
 			this.#apply = false;
 			return;
 		}

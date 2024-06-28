@@ -1,3 +1,4 @@
+import { ReactiveProps } from './../../model/interfaces/reactive-constructor-specs';
 import { ReactiveModel } from '@beyond-js/reactive/model';
 import { LocalProvider } from './local-provider';
 import { ItemSaveManager } from './save';
@@ -14,12 +15,14 @@ export /*bundle*/ class Item<T> extends ReactiveModel<IItem> {
 	declare trigger: (event?: string) => void;
 	declare triggerEvent: (event?: string) => void;
 	declare getProperties: () => any;
+	landed: boolean = false;
 	declare on: (event: string, listener: ListenerFunction, priority?: number) => this;
 
 	id: string | number;
 
 	declare localUpdate: (data) => Promise<any>;
 	protected localdb: boolean;
+
 	#provider: IItemProvider<IItem>;
 	protected storeName: string;
 	protected db: string;
@@ -73,7 +76,7 @@ export /*bundle*/ class Item<T> extends ReactiveModel<IItem> {
 		return this.checkReady();
 	}
 
-	#loadManager: ItemLoadManager;
+	#loadManager: ItemLoadManager<T>;
 	#objectReady = false;
 	#promiseReady: PendingPromise<boolean>;
 	#initPromise: PendingPromise<boolean>;
@@ -88,7 +91,7 @@ export /*bundle*/ class Item<T> extends ReactiveModel<IItem> {
 		return this.#responseAdapter;
 	}
 	constructor(config: IItemConfig = {}) {
-		super((() => (config?.properties ? { properties: config.properties } : {}))());
+		super((() => (config?.properties ? { properties: config.properties } : {}) as ReactiveProps<T>)());
 
 		const { db, storeName, localdb } = config;
 		this.#config = config;
@@ -142,7 +145,7 @@ export /*bundle*/ class Item<T> extends ReactiveModel<IItem> {
 
 		this.#promiseReady = new PendingPromise();
 
-		if (this.objectReady) this.#promiseReady.resolve(this.#objectReady);
+		if (this.#objectReady) this.#promiseReady.resolve(this.#objectReady);
 
 		const onReady = () => {
 			this.#objectReady = true;

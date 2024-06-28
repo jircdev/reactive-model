@@ -17,6 +17,7 @@ export class CollectionLoadManager {
 	filter: any;
 	#localProvider: CollectionLocalProvider;
 	#provider: IProvider;
+	
 	#loaded: Map<string | number, any> = new Map();
 	#parentBridge: {
 		get: (property: string) => any;
