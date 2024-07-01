@@ -1,6 +1,7 @@
 export interface IResponse {
 	status: boolean;
-	data: object;
+	data?: object;
+	error?: string | string[];
 }
 export type ModelId = string | number;
 export /*bundle*/ interface IProvider {

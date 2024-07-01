@@ -13,6 +13,8 @@ import { ReactiveProps } from './interfaces/reactive-constructor-specs';
 type Timeout = ReturnType<typeof setTimeout>;
 
 export /*bundle*/ abstract class ReactiveModel<T> extends Events {
+	// Dynamic properties handling
+	[key: string]: any | undefined;
 	protected schema: unknown;
 	#isReactive: boolean = true;
 	private debounceTimeout: Timeout | undefined | null;
@@ -102,12 +104,12 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 	}
 
 	triggerEvent = (event: string = 'change', delay: number = 0): void => {
-		if (this.debounceTimeout !== null) clearTimeout(this.debounceTimeout);
+		// if (this.debounceTimeout !== null) clearTimeout(this.debounceTimeout);
 
-		this.debounceTimeout = globalThis.setTimeout(() => {
-			this.trigger(event);
-			this.debounceTimeout = null;
-		}, delay);
+		// this.debounceTimeout = globalThis.setTimeout(() => {
+		this.trigger(event);
+		this.debounceTimeout = null;
+		// }, delay);
 	};
 
 	set(properties: Partial<T>, batch: boolean = false): void {
