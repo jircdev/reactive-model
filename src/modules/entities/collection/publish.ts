@@ -48,6 +48,7 @@ export class CollectionSaveManager {
 	 */
 	save = async (data = [], init = false): Promise<boolean | void> => {
 		if (!this.#localdb) return true;
+		console.log(0.2, this, this.#localdb, this.#parent);
 		await this.#localProvider.init();
 
 		await this.#localProvider.save(data);
@@ -59,7 +60,7 @@ export class CollectionSaveManager {
 			if (!this.#provider || this.#bridge.get('isOffline')) return;
 
 			const response = await this.#provider.bulkSave(data);
-			
+
 			if (!response.status) throw response.error;
 
 			return this.#adapter.toClient({ status: true });
