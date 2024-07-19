@@ -33,6 +33,7 @@ export /*bundle*/ abstract class ReactiveModel<T> extends Events {
 
 	set ready(value: boolean) {
 		if (value === this.#ready) return;
+
 		this.#ready = value;
 		this.triggerEvent();
 	}
