@@ -1,5 +1,6 @@
 import { ReactiveModel } from '@beyond-js/reactive/model';
-import { Users, User } from '@beyond-js/reactive-tests/examples/models';
+import { User } from './objects/user';
+
 export class Store extends ReactiveModel<Store> {
 	#list;
 	get list() {
@@ -9,11 +10,14 @@ export class Store extends ReactiveModel<Store> {
 	get users() {
 		return this.#users;
 	}
-
+	#model: User;
 	constructor() {
 		super();
 		this.load();
 	}
 
-	async load() {}
+	async load() {
+		const user = new User();
+		this.#model = user;
+	}
 }

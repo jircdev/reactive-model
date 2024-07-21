@@ -9,3 +9,5 @@
 export interface IInitialValues<T> {
 	[key: string]: any;
 }
+
+export type Timeout = ReturnType<typeof setTimeout>;
