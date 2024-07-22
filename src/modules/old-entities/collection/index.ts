@@ -16,7 +16,7 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 	db: string;
 	item: typeof Item;
 
-	protected localdb: boolean = true;p
+	protected localdb: boolean = true;
 
 	#elements = new Map();
 	get elements() {

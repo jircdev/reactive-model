@@ -5,25 +5,13 @@ import { Registry } from './';
 /**
  * Factory for managing multiple registry instances.
  */
-export class RegistryFactory<T extends IRegistry> extends ReactiveModel<{
-	registries: Map<string, Map<IRegistry['id'], Registry<T>>>;
-}> {
+export /*bundle */ class RegistryFactory<T> extends ReactiveModel<RegistryFactory<T>> {
 	#registries: Map<string, Map<IRegistry['id'], Registry<T>>> = new Map();
 	static #instances: Map<string, RegistryFactory<any>> = new Map();
 
 	constructor() {
 		super();
 		this.ready = true;
-	}
-
-	registerList(store: string, items: Partial<T>[]): void {
-		items.forEach(item => {
-			if (this.has(store, item.id)) {
-				this.get(store, item.id!);
-			} else {
-				this.create(store, item);
-			}
-		});
 	}
 
 	has(store: string, id?: IRegistry['id']): boolean {
@@ -40,15 +28,14 @@ export class RegistryFactory<T extends IRegistry> extends ReactiveModel<{
 		if (!this.#registries.has(store)) {
 			this.#registries.set(store, new Map());
 		}
-		this.#registries.get(store)!.set(registry.values.id as string, registry);
+
 		return registry;
 	}
 
-	static getInstance<T extends IRegistry>(): RegistryFactory<T> {
-		if (!this.#instances.has('default')) {
-			const instance = new RegistryFactory<T>();
-			this.#instances.set('default', instance);
+	static get<U>(key: string): RegistryFactory<U> {
+		if (!this.#instances.has(key)) {
+			this.#instances.set(key, new RegistryFactory<U>());
 		}
-		return this.#instances.get('default')! as RegistryFactory<T>;
+		return this.#instances.get(key) as RegistryFactory<U>;
 	}
 }

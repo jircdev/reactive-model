@@ -1,15 +1,15 @@
-import { Timeout } from './interfaces/initial-values';
+import { ZodError, ZodTypeAny, ZodObject } from 'zod';
+import { Timeout, TriggerEventInput } from './interfaces';
 import { Events } from '@beyond-js/events/events';
-interface IUser {
-	name: string;
-}
+
+import { ValidatedPropertyType, ModelProperties, ReactiveProps, PropertyValidationErrors } from './interfaces';
 
 export /*bundle */ class ReactiveModel<T> extends Events {
 	#reactiveProps: Record<string, any> = {}; // any reactive prop.
 	get reactiveProps() {
 		return this.#reactiveProps;
 	}
-	#properties: Record<string, any> = {};
+
 	protected properties: (keyof T)[] = [];
 	// properties of the object
 	debounceTimeout: Timeout | null;
@@ -18,14 +18,49 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 	processing: boolean = false;
 	processed: boolean = false;
 	loaded: boolean = false;
+	ready: boolean = false;
+	protected schema: ZodObject<{ [key in keyof T]: ZodTypeAny }>;
+	#initialValues: ModelProperties<T> = {} as ModelProperties<T>;
+	get initialValues() {
+		return this.#initialValues;
+	}
 
-	constructor(props: any = {}) {
+	/**
+	 * Defines if the model has been modified since it was loaded.
+	 */
+	get unpublished(): boolean {
+		const properties = this.getProperties() ?? {};
+		return Object.keys(properties).some(prop => {
+			if (prop === 'id' || typeof properties[prop] === 'object') return false;
+			return properties[prop] !== this.#initialValues[prop];
+		});
+	}
+	/**
+	 * @deprecated Use `unpublished` instead.
+	 */
+	get isUnpublished() {
+		return this.unpublished;
+	}
+
+	constructor(props: ReactiveProps<T> = { properties: [] }) {
 		super();
 		this.defineReactiveProps(['fetching', 'fetched', 'processing', 'processed', 'loaded'], false);
 		if (props.properties) {
 			this.properties = props.properties;
-			this.defineReactiveProps(props.properties, false);
+			this.defineReactiveProps(props.properties as string[], false);
 		}
+	}
+
+	private setInitialValues(specs?: ReactiveProps<T>): Record<keyof T, any> {
+		if (!specs || !specs.properties) return this.#initialValues;
+
+		const values = {} as ModelProperties<T>;
+		specs.properties.forEach(property => {
+			values[property] = specs[property] || undefined;
+		});
+
+		this.#initialValues = values;
+		return this.#initialValues;
 	}
 
 	protected defineReactiveProp(propKey: string, initialValue: any): void {
@@ -36,8 +71,10 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 			},
 			set: (newVal): void => {
 				if (newVal !== undefined && newVal === this.#reactiveProps[propKey]) return;
+
+				const previous = this.#reactiveProps[propKey];
 				this.#reactiveProps[propKey] = newVal;
-				this.triggerEvent();
+				this.trigger(`${propKey}.changed`, { value: newVal, previous });
 			},
 			enumerable: true,
 			configurable: true,
@@ -52,35 +89,75 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 		}
 	}
 
-	triggerEvent = (event: string = 'change', delay: number = 100): void => {
-		if (this.debounceTimeout !== null) clearTimeout(this.debounceTimeout);
-		this.debounceTimeout = globalThis.setTimeout(() => {
-			this.trigger(event);
-			this.debounceTimeout = null;
-		}, delay);
-	};
+	private validateProperty(propKey: string, value: any): ValidatedPropertyType {
+		if (!this.schema.shape[propKey]) {
+			return {
+				valid: false,
+				error: new ZodError([
+					{ path: [propKey], message: `Property ${propKey} is not defined in the schema`, code: 'custom' },
+				]),
+			};
+		}
 
-	isSameObject = (a: any, b: any) => JSON.stringify(a) === JSON.stringify(b);
-	set(properties, batch: boolean = false) {
+		const propSchema = this.schema.shape[propKey] as ZodTypeAny;
+		const result = propSchema.safeParse(value);
+
+		if (!result.success) {
+			return { valid: false, error: result.error };
+		}
+
+		return { valid: true, error: null };
+	}
+	private isSameObject = (a: any, b: any) => JSON.stringify(a) === JSON.stringify(b);
+
+	validate(properties): { valid: boolean; errors: PropertyValidationErrors<T> } {
+		const keys = Object.keys(properties);
+		const errors: PropertyValidationErrors<T> = {};
+		const onValidate = prop => {
+			if (!this.properties || !this.properties.includes(prop)) {
+				console.log(`is not a property`, prop);
+				return;
+			}
+			const validated = this.validateProperty(prop, properties[prop]);
+
+			if (!validated.valid) {
+				errors[prop] = validated.error;
+			}
+		};
+		keys.forEach(onValidate);
+
+		return { valid: !!Object.keys(errors).length, errors };
+	}
+
+	set(properties): { updated: boolean; errors: PropertyValidationErrors<T> } {
 		const keys = Object.keys(properties);
 		let updated = false;
-		console.log(0.1, properties, keys);
+		const errors: PropertyValidationErrors<T> = {};
 		const onSet = prop => {
 			if (!this.properties || !this.properties.includes(prop)) {
 				console.log(`is not a property`, prop);
 				return;
 			}
+
+			const validated = this.validateProperty(prop, properties[prop]);
+			if (!validated.valid) {
+				errors[prop] = validated;
+				return;
+			}
 			const isObject = typeof properties[prop] === 'object';
 			const isSameObject = isObject && this.isSameObject(properties[prop], this[prop]);
-			console.log(0.2, prop, this[prop], properties[prop], properties);
+
 			if (this[prop] === properties[prop] || isSameObject) return;
 			const descriptor = Object.getOwnPropertyDescriptor(this, prop as string);
 			if (!descriptor?.set) return;
 
-			this.#reactiveProps[prop] = properties[prop]!;
+			this[prop] = properties[prop]!;
 			updated = true;
 		};
+
 		keys.forEach(onSet);
+		if (updated) this.triggerEvent();
+		return { updated, errors };
 	}
 
 	getProperties() {
@@ -93,4 +170,20 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 		this.properties.forEach(loop);
 		return props;
 	}
+
+	/**
+	 * Triggers an event after a specified delay.
+	 *
+	 * @param {string} event - The name of the event to trigger.
+	 * @param {Record<string, any>} params - Additional parameters for the event, including an optional `delay` property.
+	 */
+	triggerEvent = (event: string = 'change', params: Record<string, any> = {}): void => {
+		let { delay, ...specs } = params;
+		delay = delay ?? 100;
+		if (this.debounceTimeout !== null) clearTimeout(this.debounceTimeout);
+		this.debounceTimeout = globalThis.setTimeout(() => {
+			this.trigger(event, specs);
+			this.debounceTimeout = null;
+		}, delay);
+	};
 }

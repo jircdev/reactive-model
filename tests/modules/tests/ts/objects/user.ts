@@ -1,3 +1,4 @@
+import { ZodSchema, z } from 'zod';
 import { ReactiveModel } from '@beyond-js/reactive/model';
 
 interface IUser {
@@ -5,8 +6,13 @@ interface IUser {
 	lastName: string;
 }
 export class User extends ReactiveModel<IUser> implements IUser {
-	name: string;
-	lastName: string;
+	declare name: string;
+	declare lastName: string;
+
+	schema = z.object({
+		name: z.string(),
+		lastName: z.string(),
+	});
 
 	constructor() {
 		super({
@@ -16,7 +22,9 @@ export class User extends ReactiveModel<IUser> implements IUser {
 		globalThis.u = this;
 	}
 
-	sayHello() {
+	sayHello(name) {
+		this.set({ name });
 		console.log(this.name);
+		this.triggerEvent('hello', { name });
 	}
 }

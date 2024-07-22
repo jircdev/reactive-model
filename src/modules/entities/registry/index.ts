@@ -1,46 +1,46 @@
 import { ReactiveModel } from '@beyond-js/reactive/model';
 import { v4 as uuidv4 } from 'uuid';
-import { IRegistry } from './IRegistry';
+import { IRegistry, RegistryId } from './types';
 
 /**
  * Represents a single registry item.
  */
-export class Registry<T extends IRegistry> extends ReactiveModel<T> {
-	#values: T;
-	#id: IRegistry['id'];
+export class Registry<T> extends ReactiveModel<IRegistry> {
+	#values: Record<keyof IRegistry, any>;
+	#id: RegistryId;
 	#isDeleted: boolean = false;
-	__instanceId: string;
+	__instanceId: RegistryId;
 
-	get values(): T {
+	get values(): Record<keyof IRegistry, any> {
 		return this.#values;
 	}
 
-	get isDeleted(): boolean {
+	get deleted(): boolean {
 		return this.#isDeleted;
 	}
 
-	set isDeleted(value: boolean) {
+	set deleted(value: boolean) {
 		if (value === this.#isDeleted) return;
 		this.#isDeleted = value;
 		this.triggerEvent();
 	}
 
-	constructor(data: T = { id: undefined } as T) {
+	constructor(data: Partial<IRegistry> = { id: undefined }) {
 		super();
 		const { id } = data;
 		this.#id = id ?? uuidv4();
 		this.__instanceId = data.__instanceId ?? this.#id;
-		this.#values = { ...data, id: this.#id } as T;
+		this.#values = { ...data, id: this.#id } as Record<keyof IRegistry, any>;
 		this.setValues(data);
 	}
 
-	private updateValue<K extends keyof T>(key: K, value: T[K]): void {
-		(this.#values[key] as T[K]) = value;
+	private updateValue<K extends keyof IRegistry>(key: K, value: IRegistry[K]): void {
+		(this.#values[key] as IRegistry[K]) = value;
 	}
 
-	setValues(data: Partial<T>): boolean {
+	setValues(data: Partial<IRegistry>): boolean {
 		if (!data) return false;
-		const props = Object.keys(data) as Array<keyof T>;
+		const props = Object.keys(data) as Array<keyof IRegistry>;
 		let updated = false;
 
 		props.forEach(property => {
@@ -55,7 +55,7 @@ export class Registry<T extends IRegistry> extends ReactiveModel<T> {
 		return updated;
 	}
 
-	getValues(): T {
+	getValues(): Record<keyof IRegistry, any> {
 		return { ...this.#values, __instanceId: this.__instanceId };
 	}
 }
