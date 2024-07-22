@@ -9,7 +9,7 @@ function Item({ data }): JSX.Element {
 	function onDelete(e) {
 		e.preventDefault();
 		e.stopPropagation();
-		store.deleteUser(data.id);
+		// store.deleteUser(data.id);
 	}
 	if (data.isDeleted) return null;
 	const attrs = { checked: selected.has(data.id.toString()) };

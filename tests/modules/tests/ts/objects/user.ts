@@ -1,11 +1,10 @@
-import { ZodSchema, z } from 'zod';
-import { ReactiveModel } from '@beyond-js/reactive/model';
-
+import { Item } from '@beyond-js/reactive/entities/item';
+import { z } from 'zod';
 interface IUser {
 	name: string;
 	lastName: string;
 }
-export class User extends ReactiveModel<IUser> implements IUser {
+export class User extends Item<IUser> implements IUser {
 	declare name: string;
 	declare lastName: string;
 
