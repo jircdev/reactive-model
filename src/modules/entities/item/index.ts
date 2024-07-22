@@ -4,8 +4,8 @@ import { IItemProps } from './types';
 
 //your code here
 export /*bundle*/ class Item<T> extends ReactiveModel<T> {
-	#factory: RegistryFactory;
-	constructor(args: IItemProps) {
+	#factory: RegistryFactory<T>;
+	constructor(args: IItemProps<T>) {
 		super();
 		this.#factory = RegistryFactory.get(args.name);
 		console.log(0.1, this.#factory);
