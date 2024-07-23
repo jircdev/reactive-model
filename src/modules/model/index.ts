@@ -1,5 +1,5 @@
 import { ZodError, ZodTypeAny, ZodObject } from 'zod';
-import { Timeout, TriggerEventInput } from './interfaces';
+import { SetPropertiesResult, Timeout } from './interfaces';
 import { Events } from '@beyond-js/events/events';
 
 import { ValidatedPropertyType, ModelProperties, ReactiveProps, PropertyValidationErrors } from './interfaces';
@@ -42,16 +42,17 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 		return this.unpublished;
 	}
 
-	constructor(props: ReactiveProps<T> = { properties: [] }) {
+	constructor({ properties, ...props }: ReactiveProps<T> = { properties: [] }) {
 		super();
 		this.defineReactiveProps(['fetching', 'fetched', 'processing', 'processed', 'loaded'], false);
-		if (props.properties) {
-			this.properties = props.properties;
-			this.defineReactiveProps(props.properties as string[], false);
+
+		if (properties) {
+			this.properties = properties;
+			this.defineReactiveProps(properties as string[], { ...props });
 		}
 	}
 
-	private setInitialValues(specs?: ReactiveProps<T>): Record<keyof T, any> {
+	protected setInitialValues(specs?: ReactiveProps<T>): Record<keyof T, any> {
 		if (!specs || !specs.properties) return this.#initialValues;
 
 		const values = {} as ModelProperties<T>;
@@ -129,7 +130,7 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 		return { valid: !!Object.keys(errors).length, errors };
 	}
 
-	set(properties): { updated: boolean; errors: PropertyValidationErrors<T> } {
+	set(properties): SetPropertiesResult {
 		const keys = Object.keys(properties);
 		let updated = false;
 		const errors: PropertyValidationErrors<T> = {};

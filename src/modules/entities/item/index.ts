@@ -1,13 +1,43 @@
-import { ReactiveModel } from '@beyond-js/reactive/model';
-import { RegistryFactory } from '@beyond-js/reactive/entities/registry';
-import { IItemProps } from './types';
+import { ReactiveModel, ReactiveProps, SetPropertiesResult } from '@beyond-js/reactive/model';
+
+import { IItemProps, ItemId } from './types';
+import { RegistryFactory } from './registry/factory';
+import { Registry } from './registry';
 
 //your code here
-export /*bundle*/ class Item<T> extends ReactiveModel<T> {
+export /*bundle*/ abstract class Item<T> extends ReactiveModel<T> {
 	#factory: RegistryFactory<T>;
-	constructor(args: IItemProps<T>) {
-		super();
-		this.#factory = RegistryFactory.get(args.name);
-		console.log(0.1, this.#factory);
+	declare id: string | number;
+	protected static entity: string;
+	#registry: Registry<T>;
+
+	constructor({ entity, ...args }: IItemProps<T>) {
+		super({ ...args } as ReactiveProps<T>);
+		if (!entity) throw new Error('Entity is required');
+		this.#factory = RegistryFactory.getInstance(entity);
+		const registry = this.#factory.get(this.id);
+		this.#registry = registry;
+		this.setInitialValues(registry.getValues());
+		this.#registry.on('change', this.registryListener.bind(this));
 	}
+
+	/**
+	 * This method is called when the registry changes and updates the model values to match the registry values and keep them in sync.
+	 * @param values
+	 */
+	private registryListener(values) {
+		super.set(this.#registry.getValues());
+	}
+	set(values: T): SetPropertiesResult {
+		const response = super.set(values);
+		if (response.updated) {
+			this.#registry.setValues(values);
+		}
+		return response;
+	}
+
+	abstract load();
+	abstract save();
+	abstract publish();
+	abstract delete();
 }

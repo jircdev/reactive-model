@@ -1,6 +1,0 @@
-{
-	"name": "entities/registry",
-	"ts": {
-		"files": ["*"]
-	}
-}

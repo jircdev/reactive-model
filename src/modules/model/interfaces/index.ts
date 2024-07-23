@@ -2,7 +2,7 @@ import { ZodError } from 'zod';
 export type ModelProperties<T> = Record<keyof T, any>;
 export type PropertyValidationErrors<T> = Partial<Record<keyof T, ValidatedPropertyType>>;
 
-export type ReactiveProps<T> = {
+export /*bundle*/ type ReactiveProps<T> = {
 	properties?: (keyof T)[];
 } & {
 	[K in keyof T]?: any;
@@ -21,3 +21,8 @@ export interface TriggerEventParams {
 }
 
 export type TriggerEventInput = string | TriggerEventParams;
+
+export /*bundle*/ type SetPropertiesResult = {
+	updated: boolean;
+	errors: PropertyValidationErrors<any>;
+};

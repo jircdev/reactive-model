@@ -14,10 +14,15 @@ export class Store extends ReactiveModel<Store> {
 	constructor() {
 		super();
 		this.load();
+		globalThis.store = this;
 	}
 
 	async load() {
 		const user = new User();
 		this.#model = user;
+	}
+
+	getInstance(specs) {
+		return new User({ ...specs });
 	}
 }

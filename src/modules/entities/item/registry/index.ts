@@ -7,9 +7,18 @@ import { IRegistry, RegistryId } from './types';
  */
 export class Registry<T> extends ReactiveModel<IRegistry> {
 	#values: Record<keyof IRegistry, any>;
+	/**
+	 * Unique identifier for the registry item, it does not represent the record entity id
+	 */
 	#id: RegistryId;
+	get id() {
+		return this.#id;
+	}
 	#isDeleted: boolean = false;
-	__instanceId: RegistryId;
+	#instanceId: RegistryId;
+	get instanceId() {
+		return this.#instanceId;
+	}
 
 	get values(): Record<keyof IRegistry, any> {
 		return this.#values;
@@ -28,10 +37,11 @@ export class Registry<T> extends ReactiveModel<IRegistry> {
 	constructor(data: Partial<IRegistry> = { id: undefined }) {
 		super();
 		const { id } = data;
-		this.#id = id ?? uuidv4();
-		this.__instanceId = data.__instanceId ?? this.#id;
+		this.#instanceId = uuidv4();
+		this.#id = id ?? this.#instanceId;
+
 		this.#values = { ...data, id: this.#id } as Record<keyof IRegistry, any>;
-		this.setValues(data);
+		this.set(data);
 	}
 
 	private updateValue<K extends keyof IRegistry>(key: K, value: IRegistry[K]): void {
@@ -50,12 +60,12 @@ export class Registry<T> extends ReactiveModel<IRegistry> {
 		});
 
 		if (updated) {
-			this.triggerEvent();
+			this.trigger('change', { values: this.#values });
 		}
 		return updated;
 	}
 
 	getValues(): Record<keyof IRegistry, any> {
-		return { ...this.#values, __instanceId: this.__instanceId };
+		return { ...this.#values };
 	}
 }
