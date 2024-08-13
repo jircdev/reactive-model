@@ -13,6 +13,7 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 	declare storeName: string;
 	declare trigger: (event?: string) => void;
 	declare reactiveProps: <T>(props: Array<keyof T>) => void;
+	landed: boolean = false;
 	db: string;
 	item: typeof Item;
 
@@ -159,9 +160,8 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 	}
 	filter = (args?) => this.#loadManager.filter(args);
 	save = (args?, init?) => this.#saveManager.save(args, init);
-	sync = (args?) => this.#saveManager.sync(args);
+
 	publish = (args?) => this.#saveManager.publish(args);
-	toSync = () => this.#saveManager.toSync();
 
 	async setEntries(entries) {
 		await this.save(entries, true);

@@ -4,7 +4,7 @@ export /*bundle */ class Collection extends ReactiveModel<Collection> {
 	#item: Item;
 	constructor({ item: Item, ...props }) {
 		super();
-		console.log(20, 'collection');
+
 		this.#item = Item;
 	}
 

@@ -1,9 +1,0 @@
-{
-  "name": "uses-cases/backend-providers/scripts",
-  "ts": {
-    "path": "ts",
-    "files": [
-      "*"
-    ]
-  }
-}
