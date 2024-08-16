@@ -1,0 +1,14 @@
+{
+	"name": "cases/basic",
+	"widget": {
+		"route": "/basic",
+		"is": "page",
+		"ts": {
+			"path": "/ts",
+			"files": ["*"]
+		},
+		"element": {
+			"name": "reactive-basic-example-page"
+		}
+	}
+}

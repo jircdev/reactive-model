@@ -1,0 +1,21 @@
+{
+	"name": "layouts/main",
+	"txt": {
+		"path": "txt",
+		"files": "*"
+	},
+	"widget": {
+		"is": "layout",
+		"scss": {
+			"path": "/scss",
+			"files": ["*"]
+		},
+		"ts": {
+			"path": "/ts",
+			"files": ["*"]
+		},
+		"element": {
+			"name": "rm-test-layout"
+		}
+	}
+}
