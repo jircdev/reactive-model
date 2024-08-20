@@ -1,26 +1,25 @@
 import { ReactiveModel } from '@beyond-js/reactive/model';
-import { Item } from '@beyond-js/reactive/entities/item';
-export /*bundle */ class Collection extends ReactiveModel<Collection> {
-	#item: Item;
-	constructor({ item: Item, ...props }) {
+import { CollectionItem, DefaultApiResponse, ICollectionParams, PersistenceService } from './types';
+
+// Abstract Collection class with generic return types
+export /*bundle*/ abstract class Collection<T, S extends PersistenceService<T>> extends ReactiveModel<
+	Collection<T, S>
+> {
+	#item: CollectionItem<T>;
+	protected service: S;
+
+	constructor({ Item, service, ...props }: ICollectionParams<T, S>) {
 		super();
-
 		this.#item = Item;
+		this.service = new service(); // Correctly instantiate the service here
 	}
 
-	load() {
-		console.log('loading collection');
+	// Generic abstract methods for subclasses to define return types
+	async load<R = DefaultApiResponse<T>>(params: Partial<T>): Promise<R> {
+		const response = await this.service.load(params);
+		return response as R;
 	}
-
-	save() {
-		console.log('saving collection');
-	}
-
-	publish() {
-		console.log('publishing collection');
-	}
-
-	delete() {
-		console.log('deleting collection');
-	}
+	abstract save<R = any>(specs: Partial<T>): Promise<R>;
+	abstract publish<R = any>(): Promise<R>;
+	abstract delete<R = any>(): Promise<R>;
 }

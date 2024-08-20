@@ -1,11 +1,8 @@
-export interface IRegistry {
+export type RegistryData<T> = T & {
 	id?: string | number;
 	__instanceId?: string | number;
-	[key: string]: any;
-}
+	properties: (keyof T)[];
+};
 
-export type RegistryId = IRegistry['id'];
-
-export interface IRegistryFactory<T, Record> {
-	registries: Map<string, Map<RegistryId, Record>>;
-}
+export type RegistryId<T> = RegistryData<T>['id'] | RegistryData<T>['__instanceId'];
+export type RegistryDataValue<T> = Omit<RegistryData<T>, 'properties'>;

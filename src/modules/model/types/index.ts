@@ -1,5 +1,7 @@
 import { ZodError } from 'zod';
-export type ModelProperties<T> = Record<keyof T, any>;
+export /*bundle*/ type ModelProperties<T> = {
+	[K in keyof T]: T[K];
+};
 export type PropertyValidationErrors<T> = Partial<Record<keyof T, ValidatedPropertyType>>;
 
 export /*bundle*/ type ReactiveProps<T> = {

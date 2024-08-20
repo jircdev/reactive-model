@@ -1,13 +1,11 @@
+/**
+ * File: index.ts
+ */
 import { ZodError, ZodTypeAny, ZodObject } from 'zod';
-import {
-	ValidatedPropertyType,
-	ModelProperties,
-	ReactiveProps,
-	PropertyValidationErrors,
-	SetPropertiesResult,
-	Timeout,
-} from './types';
+import { SetPropertiesResult, Timeout } from './interfaces';
 import { Events } from '@beyond-js/events/events';
+
+import { ValidatedPropertyType, ModelProperties, ReactiveProps, PropertyValidationErrors } from './interfaces';
 
 export /*bundle */ class ReactiveModel<T> extends Events {
 	#reactiveProps: Record<string, any> = {}; // any reactive prop.
@@ -57,18 +55,12 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 		}
 	}
 
-	protected setInitialValues(specs?: Partial<T>): Partial<T> {
-		if (!specs) return this.#initialValues;
+	protected setInitialValues(specs?: ReactiveProps<T>): Record<keyof T, any> {
+		if (!specs || !specs.properties) return this.#initialValues;
 
 		const values = {} as ModelProperties<T>;
-
-		this.properties.forEach(property => {
-			// Explicitly check if the value exists in the specs object
-			if (specs.hasOwnProperty(property)) {
-				values[property] = specs[property] as T[keyof T];
-			} else {
-				values[property] = undefined as unknown as T[keyof T]; // Ensure compatibility with the expected type
-			}
+		specs.properties.forEach(property => {
+			values[property] = specs[property] || undefined;
 		});
 
 		this.#initialValues = values;
@@ -204,3 +196,60 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 		}, delay);
 	};
 }
+
+/**
+ * File: property.ts
+ */
+// import type { ReactiveModel } from './';
+// function _defineReactiveProp<T>(target: ReactiveModel<T>, propKey: keyof T, initialValue: T[keyof T]): void {
+// 	const privatePropKey = `__${String(propKey)}`;
+
+// 	Object.defineProperty(target, propKey, {
+// 		get(): T[keyof T] {
+// 			if (!target.hasOwnProperty(privatePropKey)) {
+// 				target[privatePropKey] = initialValue;
+// 			}
+// 			return target[privatePropKey];
+// 		},
+// 		set(newVal: T[keyof T]): void {
+// 			if (newVal === target[privatePropKey]) return;
+// 			target[privatePropKey] = newVal;
+// 			target.triggerEvent();
+// 		},
+// 		enumerable: true,
+// 		configurable: true,
+// 	});
+// }
+// export /*bundle */ function reactiveProps<T>(
+// 	props: Array<keyof T>,
+// ): (target: { new (...args: any[]): ReactiveModel<T> } | { prototype: ReactiveModel<T> }) => void {
+// 	return function (target: { new (...args: any[]): ReactiveModel<T> } | { prototype: ReactiveModel<T> }): void {
+// 		const targetProto = 'prototype' in target ? target.prototype : target;
+
+// 		for (const propKey of props) {
+// 			const descriptor = Object.getOwnPropertyDescriptor(targetProto, propKey);
+// 			const initialValue = descriptor ? descriptor.value : undefined;
+
+// 			defineReactiveProp(targetProto, propKey, initialValue);
+// 		}
+// 	};
+// }
+
+// export function defineReactiveProp<T>(target: ReactiveModel<T>, propKey: keyof T, initialValue: T[keyof T]): void {
+// 	const privatePropKey = `__${String(propKey)}`;
+
+// 	Object.defineProperty(target, propKey, {
+// 		get(): T[keyof T] {
+// 			if (!target.hasOwnProperty(privatePropKey)) {
+// 				target[privatePropKey] = initialValue;
+// 			}
+// 			return target[privatePropKey];
+// 		},
+// 		set(newVal: T[keyof T]): void {
+// 			target.setReactiveProp(propKey, newVal);
+// 		},
+// 		enumerable: true,
+// 		configurable: true,
+// 	});
+// }
+
