@@ -9,16 +9,30 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<T> {
 	declare id: RegistryData<T>['id'];
 	protected static entity: string;
 	#registry: Registry<T>;
-
-	constructor({ entity, ...args }: IItemProps<T>) {
-		super({ ...args } as ReactiveProps<T>);
+	get registry() {
+		return this.#registry;
+	}
+	constructor({ entity, properties, ...args }: IItemProps<T>) {
+		super({ ...args, properties } as ReactiveProps<T>);
 		if (!entity) throw new Error('Entity is required');
-		this.#factory = RegistryFactory.getInstance<T>(entity, args.properties);
-		const registry = this.#factory.get(this.id);
+
+		this.#factory = RegistryFactory.getInstance<T>(entity);
+
+		const registry = this.#factory.get(this.id, args as Partial<T>);
 		this.#registry = registry;
-		
-		this.setInitialValues(registry.getValues());
+
+		const propertyValues = registry.getValues();
+		this.setInitialValues(propertyValues);
 		this.#registry.on('change', this.registryListener.bind(this));
+
+		this.properties.forEach((property: keyof T) => {
+			// TODO: capability to support object type properties.
+			if (typeof property === 'string') {
+				this.on(`${property}.changed`, () => {
+					this.#registry.setValues({ [property]: this.getProperty(property) } as Partial<T>);
+				});
+			}
+		});
 	}
 
 	private registryListener(values) {
@@ -26,7 +40,9 @@ export /*bundle*/ abstract class Item<T> extends ReactiveModel<T> {
 	}
 
 	set(values: T): SetPropertiesResult {
+		console.log(44, values);
 		const response = super.set(values);
+
 		if (response.updated) {
 			this.#registry.setValues(values);
 		}

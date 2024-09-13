@@ -15,8 +15,8 @@ export class Registry<T> extends ReactiveModel<RegistryData<T>> {
 		return this.#instanceId;
 	}
 
-	#values: RegistryData<T>;
-	get values(): RegistryData<T> {
+	#values: T;
+	get values(): T {
 		return this.#values;
 	}
 
@@ -24,40 +24,38 @@ export class Registry<T> extends ReactiveModel<RegistryData<T>> {
 		return this.#isDeleted;
 	}
 
+	#propertyNames: string[] = [];
+
 	set deleted(value: boolean) {
 		if (value === this.#isDeleted) return;
 		this.#isDeleted = value;
 		this.triggerEvent();
 	}
 
-	constructor(data: Partial<RegistryData<T>> = { id: undefined } as RegistryData<T>) {
-		super({ properties: data.properties || [] });
+	constructor({ properties, ...data }: Partial<RegistryData<T>> = { id: undefined } as RegistryData<T>) {
+		super({ properties: properties || [] });
+
 		const { id } = data;
 		this.#instanceId = uuidv4();
 		this.#id = id ?? this.#instanceId;
 
 		this.#values = { ...data, id: this.#id } as RegistryData<T>;
-		this.set(data);
+		this.setValues(data as T);
 	}
 
-	private updateValue<K extends keyof RegistryDataValue<T>>(key: K, value: RegistryDataValue<T>[K]): void {
+	private updateValue<K extends keyof T>(key: K, value: T[K]): void {
 		this.#values[key] = value;
 	}
 
-	setValues(data: Partial<RegistryDataValue<T>>): boolean {
+	setValues(data: Partial<T>): boolean {
 		if (!data) return false;
 
 		let updated = false;
 
 		for (const key in data) {
 			if (Object.prototype.hasOwnProperty.call(data, key)) {
-				// @ts-ignore
-				const property = key as keyof RegistryDataValue<T>;
-				// @ts-ignore
-				const value = data[property] as RegistryDataValue<T>[typeof property];
-
-				// Skip if the value is the same
-				// @ts-ignore
+				const property = key as keyof T;
+				const value = data[property] as T[typeof property];
 				if (value === this.#values[property]) continue;
 
 				this.updateValue(property, value);
@@ -72,6 +70,7 @@ export class Registry<T> extends ReactiveModel<RegistryData<T>> {
 	}
 
 	getValues(): ModelProperties<T> {
+		console.log(111, this.#values);
 		return { ...this.#values };
 	}
 }

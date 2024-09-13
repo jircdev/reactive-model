@@ -122,7 +122,6 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 		const errors: PropertyValidationErrors<T> = {};
 		const onValidate = prop => {
 			if (!this.properties || !this.properties.includes(prop)) {
-				console.log(0.2, prop, this.properties);
 				console.log(`is not a property`, prop);
 				return;
 			}
@@ -252,4 +251,3 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 // 		configurable: true,
 // 	});
 // }
-

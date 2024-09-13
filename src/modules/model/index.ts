@@ -7,12 +7,12 @@ import {
 	SetPropertiesResult,
 	Timeout,
 } from './types';
-import { Events } from '@beyond-js/events/events';
+import { ProxyBase } from './proxy';
 
-export /*bundle */ class ReactiveModel<T> extends Events {
-	#reactiveProps: Record<string, any> = {}; // any reactive prop.
+export /*bundle */ class ReactiveModel<T> extends ProxyBase<T> {
+	_reactiveProps: Record<string, any> = {}; // any reactive prop.
 	get reactiveProps() {
-		return this.#reactiveProps;
+		return this._reactiveProps;
 	}
 
 	protected properties: (keyof T)[] = [];
@@ -58,6 +58,7 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 	}
 
 	protected setInitialValues(specs?: Partial<T>): Partial<T> {
+		console.log('initial values', specs);
 		if (!specs) return this.#initialValues;
 
 		const values = {} as ModelProperties<T>;
@@ -70,22 +71,22 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 				values[property] = undefined as unknown as T[keyof T]; // Ensure compatibility with the expected type
 			}
 		});
-
+		this.set(specs);
 		this.#initialValues = values;
 		return this.#initialValues;
 	}
 
 	protected defineReactiveProp(propKey: string, initialValue: any): void {
-		this.#reactiveProps[propKey] = initialValue;
+		this._reactiveProps[propKey] = initialValue;
 		Object.defineProperty(this, propKey as string, {
 			get: () => {
-				return this.#reactiveProps[propKey];
+				return this._reactiveProps[propKey];
 			},
 			set: (newVal): void => {
-				if (newVal !== undefined && newVal === this.#reactiveProps[propKey]) return;
+				if (newVal !== undefined && newVal === this._reactiveProps[propKey]) return;
 
-				const previous = this.#reactiveProps[propKey];
-				this.#reactiveProps[propKey] = newVal;
+				const previous = this._reactiveProps[propKey];
+				this._reactiveProps[propKey] = newVal;
 				this.trigger(`${propKey}.changed`, { value: newVal, previous });
 			},
 			enumerable: true,
@@ -101,10 +102,18 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 		}
 	}
 
+	getProperty(propKey: string) {
+		return this._reactiveProps[propKey];
+	}
+	setProperty(propKey: string, value: any) {
+		this._reactiveProps[propKey] = value;
+	}
+
 	private validateProperty(propKey: string, value: any): ValidatedPropertyType {
 		if (!this.schema) {
 			return { valid: true, error: null };
 		}
+
 		if (!this.schema.shape[propKey]) {
 			return {
 				valid: false,
@@ -130,8 +139,7 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 		const errors: PropertyValidationErrors<T> = {};
 		const onValidate = prop => {
 			if (!this.properties || !this.properties.includes(prop)) {
-				console.log(0.2, prop, this.properties);
-				console.log(`is not a property`, prop);
+				console.trace(`is not a property`, prop);
 				return;
 			}
 			const validated = this.validateProperty(prop, properties[prop]);
@@ -145,14 +153,13 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 		return { valid: !!Object.keys(errors).length, errors };
 	}
 
-	set(properties): SetPropertiesResult {
+	set(properties: Partial<T>): SetPropertiesResult {
 		const keys = Object.keys(properties);
 		let updated = false;
 		const errors: PropertyValidationErrors<T> = {};
 		const onSet = prop => {
 			if (!this.properties || !this.properties.includes(prop)) {
-				console.log(4, this.properties, this.constructor.name);
-				console.log(`is not a property`, prop, this.constructor.name);
+				console.trace(`is not a property`, prop, this.constructor.name);
 				return;
 			}
 

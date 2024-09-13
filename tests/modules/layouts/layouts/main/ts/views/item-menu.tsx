@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'pragmate-ui/link';
+import { Link } from 'pragmate-ui/components';
 export function ItemMenu({ item: { href, label }, children }) {
 	return (
 		<li>
