@@ -1,4 +1,3 @@
-import type { ResponseAdapter } from '../adapter';
 import { IResponseAdapter } from '../adapter/interface';
 import type { Item } from './index';
 import type { LocalProvider } from './local-provider';
@@ -43,9 +42,10 @@ export class ItemSaveManager {
 			let remoteResponse;
 			if (this.#parent.isOnline && this.#provider) {
 				const response = await this.#publish(properties);
+				if (!response.status) throw response;
 				this.#localProvider.registry.setValues(response.data);
 				properties.id = response?.data?.id;
-				remoteResponse = this.#adapter.fromRemote(response);
+				remoteResponse = response;
 				this.#localProvider.registry.isNew = false;
 			}
 
