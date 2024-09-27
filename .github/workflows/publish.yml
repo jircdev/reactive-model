@@ -1,0 +1,42 @@
+name: Publish to NPM
+
+on:
+    push:
+        branches:
+            - deploy/npm # Change this to the branch you want to trigger the publish
+
+jobs:
+    build-and-publish:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Set up Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '18' # Specify the Node.js version you need
+                  registry-url: 'https://registry.npmjs.org'
+
+            - name: Install BeyondJS globally
+              run: npm install -g beyond@latest
+
+            - name: Install dependencies
+              working-directory: src
+              run: npm install
+
+            - name: Build package
+              run: beyond build --pkg=@beyond-js/reactive --distribution=npm --logs
+
+            - name: List build .beyond contents
+              run: ls -la src/.beyond
+
+            - name: List build directory contents
+              run: ls -la src/.beyond/builds/npm/code
+
+            - name: Publish to NPM
+              working-directory: src/.beyond/builds/npm/code
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+              run: npm publish --access public
