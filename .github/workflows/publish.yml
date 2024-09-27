@@ -23,7 +23,7 @@ jobs:
               run: npm install -g beyond@latest
 
             - name: Install dependencies
-              working-directory: src
+              working-directory: library
               run: npm install
 
             - name: Build package
