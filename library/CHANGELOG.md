@@ -1,5 +1,22 @@
 # CHANGELOG
 
+# Changelog
+
+## [1.1.13] - 2024-09-27
+
+### Fixed
+
+-   **Incorrect Error Handling in `save` Method**:
+    -   Removed the call to `fromRemote` on the `publish` method's response, which caused incorrect error propagation.
+    -   Updated the `save` method to handle the `publish` response directly and properly throw the response when
+        `status: false`.
+    -   The actual backend error is now returned to the client instead of the generic error message "ERROR_DATA_QUERY",
+        improving debugging and error handling.
+
+### Testing
+
+-   Errors triggered in the backend are now correctly propagated and received by the client.
+
 ## 1.1.12
 
 ### Enhancements
