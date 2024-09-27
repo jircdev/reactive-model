@@ -53,7 +53,7 @@
 		"@beyond-js/events": "^0.0.7",
 		"@beyond-js/kernel": "^0.1.9",
 		"dexie": "^3.2.3",
-		"pragmate-ui": "0.1.1",
+		"pragmate-ui": "^0.1.1",
 		"uuid": "^9.0.0"
 	},
 	"devDependencies": {
