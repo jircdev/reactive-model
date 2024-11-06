@@ -5,6 +5,7 @@
 		"experimentalDecorators": true,
 		"allowSyntheticDefaultImports": true,
 		"moduleResolution": "Node",
-		"strictNullChecks": true
+		"strictNullChecks": true,
+		"skipLibCheck": true
 	}
 }

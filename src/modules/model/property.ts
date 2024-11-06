@@ -1,4 +1,4 @@
-import type { ReactiveModel } from ".";
+import type { ReactiveModel } from './';
 function _defineReactiveProp<T>(target: ReactiveModel<T>, propKey: keyof T, initialValue: T[keyof T]): void {
 	const privatePropKey = `__${String(propKey)}`;
 
@@ -19,10 +19,10 @@ function _defineReactiveProp<T>(target: ReactiveModel<T>, propKey: keyof T, init
 	});
 }
 export /*bundle */ function reactiveProps<T>(
-	props: Array<keyof T>
+	props: Array<keyof T>,
 ): (target: { new (...args: any[]): ReactiveModel<T> } | { prototype: ReactiveModel<T> }) => void {
 	return function (target: { new (...args: any[]): ReactiveModel<T> } | { prototype: ReactiveModel<T> }): void {
-		const targetProto = "prototype" in target ? target.prototype : target;
+		const targetProto = 'prototype' in target ? target.prototype : target;
 
 		for (const propKey of props) {
 			const descriptor = Object.getOwnPropertyDescriptor(targetProto, propKey);
