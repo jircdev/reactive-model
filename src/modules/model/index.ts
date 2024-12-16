@@ -1,161 +1,293 @@
-import { Events } from '@beyond-js/events/events';
-import { IReactiveConstructorSpecs } from './interfaces/reactive-constructor-specs';
-import { IReactiveProperties } from './interfaces/reactive-props';
-import { ReactiveModelPublic } from './interfaces/reactive-public-props';
+import { ZodError, ZodTypeAny, ZodObject } from 'zod';
+import {
+	ValidatedPropertyType,
+	ModelProperties,
+	ReactiveProps,
+	PropertyValidationErrors,
+	SetPropertiesResult,
+	Timeout
+} from './types';
+import { ProxyBase } from './proxy';
 
-/**
- * The `ReactiveModel` class is a subclass of the `Events` class that provides a simple way to create
- * reactive properties that can trigger events when they change. It also provides methods for setting
- * and getting property values.
- *
- * @template T - The type of the properties that can be defined in the model.
- * @extends Events
- */
+type ReactiveProperty<T> = keyof T | { name: keyof T };
 
-export /*bundle*/ abstract class ReactiveModel<T> extends Events {
-	protected schema: unknown;
-	#isReactive: boolean = true;
-	get isReactive() {
-		return this.#isReactive;
-	}
-	[key: string]: any;
-	fetching!: boolean;
-	fetched: boolean = false;
+export /*bundle */ class ReactiveModel<T> extends ProxyBase<T> {
+	_reactiveProps: Record<string, any> = {}; // any reactive prop.
+
+	//TODO: Validate how to handle the properties
+	protected properties: Array<ReactiveProperty<T>> = [];
+	// properties of the object
+	debounceTimeout: Timeout | null;
 	processing: boolean = false;
-	ready: boolean = false;
 	processed: boolean = false;
-	protected properties: string[];
+	declare fetching: boolean;
 	loaded: boolean = false;
+	#ready: boolean = false;
 
-	#initialValues: Record<string, any> = {};
-	get isUnpublished() {
-		const properties = this.getProperties();
+	#propertyNames = new Set();
+	get ready() {
+		return this.#ready;
+	}
+	set ready(value: boolean) {
+		this.#ready = value;
+		this.triggerEvent('ready');
+		this.triggerEvent('change');
+	}
+
+	protected schema: ZodObject<Record<string, ZodTypeAny>>;
+	#initialValues: Partial<T> = {} as Partial<T>;
+
+	#isDraft: boolean = false;
+	get isDraft() {
+		return this.#isDraft;
+	}
+
+	get initialValues() {
+		return this.#initialValues;
+	}
+
+	/**
+	 * Defines if the model has been modified since it was loaded.
+	 */
+	get unpublished(): boolean {
+		const properties = this.getProperties() ?? {};
 		return Object.keys(properties).some(prop => {
-			if (prop === 'id' || typeof prop === 'object') return false;
+			if (prop === 'id') return false;
+			if (Array.isArray(properties[prop])) {
+				if (properties[prop].length !== this.#initialValues[prop]?.length) return true;
+				return JSON.stringify(properties[prop]) === JSON.stringify(this.#initialValues[prop]);
+			}
 			return properties[prop] !== this.#initialValues[prop];
 		});
 	}
-	constructor(specs: IReactiveConstructorSpecs = {}) {
+	/**
+	 * @deprecated Use `unpublished` instead.
+	 */
+	get isUnpublished() {
+		return this.unpublished;
+	}
+
+	constructor({ properties, ...props }: ReactiveProps<T> = { properties: [] }) {
 		super();
-		this.reactiveProps<IReactiveProperties>(['fetching', 'fetched', 'processing', 'processed', 'loaded', 'ready']);
+		this.defineReactiveProps(['fetching', 'fetched', 'processing', 'processed', 'loaded'], false);
 
-		if (specs.properties && Array.isArray(specs.properties)) {
-			this.properties = specs.properties;
+		if (properties) {
+			this.properties = properties;
+			this.setInitialValues(props as Partial<T>);
+			this.defineReactiveProps(properties as string[], { ...props });
 		}
-		if (specs) this.initialValues(specs);
 	}
 
-	initialValues(values?) {
-		if (!values) return this.#initialValues;
-		let data = { ...values };
-		delete data.properties;
+	protected setInitialValues(specs?: Partial<T>): Partial<T> {
+		if (!specs) return this.#initialValues;
 
-		this.#set(data);
-		this.#initialValues = data;
+		const values = {} as ModelProperties<T>;
+
+		this.properties.forEach(property => {
+			if (typeof property !== 'string') {
+				return;
+			}
+			// Explicitly check if the value exists in the specs object
+			if (specs.hasOwnProperty(property)) {
+				values[property] = specs[property] as T[keyof T];
+			} else {
+				values[property] = undefined as unknown as T[keyof T]; // Ensure compatibility with the expected type
+			}
+		});
+		this.#isDraft = Object.keys(specs).length === 0;
+
+		this.set(specs);
+		this.#initialValues = values;
+		return this.#initialValues;
 	}
 
-	protected reactiveProps<T>(props: Array<keyof T>): void {
-		for (const propKey of props) {
-			const descriptor = Object.getOwnPropertyDescriptor(this, propKey);
-			const initialValue = descriptor ? descriptor.value : undefined;
+	protected defineReactiveProp(propKey: string, initialValue: any, model: boolean = false): void {
+		this._reactiveProps[propKey] = initialValue;
+		Object.defineProperty(this, propKey as string, {
+			get: () => {
+				return this._reactiveProps[propKey];
+			},
+			set: (newVal): void => {
+				if (model) {
+					const instance = this._reactiveProps[propKey];
+					this.trigger(`${propKey}.changed`, { value: newVal, previous: instance.getProperties() });
+					this.trigger('change');
+					this._reactiveProps[propKey].set(newVal);
+					return;
+				}
+				if (newVal !== undefined && newVal === this._reactiveProps[propKey]) return;
 
+				const previous = this._reactiveProps[propKey];
+				this._reactiveProps[propKey] = newVal;
+
+				this.trigger(`${propKey}.changed`, { value: newVal, previous });
+				this.trigger('change');
+			},
+			enumerable: true,
+			configurable: true
+		});
+	}
+
+	protected defineReactiveProps(props: string[], values?): void {
+		for (let propKey of props) {
+			/**
+			 * Possibility to define a property as an object
+			 */
+			if (typeof propKey === 'object') {
+				const data = propKey as { name: string; value: any };
+				propKey = data.name;
+				const descriptor = Object.getOwnPropertyDescriptor(this, propKey as string);
+				let initialValue = values?.[propKey] ?? descriptor?.value;
+
+				if (typeof data.value !== 'function' && typeof data.value !== 'object') {
+					console.warn(`Invalid value type for  ${propKey}`);
+					continue;
+				}
+
+				const instance = new data.value(initialValue);
+				this.#propertyNames.add(propKey);
+				this.defineReactiveProp(propKey, instance, true);
+				continue;
+			}
+			this.#propertyNames.add(propKey);
+			const descriptor = Object.getOwnPropertyDescriptor(this, propKey as string);
+			let initialValue = values?.[propKey] ?? descriptor?.value;
 			this.defineReactiveProp(propKey, initialValue);
 		}
 	}
 
-	protected defineReactiveProp<T>(propKey: keyof T, initialValue: T[keyof T]): void {
-		const privatePropKey = `__${String(propKey)}`;
+	protected reactiveProps(props: string[]) {
+		this.defineReactiveProps(props);
+	}
 
-		Object.defineProperty(this, propKey, {
-			get(): T[keyof T] {
-				if (!this.hasOwnProperty(privatePropKey)) {
-					this[privatePropKey] = initialValue;
-				}
-				return this[privatePropKey];
-			},
-			set(newVal: T[keyof T]): void {
-				if (newVal === this[privatePropKey]) return;
-				this[privatePropKey] = newVal;
-				this.triggerEvent();
-			},
-			enumerable: true,
-			configurable: true,
-		});
+	getProperty(propKey: string) {
+		return this._reactiveProps[propKey];
+	}
+	setProperty(propKey: string, value: any) {
+		this._reactiveProps[propKey] = value;
+	}
+
+	private validateProperty(propKey: string, value: any): ValidatedPropertyType {
+		if (!this.schema) {
+			return { valid: true, error: null };
+		}
+
+		if (!this.schema.shape[propKey]) {
+			return {
+				valid: false,
+				error: new ZodError([
+					{ path: [propKey], message: `Property ${propKey} is not defined in the schema`, code: 'custom' }
+				])
+			};
+		}
+
+		const propSchema = this.schema.shape[propKey] as ZodTypeAny;
+		const result = propSchema.safeParse(value);
+
+		if (!result.success) {
+			return { valid: false, error: result.error };
+		}
+
+		return { valid: true, error: null };
+	}
+	private isSameObject = (a: any, b: any) => JSON.stringify(a) === JSON.stringify(b);
+
+	validate(properties): { valid: boolean; errors: PropertyValidationErrors<T> } {
+		const keys = Object.keys(properties);
+		const errors: PropertyValidationErrors<T> = {};
+		const onValidate = prop => {
+			if (!this.properties || !this.properties.includes(prop)) {
+				console.trace(`is not a property`, prop);
+				return;
+			}
+			const validated = this.validateProperty(prop, properties[prop]);
+
+			if (!validated.valid) {
+				errors[prop] = validated.error;
+			}
+		};
+		keys.forEach(onValidate);
+
+		return { valid: !!Object.keys(errors).length, errors };
+	}
+
+	set(properties: Partial<T>): SetPropertiesResult {
+		if (!properties) {
+			console.warn('you are trying to set an empty object', this.constructor.name, properties);
+			return {
+				updated: false
+			};
+		}
+
+		const keys = Object.keys(properties);
+
+		let updated = false;
+		const errors: PropertyValidationErrors<T> = {};
+		const onSet = prop => {
+			if (!this.#propertyNames.has(prop)) {
+				// console.trace(`is not a property`, prop, this.constructor.name);
+				return;
+			}
+
+			const validated = this.validateProperty(prop, properties[prop]);
+
+			if (!validated.valid) {
+				errors[prop] = validated;
+				return;
+			}
+			const isObject = typeof properties[prop] === 'object';
+			const isSameObject = isObject && this.isSameObject(properties[prop], this[prop]);
+
+			if (this[prop] === properties[prop] || isSameObject) return;
+			const descriptor = Object.getOwnPropertyDescriptor(this, prop as string);
+			if (!descriptor?.set) return;
+
+			this[prop] = properties[prop]!;
+			updated = true;
+		};
+
+		keys.forEach(onSet);
+		if (updated) {
+			this.triggerEvent('change');
+			this.trigger('set.executed');
+		}
+
+		return { updated, errors };
+	}
+
+	getProperties(): Partial<T> {
+		const props = {} as Partial<T>;
+		const properties = this.properties;
+		const loop = property => {
+			let name = property;
+			if (typeof property === 'object') {
+				name = property.name;
+				props[String(name)] = this[name]?.getProperties();
+				return;
+			}
+
+			props[String(name)] = this[name];
+		};
+		this.properties.forEach(loop);
+		return props;
 	}
 
 	/**
-	 * The `triggerEvent` method triggers a change event on the model, which can be used to notify
-	 * subscribers of changes to the model's properties.
+	 * Triggers an event after a specified delay.
 	 *
 	 * @param {string} event - The name of the event to trigger.
-	 * @returns {void}
+	 * @param {Record<string, any>} params - Additional parameters for the event, including an optional `delay` property.
 	 */
-	triggerEvent = (event: string = 'change'): void => {
-		globalThis.setTimeout(() => {
-			this.trigger(event);
-		}, 0);
+	triggerEvent = (event: string = 'change', params: Record<string, any> = {}): void => {
+		this.trigger(event);
 	};
-	/**
-	 * The `set` method sets one or more properties on the model.
-	 *
-	 * @param {keyof ReactiveModelPublic<T>} property - The name of the property to set.
-	 * @param {*} value - The value to set the property to.
-	 * @returns {void}
-	 */
-	#set(properties: Partial<T>): void {
-		let updated = false;
-		try {
-			Object.keys(properties).forEach(prop => {
-				if (!this.properties || !this.properties.includes(prop)) return;
-				const sameObject =
-					typeof properties[prop] === 'object' &&
-					JSON.stringify(properties[prop]) === JSON.stringify(this[prop]);
 
-				if (this[prop] === properties[prop] || sameObject) return;
-				const descriptor = Object.getOwnPropertyDescriptor(this, prop);
-				if (descriptor?.set) return;
-
-				this[prop] = properties[prop];
-				updated = true;
-			});
-		} catch (e) {
-			throw new Error(`Error setting properties: ${e}`);
-		} finally {
-			if (updated) this.triggerEvent();
-		}
+	revert() {
+		this.set(this.initialValues);
 	}
 
-	set(properties: Partial<T>): void {
-		this.#set(properties);
-	}
-
-	getProperties(): Record<string, any> {
-		const props: Record<string, any> = {};
-		const properties = this.properties || this.skeleton;
-
-		type IProperty = {
-			name: string;
-			type: string;
-		};
-		properties.forEach((property: string | IProperty) => {
-			if (typeof property === 'object') {
-				if (!property.hasOwnProperty('name')) return;
-				type ICollection = {
-					type: string;
-					name: string;
-				};
-
-				const collection = property as ICollection;
-				if (collection.type === 'collection') {
-					props[property.name] = this[property.name].items.map((item: any) => item.getProperties());
-					return;
-				}
-				props[property.name] = this[property.name];
-			}
-			let name = property as string;
-
-			props[name] = this[name];
-		});
-		return props;
+	saveChanges() {
+		this.#initialValues = this.getProperties();
+		this.#isDraft = false;
 	}
 }

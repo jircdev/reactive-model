@@ -1,159 +1,194 @@
-import { ReactiveModel } from '@beyond-js/reactive/model';
-import { CollectionLocalProvider } from './local-provider';
-import { CollectionSaveManager } from './publish';
-import { CollectionLoadManager } from './load';
-import { IProvider } from '../interfaces/provider';
-import { ICollectionSpecs, ICollection } from './interfaces/collection';
-import { ResponseAdapter } from '../adapter';
-import { IResponseAdapter } from '../adapter/interface';
-import { Item } from '../item';
+import { Item, ItemId, IEntityProvider, RegistryFactory } from '@aimpact/reactive/entities/item';
+import { ReactiveModel } from '@aimpact/reactive/model';
+import { ICollectionOptions, ICollectionProvider, ILoadSpecs } from './types';
 
-export /*bundle */ class Collection extends ReactiveModel<Collection> {
-	declare triggerEvent: (event?: string) => void;
-	declare storeName: string;
-	declare trigger: (event?: string) => void;
-	declare reactiveProps: <T>(props: Array<keyof T>) => void;
-	db: string;
-	item: typeof Item;
-
-	#items: Array<any | undefined> = [];
-	protected localdb: boolean = true;
-
-	#elements = new Map();
-	get elements() {
-		return this.#elements;
+export /*bundle*/ class Collection<T extends Item, P extends IEntityProvider = IEntityProvider> extends ReactiveModel<
+	Collection<T, P>
+> {
+	#entity: string;
+	get entity(): string {
+		return this.#entity;
 	}
+	#provider: P;
 
-	get items() {
-		return this.#items;
-	}
-
-	get isOnline() {
-		return !this.localProvider ? true : this.localProvider.isOnline;
-	}
-	set items(value: Array<any | undefined>) {
-		if (!Array.isArray(value)) {
-			return;
-		}
-		this.#items = value;
-		this.triggerEvent();
-	}
-
-	counters: any = {};
-	total: number = 0;
-	next: number | undefined;
-	#localProvider: CollectionLocalProvider;
-	get localProvider() {
-		return this.#localProvider;
-	}
-
-	#saveManager: CollectionSaveManager;
-	#loadManager: CollectionLoadManager;
-	#provider: IProvider;
-	get provider() {
+	get provider(): P {
 		return this.#provider;
 	}
 
-	protected sortBy: string = 'id';
-	protected sortDirection: 'asc' | 'desc' = 'asc';
-
-	#responseAdapter: IResponseAdapter;
-	get responseAdapter() {
-		return this.#responseAdapter;
+	#item: ICollectionOptions<T, P>['item'];
+	get Item(): ICollectionOptions<T, P>['item'] {
+		return this.#item;
 	}
-	#initialSpecs: ICollectionSpecs;
-	constructor(specs: ICollectionSpecs) {
-		super({ properties: ['total', 'next'] });
 
-		const { provider, storeName, db, localdb, item } = specs;
-		this.#initialSpecs = specs;
-		if (storeName) this.storeName = storeName;
-		if (db) this.db = db;
-		if (localdb) this.localdb = localdb;
-		if (item) this.item = item;
+	#map: Map<ItemId, T> = new Map();
+	get map(): Map<ItemId, T> {
+		return this.#map;
+	}
+	get items(): T[] {
+		return [...this.#map.values()];
+	}
+	#filters;
+	#registry: RegistryFactory<T>;
+	constructor({ entity, provider, item }: ICollectionOptions<T, P>) {
+		super();
+		this.#entity = entity;
+		if (provider && typeof provider !== 'function') {
+			throw new Error('Provider must be a class/constructor');
+		}
 		if (provider) {
-			if (typeof provider !== 'function') {
-				throw new Error('Provider must be a class object');
-			}
-			this.#provider = new provider();
+			this.#provider = new provider(this);
 		}
-		this.reactiveProps<ICollection>(['next']);
-		this.init();
+		this.#registry = RegistryFactory.getInstance<T>(entity);
+
+		this.#registry.on('record.published', this.onNewRegistry.bind(this));
+		this.#item = item;
 	}
 
-	protected init() {
-		const getProperty = property => {
-			return this[property];
-		};
-		const setProperty = (property, value) => (this[property] = value);
-		const bridge = { get: getProperty, set: setProperty };
-		this.#responseAdapter = ResponseAdapter.get(this, this.#initialSpecs?.adapter);
-		this.#localProvider = new CollectionLocalProvider(this, bridge);
-		this.#saveManager = new CollectionSaveManager(this, bridge);
-		this.#loadManager = new CollectionLoadManager({ parent: this, bridge, localdb: this.localdb });
-		this.#localProvider.on('items.changed', this.#listenItems);
-		this.localProvider.init();
-	}
+	/**
+	 * Loads and processes data from an external source via the `DataProvider`.
+	 * This method uses the configured `provider` to fetch data and apply the specified filters.
+	 * Filtering parameters are defined in the `args` argument, and the specific filtering logic
+	 * is implemented by the `DataProvider`.
+	 *
+	 * ### Parameters:
+	 * - `args.where` (optional): Object defining search filters with the following structure:
+	 *   - `{ property: { operator: value } }`
+	 *   - Supported operators include:
+	 *     - `equals`: Exact match with the property value.
+	 *     - `not`: Value different from the specified value.
+	 *     - `in`: The property value matches one of the values in the array.
+	 *     - `notIn`: The property value does not match any of the values in the array.
+	 *     - `contains`: The property value contains the specified substring.
+	 *     - `startsWith`: The property value starts with the specified substring.
+	 *     - `endsWith`: The property value ends with the specified substring.
+	 *     - `gt` (greater than): The property value is greater than the specified value.
+	 *     - `gte` (greater than or equal): The property value is greater than or equal to the specified value.
+	 *     - `lt` (less than): The property value is less than the specified value.
+	 *     - `lte` (less than or equal): The property value is less than or equal to the specified value.
+	 *
+	 * - `args.orderBy` (optional): Object to define the sorting of results. Example:
+	 *   - `{ property: "asc" | "desc" }` where `"asc"` is ascending order and `"desc"` is descending order.
+	 *
+	 * - `args.skip` and `args.take` (optional): Parameters for in-memory pagination.
+	 *   - `skip`: Number of items to skip from the beginning.
+	 *   - `take`: Number of items to load after skipping the defined number in `skip`.
+	 *
+	 * ### Exceptions:
+	 * - Throws an error if the `DataProvider` is not defined or does not implement the `load` method.
+	 * - Throws an error if `DataProvider.load()` does not return an array.
+	 *
+	 * @param {Object} args - Object containing filtering and configuration parameters.
+	 * @returns {Promise<void>} - A promise that resolves when data loading and processing are complete.
+	 * @throws {Error} - If data cannot be loaded or processed.
+	 */
 
-	#listenItems = async () => {
-		if (!this.localdb) return;
+	async load(args?: ILoadSpecs<T>): Promise<void> {
+		this.#filters = args?.where ? args.where : {};
 
-		this.#items = await this.#loadManager.processEntries(this.#localProvider.items);
-		this.trigger('change');
-	};
+		if (!this.#provider || typeof this.#provider.list !== 'function') {
+			throw new Error('DataProvider is not defined or does not implement the list() method.');
+		}
 
-	setOffline = value => this.localProvider.setOffline(value);
-
-	protected setItems(values) {
-		this.#items = values;
-	}
-
-	async store() {
-		await this.#localProvider.init();
-		return this.#localProvider.store;
-	}
-
-	async set(data) {
-		const { items } = data;
-		delete data.item;
-		await super.set(data);
-
-		if (!items) return;
-
-		items.forEach(item => {
-			if (item.id) this.#elements.set(item.id, item);
-		});
-	}
-	async delete(ids) {
 		try {
-			if (this.#localProvider) await this.#localProvider.softDelete(ids);
-			if (this.provider) {
-				await this.provider.deleteItems(ids);
+			const data = await this.#provider.list(args);
+
+			if (Array.isArray(data)) {
+				this.#map.clear();
+				data.forEach(item => {
+					const instance = new this.#item(item);
+					this.#map.set(item.id, instance);
+				});
+			} else {
+				throw new Error('DataProvider.load() did not return an array of items.');
 			}
-		} catch (e) {
-			console.error(e);
+
+			this.triggerEvent('load', { items: this.#map });
+		} catch (error) {
+			console.error('Error loading data:', error);
+			throw error;
 		}
 	}
 
-	load(args?) {
-		return this.#loadManager.load(args);
-	}
-	localLoad(args) {
-		return this.#loadManager.localLoad(args);
-	}
-	filter = (args?) => this.#loadManager.filter(args);
-	save = (args?, init?) => this.#saveManager.save(args, init);
-	sync = (args?) => this.#saveManager.sync(args);
-	publish = (args?) => this.#saveManager.publish(args);
-	toSync = () => this.#saveManager.toSync();
+	/**
+	 * Validates a new registry against the collection's filters and, if it matches,
+	 * creates a new item with the registry data and adds it to the data map.
+	 *
+	 * @param {object} registry - The new registry data to be checked and potentially added.
+	 */
+	onNewRegistry(registry: Record<string, any>): void {
+		// Check if the registry matches the filters
+		if (this.matchesFilters(registry)) {
+			// Create a new item instance with the registry data
+			const newItem = new this.#item(registry);
 
-	async setEntries(entries) {
-		await this.save(entries, true);
-		const items = await this.#loadManager.processEntries(entries, true);
+			// Add the new item to the map, using its id as the key
+			this.#map.set(registry.id, newItem);
 
-		items.forEach(item => this.#elements.set(item.id, item));
-		this.#items = items;
-		this.trigger('change');
-		return items;
+			// Optionally trigger an event to notify that a new item was added
+			this.triggerEvent('change.items', { item: newItem });
+			this.triggerEvent('change');
+		}
+	}
+	/**
+	 * Validates if a registry matches the stored filters, including support for AND and OR logical operators.
+	 * The #filters object contains filtering criteria that are evaluated here.
+	 *
+	 * @param {object} registry - The data of the registry to be checked.
+	 * @returns {boolean} - Returns true if the registry matches all filter criteria; otherwise, false.
+	 */
+	private matchesFilters(registry: Record<string, any>): boolean {
+		const filters = this.#filters?.where;
+		if (!filters) return true; // If no filters are set, assume it matches
+
+		// Helper function to evaluate a single condition
+		const evaluateCondition = (property: string, criteria: Record<string, any>): boolean => {
+			const registryValue = registry[property];
+			return Object.entries(criteria).every(([operator, value]) => {
+				switch (operator) {
+					case 'equals':
+						return registryValue === value;
+					case 'not':
+						return registryValue !== value;
+					case 'in':
+						return Array.isArray(value) && value.includes(registryValue);
+					case 'notIn':
+						return !Array.isArray(value) || !value.includes(registryValue);
+					case 'contains':
+						return typeof registryValue === 'string' && registryValue.includes(value);
+					case 'startsWith':
+						return typeof registryValue === 'string' && registryValue.startsWith(value);
+					case 'endsWith':
+						return typeof registryValue === 'string' && registryValue.endsWith(value);
+					case 'gt':
+						return registryValue > value;
+					case 'gte':
+						return registryValue >= value;
+					case 'lt':
+						return registryValue < value;
+					case 'lte':
+						return registryValue <= value;
+					default:
+						console.warn(`Unknown filter operator: ${operator}`);
+						return false;
+				}
+			});
+		};
+
+		// General function to evaluate conditions with logical operators
+		const evaluateConditions = (conditions: Record<string, any>[], logic: 'every' | 'some'): boolean =>
+			conditions[logic](condition =>
+				Object.entries(condition).every(([property, criteria]) => evaluateCondition(property, criteria))
+			);
+
+		// Evaluate AND conditions
+		if (filters.AND && !evaluateConditions(filters.AND, 'every')) return false;
+
+		// Evaluate OR conditions
+		if (filters.OR && !evaluateConditions(filters.OR, 'some')) return false;
+
+		// Evaluate direct conditions (outside of AND/OR)
+		return Object.entries(filters)
+			.filter(([key]) => key !== 'AND' && key !== 'OR')
+			.every(([property, criteria]) => evaluateCondition(property, criteria));
 	}
 }
