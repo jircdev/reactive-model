@@ -1,8 +1,7 @@
 import { Events } from '@beyond-js/events/events';
-import { reactiveProps } from './property';
+import { IReactiveConstructorSpecs } from './interfaces/reactive-constructor-specs';
 import { IReactiveProperties } from './interfaces/reactive-props';
 import { ReactiveModelPublic } from './interfaces/reactive-public-props';
-import { IReactiveConstructorSpecs } from './interfaces/reactive-constructor-specs';
 
 /**
  * The `ReactiveModel` class is a subclass of the `Events` class that provides a simple way to create
