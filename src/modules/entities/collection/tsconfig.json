@@ -5,7 +5,6 @@
 		"experimentalDecorators": true,
 		"allowSyntheticDefaultImports": true,
 		"moduleResolution": "Node",
-		"lib": ["dom", "es2020"], // Incluye solo tipos de navegador
 		"jsx": "react",
 		"skipLibCheck": true
 	}

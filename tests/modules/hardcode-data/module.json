@@ -1,7 +1,0 @@
-{
-	"name": "hardcode-data",
-	"ts": {
-		"path": "ts",
-		"files": ["*"]
-	}
-}

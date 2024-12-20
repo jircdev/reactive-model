@@ -1,4 +1,4 @@
-import { ReactiveModel, SetPropertiesResult } from '@aimpact/reactive/model';
+import { ReactiveModel, SetPropertiesResult } from '@beyond-js/reactive/model';
 import { Registry } from './registry';
 import { RegistryFactory } from './registry/factory';
 import { RegistryData } from './registry/types/index';
@@ -6,7 +6,7 @@ import { IEntityProvider, IItemProps } from './types';
 
 export /*bundle*/ class Item<
 	T extends Record<string, any> = Record<string, any>,
-	P extends IEntityProvider = IEntityProvider
+	P extends IEntityProvider = IEntityProvider,
 > extends ReactiveModel<T> {
 	#factory: RegistryFactory<T>;
 	declare id: string | number;
@@ -111,7 +111,7 @@ export /*bundle*/ class Item<
 	async load?(args?: any) {
 		if (!this.provider || typeof this.provider.load !== 'function') {
 			throw new Error(
-				`DataProvider is not defined or does not implement the load() method in object ${this.constructor.name}`
+				`DataProvider is not defined or does not implement the load() method in object ${this.constructor.name}`,
 			);
 		}
 

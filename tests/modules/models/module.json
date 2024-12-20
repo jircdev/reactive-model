@@ -1,9 +1,0 @@
-{
-	"name": "examples/models",
-	"description": "Model samples",
-	"platforms": ["web", "android", "ios"],
-	"ts": {
-		"path": "ts",
-		"files": ["*"]
-	}
-}

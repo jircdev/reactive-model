@@ -1,4 +1,4 @@
-import { ReactiveModel } from '@aimpact/reactive/model';
+import { ReactiveModel } from '@beyond-js/reactive/model';
 import { RegistryData, RegistryId } from './types';
 import { Registry } from './';
 import { IRecordProps } from '../types';

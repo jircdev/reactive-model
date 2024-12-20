@@ -1,5 +1,5 @@
-import { Item, ItemId, IEntityProvider, RegistryFactory } from '@aimpact/reactive/entities/item';
-import { ReactiveModel } from '@aimpact/reactive/model';
+import { Item, ItemId, IEntityProvider, RegistryFactory } from '@beyond-js/reactive/entities/item';
+import { ReactiveModel } from '@beyond-js/reactive/model';
 import { ICollectionOptions, ICollectionProvider, ILoadSpecs } from './types';
 
 export /*bundle*/ class Collection<T extends Item, P extends IEntityProvider = IEntityProvider> extends ReactiveModel<
@@ -177,7 +177,7 @@ export /*bundle*/ class Collection<T extends Item, P extends IEntityProvider = I
 		// General function to evaluate conditions with logical operators
 		const evaluateConditions = (conditions: Record<string, any>[], logic: 'every' | 'some'): boolean =>
 			conditions[logic](condition =>
-				Object.entries(condition).every(([property, criteria]) => evaluateCondition(property, criteria))
+				Object.entries(condition).every(([property, criteria]) => evaluateCondition(property, criteria)),
 			);
 
 		// Evaluate AND conditions

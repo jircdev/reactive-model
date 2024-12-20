@@ -1,4 +1,4 @@
-import { IEntityProvider, Item } from '@aimpact/reactive/entities/item';
+import { IEntityProvider, Item } from '@beyond-js/reactive/entities/item';
 import type { Collection } from './';
 
 export interface ICollectionProviderResponse<T> {

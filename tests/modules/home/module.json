@@ -1,20 +1,26 @@
 {
-	"name": "home",
-	"platforms": ["web", "android", "ios"],
-	"widget": {
-		"is": "page",
-		"route": "/home-reactive",
-
-		"element": {
-			"name": "home-page-reactive"
-		},
-		"scss": {
-			"path": "scss",
-			"files": ["*"]
-		},
-		"ts": {
-			"path": "ts",
-			"files": ["*"]
-		}
-	}
+  "name": "home",
+  "txt": {
+    "path": "txt",
+    "files": "*"
+  },
+  "widget": {
+    "route": "/",
+    "is": "page",
+    "scss": {
+      "path": "/widget/scss",
+      "files": [
+        "*"
+      ]
+    },
+    "ts": {
+      "path": "/widget/ts",
+      "files": [
+        "*"
+      ]
+    },
+    "element": {
+      "name": "app-test-page"
+    }
+  }
 }
