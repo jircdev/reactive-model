@@ -1,5 +1,5 @@
 import { PageReactWidgetController } from '@beyond-js/react-18-widgets/page';
-import { StoreManager } from '../widget/ts/store';
+import { StoreManager } from './store';
 import { View } from './views';
 
 export /*bundle*/

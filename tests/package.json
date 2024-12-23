@@ -75,7 +75,8 @@
 		"sqlite3": "^5.1.6",
 		"tippy": "^0.0.0",
 		"tippy.js": "^6.3.7",
-		"uuid": "^9.0.0"
+		"uuid": "^9.0.0",
+		"zod": "^3.24.1"
 	},
 	"devDependencies": {
 		"@beyond-js/bee": "^0.0.6",
