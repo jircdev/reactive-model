@@ -1,19 +1,16 @@
-import { ReactiveModel, SetPropertiesResult } from '@beyond-js/reactive/model';
+import { ReactiveModel, SetPropertiesResult } from '@aimpact/reactive/model';
 import { Registry } from './registry';
 import { RegistryFactory } from './registry/factory';
-import { RegistryData } from './registry/types/index';
-import { IEntityProvider, IItemProps } from './types';
+import { IEntityProvider, IItem, IItemProps } from './types';
 
-export /*bundle*/ class Item<
-	T extends Record<string, any> = Record<string, any>,
-	P extends IEntityProvider = IEntityProvider,
-> extends ReactiveModel<T> {
+export /*bundle*/ class Item<T extends IItem, P extends IEntityProvider = IEntityProvider> extends ReactiveModel<T> {
 	#factory: RegistryFactory<T>;
-	declare id: string | number;
+
 	#entity: string;
 	get entity() {
 		return this.#entity;
 	}
+
 	#registry: Registry;
 
 	get __registryState() {
@@ -44,16 +41,19 @@ export /*bundle*/ class Item<
 	get draft() {
 		return this.#draft;
 	}
+	declare deleted: boolean;
 
-	constructor({ entity, provider, properties, ...args }: Partial<IItemProps<P>> = {}) {
+	constructor({ entity, provider, properties, ...args }: Partial<IItemProps<T, P>> = {}) {
 		super({ ...args, properties });
+		// if (this.constructor.name === 'Assignment')
 
 		if (!entity) throw new Error('Entity is required');
-		this.id = args.id;
+
 		if (provider && typeof provider !== 'function') {
 			throw new Error(`Provider must be a class/constructor in object ${entity}`);
 		}
 
+		this.reactiveProps(['deleted']);
 		this.#entity = entity;
 
 		this.onSet = this.onSet.bind(this);
@@ -63,7 +63,7 @@ export /*bundle*/ class Item<
 		this.on('set.executed', this.onSet);
 
 		if (provider) {
-			this._provider = new provider(this as Item);
+			this._provider = new provider(this);
 		}
 
 		this.#factory = RegistryFactory.getInstance(entity);
@@ -75,7 +75,7 @@ export /*bundle*/ class Item<
 	 * @param param0
 	 */
 	protected initialize({ ...args }) {
-		const registry = this.#factory.get(this.id, args);
+		const registry = this.#factory.getItem(this.getProperty('id'), args);
 		this.#registry = registry;
 
 		const propertyValues = this.#registry.getValues();
@@ -93,10 +93,6 @@ export /*bundle*/ class Item<
 		});
 	}
 
-	private registryListener(values) {
-		super.set(this.#registry.getValues());
-	}
-
 	set(values: any): SetPropertiesResult {
 		const response = super.set(values);
 		return response;
@@ -108,19 +104,20 @@ export /*bundle*/ class Item<
 
 	protected _load(args: any) {}
 	// Define optional methods with a default implementation that gives a warning message
-	async load?(args?: any) {
+	async load(args?: any) {
 		if (!this.provider || typeof this.provider.load !== 'function') {
 			throw new Error(
-				`DataProvider is not defined or does not implement the load() method in object ${this.constructor.name}`,
+				`DataProvider is not defined or does not implement the load() method in object ${this.constructor.name}`
 			);
 		}
 
 		try {
-			const data = await this.provider.load(args);
+			const response = await this.provider.load(args);
 
+			const data = response;
 			if (!data) {
 				this.#found = false;
-				throw new Error('DataProvider.load() did not return an item.');
+				throw new Error('Provider.load() did not return an item.');
 			}
 			this.#found = true;
 			this.#fetched = true;
@@ -129,13 +126,15 @@ export /*bundle*/ class Item<
 
 			this.triggerEvent('load', { ...this.getProperties() });
 			this.trigger('change');
-			return data;
-		} finally {
-			this.#fetched = true;
+
+			return response;
+		} catch (e) {
+			this.#found = false;
+			throw e;
 		}
 	}
 
-	async publish?(data?: any) {
+	async publish(data?: any) {
 		data = data ? data : this.getProperties();
 
 		this.set({ ...this.getProperties(), ...data });
@@ -154,14 +153,16 @@ export /*bundle*/ class Item<
 		return this.getProperties();
 	}
 
-	async delete?(id) {
+	async delete(id) {
 		try {
-			id = id ?? this.id;
+			id = id ?? this.getProperty('id');
 			if (!this.provider || typeof this.provider.delete !== 'function') {
 				throw new Error('DataProvider is not defined or does not implement the delete() method.');
 			}
 			this.processing = true;
+			this.#registry.deleted = true;
 			return this.provider.delete(id);
+			return true;
 		} catch (e) {
 			console.error(e);
 		}

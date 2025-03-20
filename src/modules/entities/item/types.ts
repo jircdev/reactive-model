@@ -1,10 +1,13 @@
 import type { Item } from './index';
 
+export /*bundle*/ interface IItem {
+	id: string | number;
+}
 export /*bundle*/ type ItemId = string | number;
 export type ReactiveProperty<T> = keyof T | { name: keyof T };
-export /*bundle*/ interface IItemProps<P extends IEntityProvider> {
+export /*bundle*/ interface IItemProps<T, P extends IEntityProvider> {
 	id?: ItemId;
-	provider: new (parent: Item) => P;
+	provider: new (parent: any) => P;
 	entity: string;
 	properties: any;
 }

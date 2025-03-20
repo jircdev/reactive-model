@@ -1,4 +1,4 @@
-import { IEntityProvider, Item } from '@beyond-js/reactive/entities/item';
+import { IEntityProvider, IItem, Item } from '@aimpact/reactive/entities/item';
 import type { Collection } from './';
 
 export interface ICollectionProviderResponse<T> {
@@ -17,16 +17,16 @@ export /*bundle*/ interface ICollectionProvider {
 	remove?(specs?: any): Promise<any>;
 }
 
-export interface ICollectionOptions<T extends Item<IEntityProvider>, P extends Partial<ICollectionProvider>> {
+export interface ICollectionOptions<T, P extends Partial<IEntityProvider>> {
 	entity: string;
-	provider?: new (parent: Collection<T, P>) => P;
-	item: new (...args: any[]) => T;
+	provider?: new (parent: any) => any;
+	item: new (...args: any) => T;
 }
 
 /**
  * Interface defining the specifications for data loading, filtering, sorting, and pagination.
  */
-export interface ILoadSpecs<T> {
+export /*bundle*/ interface ILoadSpecs<T> {
 	/**
 	 * Filters to apply when loading data.
 	 * Each filter can be a property of the data item with various operators.

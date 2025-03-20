@@ -2,21 +2,19 @@ import { ZodError, ZodTypeAny, ZodObject } from 'zod';
 import {
 	ValidatedPropertyType,
 	ModelProperties,
-	ReactiveProps,
 	PropertyValidationErrors,
 	SetPropertiesResult,
-	Timeout
+	Timeout,
+	ReactiveObjectProperty,
+	DefaultProps,
+	IReactiveModelOptions,
+	ReactiveProperty,
+	EntityProperty
 } from './types';
-import { ProxyBase } from './proxy';
 
-type ReactiveProperty<T> = keyof T | { name: keyof T };
+import { Events } from '@beyond-js/events/events';
 
-export /*bundle */ class ReactiveModel<T> extends ProxyBase<T> {
-	_reactiveProps: Record<string, any> = {}; // any reactive prop.
-
-	//TODO: Validate how to handle the properties
-	protected properties: Array<ReactiveProperty<T>> = [];
-	// properties of the object
+export /*bundle */ class ReactiveModel<T> extends Events {
 	debounceTimeout: Timeout | null;
 	processing: boolean = false;
 	processed: boolean = false;
@@ -24,6 +22,17 @@ export /*bundle */ class ReactiveModel<T> extends ProxyBase<T> {
 	loaded: boolean = false;
 	#ready: boolean = false;
 
+	private _reactiveProps: Record<keyof T, any> = {} as Record<keyof T, any>;
+	static isReactive() {
+		return true;
+	}
+	//TODO: Validate how to handle the properties
+	protected properties: EntityProperty<T>[] = [];
+	// properties of the object
+	#isDraft: boolean = false;
+	get isDraft() {
+		return this.#isDraft;
+	}
 	#propertyNames = new Set();
 	get ready() {
 		return this.#ready;
@@ -36,11 +45,6 @@ export /*bundle */ class ReactiveModel<T> extends ProxyBase<T> {
 
 	protected schema: ZodObject<Record<string, ZodTypeAny>>;
 	#initialValues: Partial<T> = {} as Partial<T>;
-
-	#isDraft: boolean = false;
-	get isDraft() {
-		return this.#isDraft;
-	}
 
 	get initialValues() {
 		return this.#initialValues;
@@ -55,8 +59,16 @@ export /*bundle */ class ReactiveModel<T> extends ProxyBase<T> {
 			if (prop === 'id') return false;
 			if (Array.isArray(properties[prop])) {
 				if (properties[prop].length !== this.#initialValues[prop]?.length) return true;
-				return JSON.stringify(properties[prop]) === JSON.stringify(this.#initialValues[prop]);
+				return JSON.stringify(properties[prop]) !== JSON.stringify(this.#initialValues[prop]);
 			}
+			if (typeof properties[prop] === 'object') {
+				if (this[prop] instanceof ReactiveModel) {
+					return this[prop].unpublished;
+				}
+
+				return JSON.stringify(properties[prop]) !== JSON.stringify(this.#initialValues[prop]);
+			}
+
 			return properties[prop] !== this.#initialValues[prop];
 		});
 	}
@@ -67,15 +79,22 @@ export /*bundle */ class ReactiveModel<T> extends ProxyBase<T> {
 		return this.unpublished;
 	}
 
-	constructor({ properties, ...props }: ReactiveProps<T> = { properties: [] }) {
+	constructor(
+		{ properties, ...props }: IReactiveModelOptions<T> = { properties: [] } as Partial<IReactiveModelOptions<T>>
+	) {
 		super();
-		this.defineReactiveProps(['fetching', 'fetched', 'processing', 'processed', 'loaded'], false);
+		const defaultProps: DefaultProps[] = ['fetching', 'fetched', 'processing', 'processed', 'loaded'];
 
 		if (properties) {
-			this.properties = properties;
-			this.setInitialValues(props as Partial<T>);
-			this.defineReactiveProps(properties as string[], { ...props });
+			this.properties = properties as EntityProperty<T>[];
+			this.defineReactiveProps(properties, props);
+			if (Object.keys(props).length > 0) {
+				this.setInitialValues(props as Partial<T>);
+			}
 		}
+		// if (['LearningModule', 'LearningModuleAudience'].includes(this.constructor.name))
+		// 	console.log('instanciamos', this.constructor.name, props, this.initialValues);
+		this.defineReactiveProps(defaultProps as ReactiveProperty<T>[], this.initialValues);
 	}
 
 	protected setInitialValues(specs?: Partial<T>): Partial<T> {
@@ -85,6 +104,9 @@ export /*bundle */ class ReactiveModel<T> extends ProxyBase<T> {
 
 		this.properties.forEach(property => {
 			if (typeof property !== 'string') {
+				property = property as ReactiveObjectProperty<T>;
+
+				values[property.name] = specs[property.name];
 				return;
 			}
 			// Explicitly check if the value exists in the specs object
@@ -96,13 +118,20 @@ export /*bundle */ class ReactiveModel<T> extends ProxyBase<T> {
 		});
 		this.#isDraft = Object.keys(specs).length === 0;
 
-		this.set(specs);
 		this.#initialValues = values;
+
 		return this.#initialValues;
 	}
 
-	protected defineReactiveProp(propKey: string, initialValue: any, model: boolean = false): void {
+	getProperty<K extends keyof T>(key: K): T[K] {
+		return this._reactiveProps[key]; // Type-safe access.
+	}
+
+	property = this.getProperty;
+
+	protected defineReactiveProp<K extends keyof T>(propKey: string, initialValue: any, model: boolean = false): void {
 		this._reactiveProps[propKey] = initialValue;
+
 		Object.defineProperty(this, propKey as string, {
 			get: () => {
 				return this._reactiveProps[propKey];
@@ -115,6 +144,7 @@ export /*bundle */ class ReactiveModel<T> extends ProxyBase<T> {
 					this._reactiveProps[propKey].set(newVal);
 					return;
 				}
+
 				if (newVal !== undefined && newVal === this._reactiveProps[propKey]) return;
 
 				const previous = this._reactiveProps[propKey];
@@ -128,41 +158,59 @@ export /*bundle */ class ReactiveModel<T> extends ProxyBase<T> {
 		});
 	}
 
-	protected defineReactiveProps(props: string[], values?): void {
+	/**
+	 *  Defines the reactive properties of the object.
+	 * The properties are defined as an array of strings or objects.
+	 * The objects must have a `name` property with the name of the property and a `value` property with the class of the object.
+	 * The `value` property can be a class or an object.
+	 * If the `value` property is a class, the class must extend the `ReactiveModel` class.
+	 *
+	 * @param props
+	 * @param values
+	 */
+	protected defineReactiveProps(props: ReactiveProperty<T>[], values?): void {
 		for (let propKey of props) {
-			/**
-			 * Possibility to define a property as an object
-			 */
-			if (typeof propKey === 'object') {
-				const data = propKey as { name: string; value: any };
-				propKey = data.name;
-				const descriptor = Object.getOwnPropertyDescriptor(this, propKey as string);
-				let initialValue = values?.[propKey] ?? descriptor?.value;
+			const descriptor = Object.getOwnPropertyDescriptor(this, propKey as string);
 
-				if (typeof data.value !== 'function' && typeof data.value !== 'object') {
-					console.warn(`Invalid value type for  ${propKey}`);
-					continue;
-				}
+			if (propKey === undefined) continue;
 
-				const instance = new data.value(initialValue);
+			if (typeof propKey !== 'object') {
 				this.#propertyNames.add(propKey);
-				this.defineReactiveProp(propKey, instance, true);
+				let initialValue = values?.[propKey] ?? descriptor?.value;
+				this.defineReactiveProp(propKey as string, initialValue);
 				continue;
 			}
-			this.#propertyNames.add(propKey);
-			const descriptor = Object.getOwnPropertyDescriptor(this, propKey as string);
-			let initialValue = values?.[propKey] ?? descriptor?.value;
-			this.defineReactiveProp(propKey, initialValue);
+
+			const data = propKey as ReactiveObjectProperty<T>;
+
+			const name = data.name as string;
+
+			let initialValue = values?.[name] ?? descriptor?.value;
+			const specs = data.properties ?? {};
+
+			if (typeof data.value !== 'function' && typeof data.value !== 'object') {
+				console.warn(`Invalid value type for  ${name as string}`);
+				continue;
+			}
+
+			const parameters = data.value.isCollection ? { parent: this } : { parent: this, ...initialValue, ...specs };
+			const instance = new data.value(parameters);
+
+			if (data.value.isCollection) {
+				instance.setItems(initialValue);
+			}
+
+			this.#propertyNames.add(name);
+			this.defineReactiveProp(name, instance, true);
+
+			continue;
 		}
 	}
 
-	protected reactiveProps(props: string[]) {
+	protected reactiveProps(props: ReactiveProperty<T>[]) {
 		this.defineReactiveProps(props);
 	}
 
-	getProperty(propKey: string) {
-		return this._reactiveProps[propKey];
-	}
 	setProperty(propKey: string, value: any) {
 		this._reactiveProps[propKey] = value;
 	}
@@ -220,9 +268,9 @@ export /*bundle */ class ReactiveModel<T> extends ProxyBase<T> {
 		}
 
 		const keys = Object.keys(properties);
-
 		let updated = false;
 		const errors: PropertyValidationErrors<T> = {};
+
 		const onSet = prop => {
 			if (!this.#propertyNames.has(prop)) {
 				// console.trace(`is not a property`, prop, this.constructor.name);
@@ -230,17 +278,25 @@ export /*bundle */ class ReactiveModel<T> extends ProxyBase<T> {
 			}
 
 			const validated = this.validateProperty(prop, properties[prop]);
-
 			if (!validated.valid) {
 				errors[prop] = validated;
 				return;
 			}
+
+			//@ts-ignore
+			if (this.getProperty(prop)?.isReactive) {
+				const instance = this.getProperty(prop) as unknown as ReactiveModel<T>;
+
+				instance.set(properties[prop]);
+				if (instance.unpublished) updated = true;
+
+				return;
+			}
+
 			const isObject = typeof properties[prop] === 'object';
-			const isSameObject = isObject && this.isSameObject(properties[prop], this[prop]);
+			const isSameObject = isObject && this.isSameObject([prop], this[prop]);
 
 			if (this[prop] === properties[prop] || isSameObject) return;
-			const descriptor = Object.getOwnPropertyDescriptor(this, prop as string);
-			if (!descriptor?.set) return;
 
 			this[prop] = properties[prop]!;
 			updated = true;
@@ -257,12 +313,19 @@ export /*bundle */ class ReactiveModel<T> extends ProxyBase<T> {
 
 	getProperties(): Partial<T> {
 		const props = {} as Partial<T>;
-		const properties = this.properties;
+
 		const loop = property => {
 			let name = property;
-			if (typeof property === 'object') {
+			// console.log(1, name, property);
+
+			if (typeof property === 'object' && property.value.isReactive) {
 				name = property.name;
-				props[String(name)] = this[name]?.getProperties();
+				/**
+				 * If the property is a collection, we return the items.
+				 */
+				props[String(name)] = property.value.isCollection
+					? this[name].getItemProperties()
+					: this[name]?.getProperties();
 				return;
 			}
 

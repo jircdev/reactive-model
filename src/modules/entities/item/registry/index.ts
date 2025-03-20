@@ -1,4 +1,4 @@
-import { ReactiveModel } from '@beyond-js/reactive/model';
+import { ReactiveModel } from '@aimpact/reactive/model';
 import { v4 as uuidv4 } from 'uuid';
 
 export class Registry extends ReactiveModel<Registry> {
@@ -41,6 +41,8 @@ export class Registry extends ReactiveModel<Registry> {
 	set deleted(value: boolean) {
 		if (value === this.#isDeleted) return;
 		this.#isDeleted = value;
+
+		this.trigger('record.deleted', this.#values);
 		this.triggerEvent();
 	}
 	#entity: string;

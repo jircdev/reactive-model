@@ -1,8 +1,8 @@
-import { Item, ItemId, IEntityProvider, RegistryFactory } from '@beyond-js/reactive/entities/item';
-import { ReactiveModel } from '@beyond-js/reactive/model';
+import { Item, ItemId, IEntityProvider, RegistryFactory } from '@aimpact/reactive/entities/item';
+import { ReactiveModel } from '@aimpact/reactive/model';
 import { ICollectionOptions, ICollectionProvider, ILoadSpecs } from './types';
 
-export /*bundle*/ class Collection<T extends Item, P extends IEntityProvider = IEntityProvider> extends ReactiveModel<
+export /*bundle*/ class Collection<T, P extends IEntityProvider = IEntityProvider> extends ReactiveModel<
 	Collection<T, P>
 > {
 	#entity: string;
@@ -14,6 +14,8 @@ export /*bundle*/ class Collection<T extends Item, P extends IEntityProvider = I
 	get provider(): P {
 		return this.#provider;
 	}
+
+	static isCollection = true;
 
 	#item: ICollectionOptions<T, P>['item'];
 	get Item(): ICollectionOptions<T, P>['item'] {
@@ -31,6 +33,7 @@ export /*bundle*/ class Collection<T extends Item, P extends IEntityProvider = I
 	#registry: RegistryFactory<T>;
 	constructor({ entity, provider, item }: ICollectionOptions<T, P>) {
 		super();
+
 		this.#entity = entity;
 		if (provider && typeof provider !== 'function') {
 			throw new Error('Provider must be a class/constructor');
@@ -41,6 +44,7 @@ export /*bundle*/ class Collection<T extends Item, P extends IEntityProvider = I
 		this.#registry = RegistryFactory.getInstance<T>(entity);
 
 		this.#registry.on('record.published', this.onNewRegistry.bind(this));
+		this.#registry.on('record.deleted', this.onRegistryDeleted.bind(this));
 		this.#item = item;
 	}
 
@@ -82,7 +86,7 @@ export /*bundle*/ class Collection<T extends Item, P extends IEntityProvider = I
 	 * @throws {Error} - If data cannot be loaded or processed.
 	 */
 
-	async load(args?: ILoadSpecs<T>): Promise<void> {
+	async load(args?: ILoadSpecs<T>): Promise<T[]> {
 		this.#filters = args?.where ? args.where : {};
 
 		if (!this.#provider || typeof this.#provider.list !== 'function') {
@@ -93,22 +97,56 @@ export /*bundle*/ class Collection<T extends Item, P extends IEntityProvider = I
 			const data = await this.#provider.list(args);
 
 			if (Array.isArray(data)) {
-				this.#map.clear();
-				data.forEach(item => {
-					const instance = new this.#item(item);
-					this.#map.set(item.id, instance);
-				});
+				this.setItems(data, true);
 			} else {
 				throw new Error('DataProvider.load() did not return an array of items.');
 			}
 
 			this.triggerEvent('load', { items: this.#map });
+			return data;
 		} catch (error) {
 			console.error('Error loading data:', error);
 			throw error;
 		}
 	}
 
+	protected setItems(data, clear = false) {
+		if (clear) this.#map.clear();
+		if (!data) return;
+		if (!Array.isArray(data)) {
+			// console.trace(data);
+			console.warn('Data must be an array');
+			return;
+		}
+		data.forEach(item => {
+			if (this.map.has(item.id)) {
+				(this.map.get(item.id as ItemId) as ReactiveModel<T>).set(item);
+				return;
+			}
+			const instance = new this.#item({ parent: this, ...item });
+			this.#map.set(item.id, instance);
+		});
+	}
+
+	set(data) {
+		super.set(data);
+
+		this.trigger('change');
+		return data;
+	}
+
+	getProperties() {
+		//@ts-ignore;
+		return { items: this.items };
+	}
+
+	getItemProperties() {
+		const items = [];
+		for (let item of this.items) {
+			items.push((item as Item).getProperties());
+		}
+		return items;
+	}
 	/**
 	 * Validates a new registry against the collection's filters and, if it matches,
 	 * creates a new item with the registry data and adds it to the data map.
@@ -125,9 +163,17 @@ export /*bundle*/ class Collection<T extends Item, P extends IEntityProvider = I
 			this.#map.set(registry.id, newItem);
 
 			// Optionally trigger an event to notify that a new item was added
-			this.triggerEvent('change.items', { item: newItem });
+			this.triggerEvent('items.changed', { item: newItem });
 			this.triggerEvent('change');
 		}
+	}
+
+	onRegistryDeleted(registry) {
+		if (!this.#map.has(registry.id)) return;
+		this.#map.delete(registry.id);
+
+		this.trigger('change');
+		this.trigger('items.changed');
 	}
 	/**
 	 * Validates if a registry matches the stored filters, including support for AND and OR logical operators.
@@ -177,7 +223,7 @@ export /*bundle*/ class Collection<T extends Item, P extends IEntityProvider = I
 		// General function to evaluate conditions with logical operators
 		const evaluateConditions = (conditions: Record<string, any>[], logic: 'every' | 'some'): boolean =>
 			conditions[logic](condition =>
-				Object.entries(condition).every(([property, criteria]) => evaluateCondition(property, criteria)),
+				Object.entries(condition).every(([property, criteria]) => evaluateCondition(property, criteria))
 			);
 
 		// Evaluate AND conditions

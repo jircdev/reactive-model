@@ -1,7 +1,6 @@
-import { ReactiveModel } from '@beyond-js/reactive/model';
-import { RegistryData, RegistryId } from './types';
+import { ReactiveModel } from '@aimpact/reactive/model';
 import { Registry } from './';
-import { IRecordProps } from '../types';
+import { RegistryId } from './types';
 
 /**
  * Factory for managing multiple registry instances.
@@ -18,7 +17,7 @@ export /*bundle */ class RegistryFactory<T> extends ReactiveModel<RegistryFactor
 		this.ready = true;
 	}
 
-	get(id: RegistryId, data: any): Registry {
+	getItem(id: RegistryId, data: any): Registry {
 		if (!id || !this.items.has(id)) {
 			const specs = data ? { id, ...data } : { id, properties: this.properties, ...data };
 			const registry = new Registry(this.#name, specs);
@@ -26,6 +25,7 @@ export /*bundle */ class RegistryFactory<T> extends ReactiveModel<RegistryFactor
 				this.trigger('record.published', registry);
 			});
 			registry.on('record.updated', registry => this.trigger('update.registry', registry));
+			registry.on('record.deleted', registry => this.trigger('record.deleted', registry));
 			id = registry.id;
 			this.items.set(id, registry);
 		}

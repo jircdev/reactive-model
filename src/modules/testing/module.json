@@ -1,0 +1,14 @@
+{
+	"name": "testing",
+	"widget": {
+		"route": "/test",
+		"is": "page",
+		"ts": {
+			"path": "/ts",
+			"files": ["*"]
+		},
+		"element": {
+			"name": "reactive-testing"
+		}
+	}
+}
