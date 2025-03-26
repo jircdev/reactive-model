@@ -30,7 +30,7 @@ jobs:
               run: beyond build --pkg=@beyond-js/reactive --distribution=npm --logs
 
             - name: Publish to NPM
-              working-directory: library/.beyond/builds/npm/code
+              working-directory: src/.beyond/builds/npm/code
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
               run: npm publish --access public
