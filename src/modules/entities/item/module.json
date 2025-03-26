@@ -1,0 +1,6 @@
+{
+	"name": "entities/item",
+	"bundle": "ts",
+	"platforms": ["*"],
+	"files": ["*"]
+}

@@ -1,7 +1,0 @@
-{
-	"name": "uses-cases/no-providers",
-	"ts": {
-		"path": "./",
-		"files": ["*"]
-	}
-}

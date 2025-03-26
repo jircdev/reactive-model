@@ -1,7 +1,0 @@
-{
-	"name": "uses-cases/only-local",
-	"ts": {
-		"path": "./",
-		"files": ["*"]
-	}
-}

@@ -1,19 +1,25 @@
 import { PageReactWidgetController } from '@beyond-js/react-18-widgets/page';
-import { Page } from './views';
-import { Store } from './store';
+import { StoreManager } from './store';
+import { View } from './views';
 
 export /*bundle*/
 class Controller extends PageReactWidgetController {
-	get Widget() {
-		return Page;
-	}
-	#store;
-
-	createStore(language?: string) {
-		this.#store = new Store();
+	#store: StoreManager;
+	createStore() {
+		this.#store = new StoreManager();
 		return this.#store;
 	}
-	show() {
-		// const user = new User(1);
+	get Widget() {
+		return View;
 	}
+
+	/**
+	 * this method is executed when the widget is showd
+	 */
+	show() {}
+
+	/**
+	 * this method is executed when the widget is hidden
+	 */
+	hide() {}
 }

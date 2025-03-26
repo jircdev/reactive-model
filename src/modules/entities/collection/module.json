@@ -1,0 +1,5 @@
+{
+	"name": "entities/collection",
+	"bundle": "ts",
+	"files": ["*"]
+}

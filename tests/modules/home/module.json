@@ -1,20 +1,22 @@
 {
 	"name": "home",
-	"platforms": ["web", "android", "ios"],
+	"txt": {
+		"path": "txt",
+		"files": "*"
+	},
 	"widget": {
+		"route": "/",
 		"is": "page",
-		"route": "/home-reactive",
-
-		"element": {
-			"name": "home-page-reactive"
-		},
 		"scss": {
-			"path": "scss",
+			"path": "/scss",
 			"files": ["*"]
 		},
 		"ts": {
-			"path": "ts",
+			"path": "/ts",
 			"files": ["*"]
+		},
+		"element": {
+			"name": "app-test-page"
 		}
 	}
 }
