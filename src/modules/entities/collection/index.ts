@@ -1,10 +1,11 @@
-import { Item, ItemId, IEntityProvider, RegistryFactory } from '@aimpact/reactive/entities/item';
-import { ReactiveModel } from '@aimpact/reactive/model';
+import { Item, ItemId, IEntityProvider, RegistryFactory } from '@beyond-js/reactive/entities/item';
+import { ReactiveModel } from '@beyond-js/reactive/model';
 import { ICollectionOptions, ICollectionProvider, ILoadSpecs } from './types';
 
-export /*bundle*/ class Collection<T, P extends IEntityProvider = IEntityProvider> extends ReactiveModel<
-	Collection<T, P>
-> {
+export /*bundle*/ class Collection<
+	T extends ReactiveModel<any>,
+	P extends IEntityProvider = IEntityProvider,
+> extends ReactiveModel<Collection<T, P>> {
 	#entity: string;
 	get entity(): string {
 		return this.#entity;
@@ -143,7 +144,7 @@ export /*bundle*/ class Collection<T, P extends IEntityProvider = IEntityProvide
 	getItemProperties() {
 		const items = [];
 		for (let item of this.items) {
-			items.push((item as Item).getProperties());
+			items.push((item as unknown as Item<any>).getProperties());
 		}
 		return items;
 	}
@@ -223,7 +224,7 @@ export /*bundle*/ class Collection<T, P extends IEntityProvider = IEntityProvide
 		// General function to evaluate conditions with logical operators
 		const evaluateConditions = (conditions: Record<string, any>[], logic: 'every' | 'some'): boolean =>
 			conditions[logic](condition =>
-				Object.entries(condition).every(([property, criteria]) => evaluateCondition(property, criteria))
+				Object.entries(condition).every(([property, criteria]) => evaluateCondition(property, criteria)),
 			);
 
 		// Evaluate AND conditions

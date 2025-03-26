@@ -1,5 +1,5 @@
 import { IEntityProvider } from '@beyond-js/reactive/entities/item';
-import { PendingPromise } from '@beyond-js/kernel/core';
+import { PendingPromise } from '@beyond-js/pending-promise/main';
 
 export class CollectionProvider {
 	async list() {

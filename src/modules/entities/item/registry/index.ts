@@ -1,4 +1,4 @@
-import { ReactiveModel } from '@aimpact/reactive/model';
+import { ReactiveModel } from '@beyond-js/reactive/model';
 import { v4 as uuidv4 } from 'uuid';
 
 export class Registry extends ReactiveModel<Registry> {
