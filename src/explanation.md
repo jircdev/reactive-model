@@ -1,4 +1,0 @@
-ReactiveModel es una clase abstracta que extiende de la clase Events y proporciona una forma sencilla de crear propiedades reactivas que pueden desencadenar eventos cuando cambian. También proporciona métodos para establecer y obtener valores de propiedad. La clase define algunas propiedades de estado como fetching, fetched, processing, processed, loaded y ready, que se hacen reactivas utilizando el decorador reactiveProps. Además, la clase contiene métodos como triggerEvent para disparar eventos, set para establecer propiedades y getProperties para obtener un objeto con las propiedades del modelo.
-
-El archivo property.ts contiene funciones para hacer que las propiedades sean reactivas, como reactiveProp y reactiveProps. Estas funciones se utilizan para crear propiedades reactivas en ReactiveModel, permitiendo que los cambios en estas propiedades desencadenen eventos automáticamente.
-
