@@ -44,8 +44,7 @@ npm install @beyond-js/reactive
 ```
 
 For more detailed information about the library and how to use it, refer to the individual READMEs of
-[ReactiveModel](./src/docs/model/README.md), [Collection](./src/docs/collection/README.md), and
-[Item](./src/docs/item/README.md).
+[ReactiveModel](./src/docs/model.md), [Collection](./src/docs/collection.md), and [Item](./src/docs/item.md).
 
 ## Contributions
 
