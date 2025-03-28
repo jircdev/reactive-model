@@ -1,6 +1,133 @@
-# CHANGELOG
+## 1.2.0
 
-# Changelog
+This release introduces **Zod** integration for validations, new event-driven enhancements for property changes, a
+reorganization of code structure, and a revised approach to how `Item` and `Collection` receive data from the provider.
+It also changes **how properties** are defined in models—properties are now passed into the constructor rather than
+defined via a `get` property.
+
+---
+
+## Breaking Changes
+
+1. **Separate Subpaths for `Item` & `Collection`**
+
+    - In versions `1.1.x`, both `Item` and `Collection` objects were located under a single subpath.
+    - Now, each has its **own** subpath:
+        - `@beyond-js/reactive/entities/item`
+        - `@beyond-js/reactive/entities/collection`
+    - This change **requires updating your imports**.
+
+2. **Constructor Property Definitions**
+
+    - Previously, the **properties** array for a model/item was defined via a **`get` property** inside the class.
+    - **Now**, you must pass the **properties array** directly to the **`super()`** constructor call.
+    - Example (new approach):
+        ```ts
+        export class MyModel extends Model {
+        	constructor() {
+        		const definitions = [
+        			{ type: 'field', name: 'id', valueType: Number },
+        			// ...
+        		];
+        		super(definitions, 'myModel');
+        	}
+        }
+        ```
+
+3. **Constructor Parameters for `Item` & `Collection`**
+    - Previously, constructors could receive properties for IndexedDB integration.
+    - **IndexedDB support has been removed** from the core and will be handled via plugins.
+    - **New** requirement: an `"entity"` property in the constructor to identify the entity name (for plugin
+      integrations or custom usage).
+
+---
+
+## New Features & Enhancements
+
+1. **Zod Integration for Validations**
+
+    - Zod schemas can now be defined per `Model`, `Item`, or `Collection` (where applicable).
+    - Provides **runtime data validation** and improved type inference.
+    - Example usage:
+
+        ```ts
+        import { z } from 'zod';
+
+        const userSchema = z.object({
+        	id: z.number().min(1),
+        	username: z.string().nonempty(),
+        });
+
+        myItem.schema = userSchema;
+        myItem.validate(); // checks the item against the schema
+        ```
+
+2. **`validate` Method**
+
+    - A new `validate()` method checks whether **all properties** of an object conform to the attached Zod schema.
+    - It returns validation success/failure or throws an error (depending on your usage).
+
+3. **`schema` Property**
+
+    - Entities now have a `schema` property that can reference a Zod schema for validation.
+
+4. **Property Change Events**
+
+    - Each property **fires a custom event** on change, providing **fine-grained reactivity**.
+    - The event signature: `(eventName, updatedObjectOrProperty)`.
+        - The **second parameter** gives direct access to the changed property or object.
+
+5. **`unpublished` Property**
+
+    - A new `unpublished` flag helps track when an object has changed locally but not yet “published” or synced.
+    - Useful for offline/staging workflows.
+
+6. **Two Generics in `Item`**
+
+    - `Item<TProps, TProvider>`:
+        - **`TProps`**: interface defining the **properties**.
+        - **`TProvider`**: interface defining the **provider methods**.
+    - Improves TypeScript autocompletion and type safety for data + provider usage.
+
+7. **Nested Objects in Property Definitions**
+
+    - You can now define **nested objects** by marking a property as an object within the property definitions array.
+    - This allows more complex, hierarchical data structures in a single reactive entity.
+
+8. **`Item` & `Collection` Receive Data from the Provider**
+    - Entity objects (`Item` and `Collection`) now rely on a **provider** to supply the API response.
+    - The provider is responsible for capturing and validating the API response, then returning correctly structured
+      data.
+    - This ensures that the reactive model has **accurate**, **validated** data and centralizes API logic in the
+      provider layer.
+
+---
+
+## Removed
+
+1. **IndexedDB Core Integration**
+    - The library no longer includes IndexedDB support by default.
+    - This is now **plugin-based**, so you only add it if your project needs offline storage.
+
+---
+
+### Summary
+
+**v1.2.0** significantly improves flexibility and type safety with **Zod** integration, adds more granular **event**
+handling, and refactors code structure into **separate subpaths**. The key **breaking changes** to watch out for
+include:
+
+-   **Separate subpaths** for `Item` and `Collection`.
+-   **Revised constructor** usage (properties array now passed to `super()`).
+-   **IndexedDB** integration removed from the core (now plugin-based).
+-   **Entities** must specify an `"entity"` property in the constructor.
+-   **API data** is now provided via a **provider** method, which handles and validates the response before populating
+    the model.
+
+Upgrade carefully to accommodate these changes. Once updated, you’ll benefit from stronger validations, more robust
+event-driven behavior, and a clearer separation of concerns between data fetching and reactive state management.
+
+Enjoy the new features and validations in **v1.2.0**!
 
 ## [1.1.13] - 2024-09-27
 

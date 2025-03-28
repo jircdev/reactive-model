@@ -1,4 +1,4 @@
-import { ReactiveModel } from './';
+import { ReactiveModel } from '../src/modules/model';
 
 interface IExample {
 	name: string;

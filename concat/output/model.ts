@@ -1,3 +1,44 @@
+/**
+ * File: example.ts
+ */
+import { ReactiveModel } from './';
+
+interface IExample {
+	name: string;
+	id: string;
+}
+
+export class Example extends ReactiveModel<IExample> {
+	declare name: string;
+	declare id: string;
+	declare pepito: string;
+
+	constructor({ ...args }: Partial<IExample> = {}) {
+		super({ ...args, properties: ['name', 'id'] });
+		this.reactiveProps(['pepito']);
+	}
+
+	print() {
+		return this.getProperty('name');
+	}
+}
+
+// const instance = new Example();
+// instance.on('name.changed', () => console.log('cambio el nombre a ', instance.name));
+// instance.on('pepito.changed', () => console.log('cambio el pepito a ', instance.pepito));
+// instance.name = 'nuevo nombre';
+// instance.pepito = 'nuevo pepito';
+// setTimeout(() => {
+// 	instance.name = 'otro nombre';
+// 	instance.pepito = 'otro pepito';
+// 	console.log(12, instance.name);
+// }, 1000);
+
+// console.log(instance.id, instance.name);
+
+/**
+ * File: index.ts
+ */
 import { ZodError, ZodTypeAny, ZodObject } from 'zod';
 import {
 	ValidatedPropertyType,
@@ -9,7 +50,7 @@ import {
 	DefaultProps,
 	IReactiveModelOptions,
 	ReactiveProperty,
-	EntityProperty,
+	EntityProperty
 } from './types';
 
 import { Events } from '@beyond-js/events/events';
@@ -39,8 +80,8 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 	}
 	set ready(value: boolean) {
 		this.#ready = value;
-		this.trigger('ready');
-		this.trigger('change');
+		this.triggerEvent('ready');
+		this.triggerEvent('change');
 	}
 
 	protected schema: ZodObject<Record<string, ZodTypeAny>>;
@@ -80,7 +121,7 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 	}
 
 	constructor(
-		{ properties, ...props }: IReactiveModelOptions<T> = { properties: [] } as Partial<IReactiveModelOptions<T>>,
+		{ properties, ...props }: IReactiveModelOptions<T> = { properties: [] } as Partial<IReactiveModelOptions<T>>
 	) {
 		super();
 		const defaultProps: DefaultProps[] = ['fetching', 'fetched', 'processing', 'processed', 'loaded'];
@@ -154,7 +195,7 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 				this.trigger('change');
 			},
 			enumerable: true,
-			configurable: true,
+			configurable: true
 		});
 	}
 
@@ -224,8 +265,8 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 			return {
 				valid: false,
 				error: new ZodError([
-					{ path: [propKey], message: `Property ${propKey} is not defined in the schema`, code: 'custom' },
-				]),
+					{ path: [propKey], message: `Property ${propKey} is not defined in the schema`, code: 'custom' }
+				])
 			};
 		}
 
@@ -263,7 +304,7 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 		if (!properties) {
 			console.warn('you are trying to set an empty object', this.constructor.name, properties);
 			return {
-				updated: false,
+				updated: false
 			};
 		}
 
@@ -304,7 +345,7 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 
 		keys.forEach(onSet);
 		if (updated) {
-			this.trigger('change');
+			this.triggerEvent('change');
 			this.trigger('set.executed');
 		}
 
@@ -335,6 +376,16 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 		return props;
 	}
 
+	/**
+	 * Triggers an event after a specified delay.
+	 *
+	 * @param {string} event - The name of the event to trigger.
+	 * @param {Record<string, any>} params - Additional parameters for the event, including an optional `delay` property.
+	 */
+	triggerEvent = (event: string = 'change', params: Record<string, any> = {}): void => {
+		this.trigger(event);
+	};
+
 	revert() {
 		this.set(this.initialValues);
 	}
@@ -343,8 +394,86 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 		this.#initialValues = this.getProperties();
 		this.#isDraft = false;
 	}
+}
 
-	triggerEvent(event = 'change', specs?) {
-		this.trigger('event', specs);
+/**
+ * File: list.ts
+ */
+import { Events } from '@beyond-js/events/events';
+export class ReactiveList<T> extends Events {
+    
+}
+
+/**
+ * File: proxy.ts
+ */
+import { Events } from '@beyond-js/events/events';
+
+export class ProxyBase<T> extends Events {
+	constructor() {
+		super();
+
+		const proxy = new Proxy(this, {
+			get: (target, prop, receiver) => {
+				if (prop in target) {
+					const value = target[prop];
+					return typeof value === 'function' ? value.bind(target) : value;
+				}
+
+				if (prop in target) {
+					return Reflect.get(target, prop, receiver);
+				} else {
+					throw new Error(`Property ${String(prop)} does not exist`);
+				}
+			},
+			set: (target, prop, value) => {
+				target[prop] = value;
+				return true;
+			}
+		});
+
+		return Object.assign(this, proxy); // Ensures proxy functionality
 	}
 }
+
+/**
+ * File: types\index.ts
+ */
+import { ZodError } from 'zod';
+export /*bundle*/ type ModelProperties<T> = any;
+export type PropertyValidationErrors<T> = Partial<Record<keyof T, ValidatedPropertyType>>;
+
+export /*bundle*/ type IReactiveModelOptions<T> = {
+	properties?: EntityProperty<T>[];
+} & {
+	[K in keyof T]?: any;
+};
+
+export type Timeout = ReturnType<typeof setTimeout>;
+
+export interface ValidatedPropertyType {
+	valid: boolean;
+	error?: ZodError | null;
+}
+export interface TriggerEventParams {
+	event: string;
+	delay?: number;
+	specs?: any;
+}
+
+export type TriggerEventInput = string | TriggerEventParams;
+
+export /*bundle*/ type SetPropertiesResult = {
+	updated: boolean;
+	errors?: PropertyValidationErrors<any>;
+};
+
+export type EntityProperty<T> = keyof T | ReactiveObjectProperty<T>;
+
+export type DefaultProps = 'fetching' | 'fetched' | 'processing' | 'processed' | 'loaded';
+/**
+ * Represents a reactive property which is another ReactiveModel instance.
+ */
+export type ReactiveObjectProperty<T> = { name: keyof T; value: any; properties: any };
+export type ReactiveProperty<T> = keyof T | DefaultProps | ReactiveObjectProperty<T> | string;
+

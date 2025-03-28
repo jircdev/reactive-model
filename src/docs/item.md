@@ -1,76 +1,152 @@
+````markdown
 # Item
 
-The `Item` class is an abstract class that extends `ReactiveModel`. This class represents a "reactive" object in the
-sense that it can handle changes in its properties and automatically update other parts of the code, thanks to the
-inheritance from `ReactiveModel`.
+The `Item<T>` class is a specialized extension of `Model<T>`, representing a single identifiable entity within a
+reactive application. It integrates deeply with a registry system to persist and track the lifecycle of individual
+items, including fetching, publishing, deleting, and local state management.
 
-`Item` has a local provider (`LocalProvider`) and a remote provider (`provider`). The local provider handles the loading
-and storing operations in the local database (such as IndexedDB), while the remote provider interacts with an external
-server.
+This class is ideal for managing domain entities like users, products, posts, etc., offering built-in mechanisms for
+data persistence and event-driven updates.
 
-The `Item` class also includes instances of `ItemSaveManager` and `ItemLoadManager` to handle save and load operations,
-respectively. These managers work in conjunction with the local and remote providers to synchronize the data.
+> 💡 To better understand how **providers** work and how to implement them, see the
+> [providers documentation](./providers).
 
-The following usage example creates a `User` class that extends `Item`:
+---
+
+## 🧩 Inheritance
+
+-   Extends: `Model<T>`
+-   Implements registry tracking and provider-based loading/publishing
+
+---
+
+## 🧪 Basic Usage
 
 ```ts
-import { Item, IItem } from '@beyond-js/reactive/entities';
-import { UserProvider } from '@beyond-js/reactive-tests/backend/provider';
+import { Item } from '@beyond-js/reactive/entities/item';
 
 interface IUser {
-	name?: string;
-	password: string;
-	lastnames: string;
+	id: string;
+	name: string;
 }
-interface ISpecs {
-	id?: string;
-}
-export /*bundle */
-class User extends Item<IUser> {
-	protected properties = ['id', 'name', 'lastname'];
 
-	constructor({ id = undefined }: ISpecs) {
-		super({ storeName: 'user', db: 'test', id, provider: UserProvider });
+class UserProvider {
+	async load() {
+		return { id: '1', name: 'Alice' };
+	}
+	async publish(data) {
+		return { status: 200, data };
+	}
+}
+
+class User extends Item<IUser, UserProvider> {
+	declare id: string;
+	declare name: string;
+
+	constructor() {
+		super({
+			entity: 'users',
+			provider: UserProvider,
+			properties: ['id', 'name'],
+		});
 	}
 }
 ```
 
-In this example, the `User` class is defined, which inherits from `Item`. The `User` class has properties such as `id`,
-`name`, and `lastname`, and it uses a `UserProvider` user provider to interact with an external server. It also defines
-the name of the local store (`storeName`) and the name of the local database (`db`).
+---
 
-To use this class, simply instantiate a `User` object and use its inherited methods like `save`, `load`, `sync`, etc.,
-to interact with the local and remote database.
+## 🧱 Constructor
 
-## Properties
+```ts
+new Item({
+  entity: string,
+  provider?: class implements IEntityProvider,
+  properties: string[],
+  ...initialValues
+})
+```
 
--   `isUnpublished: boolean ` Returns a boolean value indicating whether the item is unpublished, meaning its data has
-    not been published to the remote server.
--   `skeleton: Array<string>` An array of strings representing the skeleton properties of the item. These properties are
-    used when retrieving or saving data.
+-   `entity`: **(required)** name of the domain entity (used for registry tracking)
+-   `provider`: **(optional)** class implementing `IEntityProvider`
+-   `properties`: array of reactive property names
 
--   `unique: Array<string>` An array of strings representing the unique properties of the item. These properties are
-    used to determine the uniqueness of the item.
+---
 
-## Public Methods
+## 🔑 Key Properties
 
--   ` save(data?: any): Promise<{ status: boolean }>` Saves the item's data to the local database and publishes it to
-    the remote server if it is unpublished. If data is provided, it sets the item's properties with the given data
-    before saving. Returns a promise that resolves to an object with a status property indicating the success of the
-    operation.
+| Property          | Type       | Description                              |
+| ----------------- | ---------- | ---------------------------------------- |
+| `entity`          | `string`   | Name of the entity (e.g., `'user'`)      |
+| `registry`        | `Registry` | Internal registry record manager         |
+| `provider`        | `object`   | Optional data provider instance          |
+| `fetched`         | `boolean`  | True if `load()` was successful          |
+| `found`           | `boolean`  | True if the record was found on load     |
+| `draft`           | `boolean`  | True if the item is still a draft        |
+| `__registryState` | `string`   | `'draft'`, `'published'`, or `'deleted'` |
+| `__instanceId`    | `string`   | Internal instance ID for tracking        |
 
--   `publish(): Promise<{ status: boolean, data?: any, error?: any }>`  
-    Publishes the item's data to the remote server. If the item has a local provider and is online, it saves the
-    published data to the local database. Returns a promise that resolves to an object with a status property indicating
-    the success of the operation. If successful, the data property contains the published data.
+---
 
--   `sync()` Syncs the item's data between the local database and the remote server. It publishes any unpublished data
-    to the server and retrieves any new data from the server. This method is typically used to synchronize data when
-    transitioning from an offline to an online state.
+## ⚙️ Methods
 
--   `load(params: any): Promise<{ status: boolean, data?: any, error?: any }>`
+### `load(args?): Promise<any>`
 
-    Loads the item's data from the local database and, if online, retrieves the latest data from the remote server. If
-    params is provided, it can be used to specify additional parameters for loading the data. Returns a promise that
-    resolves to an object with a status property indicating the success of the operation. If successful, the data
-    property contains the loaded data.
+Fetches the item using the associated provider’s `load()` method.  
+Updates internal state with fetched data and emits `"load"` and `"change"` events.
+
+```ts
+await user.load();
+```
+
+---
+
+### `publish(data?: Partial<T>): Promise<T>`
+
+Saves changes to the item. Updates registry state and calls the provider’s `publish()` method (if implemented).  
+Saves the changes as `initialValues` internally.
+
+```ts
+await user.publish();
+```
+
+---
+
+### `delete(id?: string | number): Promise<boolean>`
+
+Deletes the item via the provider’s `delete()` method and marks the item as deleted in the registry.
+
+```ts
+await user.delete();
+```
+
+---
+
+### `set(values: Partial<T>): SetPropertiesResult`
+
+Overrides the `Model` method to update values and synchronize them with the registry. Triggers `set.executed`.
+
+---
+
+## 🔄 Events
+
+| Event            | Triggered When                            |
+| ---------------- | ----------------------------------------- |
+| `set.executed`   | After the `set()` method is called        |
+| `change`         | On any property update                    |
+| `load`           | After successful `load()`                 |
+| `<prop>.changed` | When a specific reactive property changes |
+
+---
+
+## 🛠 Provider Interface
+
+To enable data loading, publishing, or deleting, pass a class that implements `IEntityProvider`
+
+```ts
+interface IEntityProvider {
+	load?(args?: any): Promise<any>;
+	publish?(data: any): Promise<{ status: number; data: any }>;
+	delete?(id: string | number): Promise<boolean>;
+}
+```
+````

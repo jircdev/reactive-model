@@ -17,19 +17,19 @@ everything in sync.
 The library offers three main objects - ReactiveModel, Collection, and Item - each serving a distinct purpose in the
 reactive data layer.
 
-### 1. [ReactiveModel](./src/docs/model.md)
+### 1. [ReactiveModel](./docs/model.md)
 
 ReactiveModel is a TypeScript class designed to create reactive properties that can trigger events when they change. It
 makes use of the Observable pattern to notify subscribers whenever a change is made to the model's properties. It's
 especially useful in contexts where data-driven views or components are used.
 
-### 2. [Collection](./src/docs/collection.md)
+### 2. [Collection](./docs/collection.md)
 
 Collection is a reactive data structure designed to handle a set of Items. It extends the ReactiveModel and provides
 methods for managing a collection of reactive objects. It can load, save, and sync items with both a local database and
 a remote server.
 
-### 3. [Item](./src/docs/item.md)
+### 3. [Item](./docs/item.md)
 
 Item is an abstract class that represents a "reactive" object in your application. It extends the ReactiveModel, meaning
 it can handle changes in its properties and automatically update other parts of the code. Item includes methods for
@@ -44,8 +44,7 @@ npm install @beyond-js/reactive
 ```
 
 For more detailed information about the library and how to use it, refer to the individual READMEs of
-[ReactiveModel](./src/docs/model/README.md), [Collection](./src/docs/collection/README.md), and
-[Item](./src/docs/item/README.md).
+[ReactiveModel](./docs/model/README.md), [Collection](./docs/collection/README.md), and [Item](./docs/item/README.md).
 
 ## Contributions
 
