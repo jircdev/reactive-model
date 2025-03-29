@@ -1,4 +1,4 @@
-## 1.2.0
+## 2.0.0
 
 This release introduces **Zod** integration for validations, new event-driven enhancements for property changes, a
 reorganization of code structure, and a revised approach to how `Item` and `Collection` receive data from the provider.
