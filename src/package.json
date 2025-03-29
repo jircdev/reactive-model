@@ -1,6 +1,6 @@
 {
 	"name": "@beyond-js/reactive",
-	"version": "2.0.0",
+	"version": "2.0.1",
 	"title": "Reactive Model v2",
 	"description": "",
 	"license": "ISC",
@@ -42,6 +42,7 @@
 	},
 	"dependencies": {
 		"@beyond-js/events": "^0.0.7",
+		"@beyond-js/kernel": "^0.1.12",
 		"uuid": "^11.0.3",
 		"zod": "^3.24.2"
 	},
