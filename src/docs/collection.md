@@ -19,7 +19,7 @@ enabling reactive collections that automatically reflect backend or external cha
 ## 🧪 Basic Usage
 
 > 💡 To better understand how **providers** work and how to implement them, see the
-> [providers documentation](./providers).
+> &nbsp;[providers documentation](./providers).
 
 ```ts
 import { Collection } from '@beyond-js/reactive/entities/collection';

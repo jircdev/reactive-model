@@ -25,11 +25,9 @@ defined via a `get` property.
         ```ts
         export class MyModel extends Model {
         	constructor() {
-        		const definitions = [
-        			{ type: 'field', name: 'id', valueType: Number },
-        			// ...
-        		];
-        		super(definitions, 'myModel');
+        		super({
+        			properties: ['id', 'name', 'lastname'],
+        		});
         	}
         }
         ```
@@ -52,14 +50,14 @@ defined via a `get` property.
 
         ```ts
         import { z } from 'zod';
-
-        const userSchema = z.object({
+        //create a getter in the model class definition
+        get schema () {
+            return  z.object({
         	id: z.number().min(1),
         	username: z.string().nonempty(),
         });
+        }
 
-        myItem.schema = userSchema;
-        myItem.validate(); // checks the item against the schema
         ```
 
 2. **`validate` Method**

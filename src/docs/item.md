@@ -8,7 +8,7 @@ This class is ideal for managing domain entities like users, products, posts, et
 data persistence and event-driven updates.
 
 > 💡 To better understand how **providers** work and how to implement them, see the
-> [providers documentation](./providers).
+> &nbsp;[providers documentation](./providers).
 
 ---
 
