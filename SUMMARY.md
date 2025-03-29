@@ -6,7 +6,7 @@
 -   [Model](src/docs/model.md)
 -   [Providers](src/docs/providers.md)
 -   [HTTP Responses](src/docs/http-responses.md)
--   [Settings](src/docs/settings.md)
+-   [Changelog](src/CHANGELOG.md)
 
 -   [Versión 1.1.x](src/docs/v1.1.x/README.md)
     -   [Item](src/docs/v1.1.x/item.md)

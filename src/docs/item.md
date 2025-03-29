@@ -1,4 +1,3 @@
-````markdown
 # Item
 
 The `Item<T>` class is a specialized extension of `Model<T>`, representing a single identifiable entity within a
@@ -149,4 +148,3 @@ interface IEntityProvider {
 	delete?(id: string | number): Promise<boolean>;
 }
 ```
-````

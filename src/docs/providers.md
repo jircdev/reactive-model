@@ -1,4 +1,3 @@
-````markdown
 # Providers
 
 **Providers** are a key concept in the ReactiveModel system. They allow you to decouple data access logic from the
@@ -57,7 +56,6 @@ export interface IEntityProvider {
 	delete?(specs?: any): Promise<any>;
 }
 ```
-````
 
 ### Example
 
@@ -86,8 +84,8 @@ export class UserProvider {
 
 ## 📚 Collection Providers
 
-Used in the `Collection<T>` class to interact with a list of items.  
-You must implement the `ICollectionProvider` interface:
+Used in the `Collection<T>` class to interact with a list of items. You must implement the `ICollectionProvider`
+interface:
 
 ```ts
 export interface ICollectionProviderResponse<T> {

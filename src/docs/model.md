@@ -38,8 +38,6 @@ user.id = '1';
 user.name = 'Alice';
 ```
 
-````
-
 ---
 
 ## 🧱 Constructor
@@ -184,10 +182,6 @@ class User extends Model<{ id: string; profile: Profile }> {
 }
 ```
 
----
+```
 
-## 📄 License
-
-MIT © BeyondJS
-
-````
+```
