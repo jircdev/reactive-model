@@ -1,4 +1,10 @@
-## 2.0.0
+## 2.0.2
+
+### Fixed
+
+-   Changed `triggerEvent` function in ReactiveModel to an arrow function to maintain proper `this` scope
+
+## 2.0.1
 
 This release introduces **Zod** integration for validations, new event-driven enhancements for property changes, a
 reorganization of code structure, and a revised approach to how `Item` and `Collection` receive data from the provider.
@@ -77,7 +83,7 @@ defined via a `get` property.
 
 5. **`unpublished` Property**
 
-    - A new `unpublished` flag helps track when an object has changed locally but not yet “published” or synced.
+    - A new `unpublished` flag helps track when an object has changed locally but not yet "published" or synced.
     - Useful for offline/staging workflows.
 
 6. **Two Generics in `Item`**
@@ -122,7 +128,7 @@ include:
 -   **API data** is now provided via a **provider** method, which handles and validates the response before populating
     the model.
 
-Upgrade carefully to accommodate these changes. Once updated, you’ll benefit from stronger validations, more robust
+Upgrade carefully to accommodate these changes. Once updated, you'll benefit from stronger validations, more robust
 event-driven behavior, and a clearer separation of concerns between data fetching and reactive state management.
 
 Enjoy the new features and validations in **v1.2.0**!
