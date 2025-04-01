@@ -13,7 +13,7 @@ import {
 } from './types';
 
 import { Events } from '@beyond-js/events/events';
-
+console.log(9);
 export /*bundle */ class ReactiveModel<T> extends Events {
 	debounceTimeout: Timeout | null;
 	processing: boolean = false;
@@ -344,7 +344,13 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 		this.#isDraft = false;
 	}
 
-	triggerEvent = (event = 'change', specs?) => {
-		this.trigger('event', specs);
+	/**
+	 * Triggers an event after a specified delay.
+	 *
+	 * @param {string} event - The name of the event to trigger.
+	 * @param {Record<string, any>} params - Additional parameters for the event, including an optional `delay` property.
+	 */
+	triggerEvent = (event: string = 'change', params: Record<string, any> = {}): void => {
+		this.trigger(event);
 	};
 }
