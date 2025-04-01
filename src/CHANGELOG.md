@@ -1,3 +1,13 @@
+## 2.0.4
+
+### Added
+
+-   Added comprehensive JSDoc documentation to key methods in ReactiveModel:
+    -   `validate`: Documents property validation against Zod schema
+    -   `getProperties`: Documents property retrieval including nested objects
+    -   `revert`: Documents state restoration functionality
+    -   `saveChanges`: Documents state persistence functionality
+
 ## 2.0.3
 
 ### Fixed
