@@ -344,7 +344,7 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 		this.#isDraft = false;
 	}
 
-	triggerEvent(event = 'change', specs?) {
+	triggerEvent = (event = 'change', specs?) => {
 		this.trigger('event', specs);
-	}
+	};
 }
