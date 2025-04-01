@@ -1,8 +1,9 @@
-## 2.0.2
+## 2.0.3
 
 ### Fixed
 
 -   Changed `triggerEvent` function in ReactiveModel to an arrow function to maintain proper `this` scope
+-   Defined `triggerEvent` as deprecated, it's recommended to use `trigger` method instead.
 
 ## 2.0.1
 
