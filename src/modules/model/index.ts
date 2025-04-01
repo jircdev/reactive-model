@@ -346,7 +346,7 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 
 	/**
 	 * Triggers an event after a specified delay.
-	 *
+	 * @deprecated use trigger method instead.
 	 * @param {string} event - The name of the event to trigger.
 	 * @param {Record<string, any>} params - Additional parameters for the event, including an optional `delay` property.
 	 */
