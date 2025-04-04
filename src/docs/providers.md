@@ -38,9 +38,10 @@ Used in the `Item<T>` class to interact with a single entity.
 You must implement the `IEntityProvider` interface:
 
 ```ts
-export interface IItemProviderResponse<T> {
-	status: number;
-	data?: T;
+// Common API response interface
+export interface IAPIResponse<T> {
+	status: boolean;
+	data: T;
 	error?: string;
 	errors?: Array<{
 		field: string;
@@ -48,34 +49,58 @@ export interface IItemProviderResponse<T> {
 	}>;
 }
 
+// Interface for item data
+export interface IItemData {
+	id: string | number;
+	[key: string]: any;
+}
+
 export interface IEntityProvider {
-	load?(specs?: any): Promise<any>;
-	list?(specs?: any): Promise<any>; // Optional, for completeness
-	publish?(data: any): Promise<any>;
-	remove?(specs: any): Promise<any>;
-	delete?(specs?: any): Promise<any>;
+	// Must return the item data directly, not the API response
+	load?(specs?: any): Promise<IItemData>;
+	publish?(data: any): Promise<IItemData>;
+	delete?(specs?: any): Promise<boolean>;
 }
 ```
 
 ### Example
 
 ```ts
-export class UserProvider {
-	async load(id: string) {
+export class UserProvider implements IEntityProvider {
+	async load(id: string): Promise<IItemData> {
 		const response = await fetch(`/api/users/${id}`);
-		return await response.json();
+		const result: IAPIResponse<IItemData> = await response.json();
+
+		if (!result.status) {
+			throw new Error(result.error || 'Failed to load user');
+		}
+
+		return result.data;
 	}
 
-	async publish(data) {
+	async publish(data: IItemData): Promise<IItemData> {
 		const response = await fetch(`/api/users`, {
 			method: 'POST',
 			body: JSON.stringify(data),
 		});
-		return await response.json();
+		const result: IAPIResponse<IItemData> = await response.json();
+
+		if (!result.status) {
+			throw new Error(result.error || 'Failed to publish user');
+		}
+
+		return result.data;
 	}
 
-	async delete(id: string) {
-		return await fetch(`/api/users/${id}`, { method: 'DELETE' });
+	async delete(id: string): Promise<boolean> {
+		const response = await fetch(`/api/users/${id}`, { method: 'DELETE' });
+		const result: IAPIResponse<boolean> = await response.json();
+
+		if (!result.status) {
+			throw new Error(result.error || 'Failed to delete user');
+		}
+
+		return true;
 	}
 }
 ```
@@ -88,32 +113,42 @@ Used in the `Collection<T>` class to interact with a list of items. You must imp
 interface:
 
 ```ts
-export interface ICollectionProviderResponse<T> {
-	status: number;
-	data?: T;
-	error?: string;
-	errors?: Array<{
-		field: string;
-		message: string;
-	}>;
-}
-
 export interface ICollectionProvider {
-	load?(specs?: any): Promise<any>; // Optional (used in some setups)
-	list(specs?: any): Promise<any>; // Required: fetches the list of items
-	publish?(data: any): Promise<any>;
-	remove?(specs?: any): Promise<any>;
+	// Must return array of items directly, not the API response
+	list(specs?: any): Promise<IItemData[]>;
+	publish?(data: any): Promise<IItemData>;
+	remove?(specs?: any): Promise<boolean>;
 }
 ```
 
 ### Example
 
 ```ts
-export class UserCollectionProvider {
-	async list(filters) {
+export class UserCollectionProvider implements ICollectionProvider {
+	async list(filters?: any): Promise<IItemData[]> {
 		const params = new URLSearchParams(filters).toString();
 		const response = await fetch(`/api/users?${params}`);
-		return await response.json();
+		const result: IAPIResponse<IItemData[]> = await response.json();
+
+		if (!result.status) {
+			throw new Error(result.error || 'Failed to fetch users');
+		}
+
+		return result.data;
+	}
+
+	async publish(data: IItemData): Promise<IItemData> {
+		const response = await fetch(`/api/users`, {
+			method: 'POST',
+			body: JSON.stringify(data),
+		});
+		const result: IAPIResponse<IItemData> = await response.json();
+
+		if (!result.status) {
+			throw new Error(result.error || 'Failed to publish user');
+		}
+
+		return result.data;
 	}
 }
 ```
@@ -132,30 +167,31 @@ export class UserCollectionProvider {
 
 ## 🧪 Implementation Notes
 
--   All methods return `Promise<any>`. The return shape is not enforced strictly yet, but a standard response with
-    `status`, `data`, or `error` is encouraged.
--   These interfaces are simple by design but will evolve in future versions to support advanced patterns like
-    optimistic updates, error handling, and more detailed typing.
+-   Provider methods should handle API responses internally and return only the relevant data
+-   Error handling should be done within the provider methods using try/catch blocks
+-   All methods should validate the API response status before returning data
+-   Methods should throw errors with meaningful messages when operations fail
+-   TypeScript interfaces ensure type safety and better development experience
 
 ---
 
 ## 🔮 Future Enhancements
 
-The current provider interfaces are intentionally minimal. Upcoming improvements may include:
+The provider interfaces are designed to be simple yet powerful. Future improvements may include:
 
--   Better typing for responses
--   Automatic retry logic
--   Lifecycle hooks
--   Centralized error handling
+-   Additional lifecycle hooks
+-   Built-in caching strategies
+-   Batch operation support
+-   Real-time data sync capabilities
 
 ---
 
 ## 📄 Summary
 
-| Use Case      | Class           | Interface             |
-| ------------- | --------------- | --------------------- |
-| Single Entity | `Item<T>`       | `IEntityProvider`     |
-| Collection    | `Collection<T>` | `ICollectionProvider` |
+| Use Case      | Class           | Return Type            |
+| ------------- | --------------- | ---------------------- |
+| Single Entity | `Item<T>`       | `Promise<IItemData>`   |
+| Collection    | `Collection<T>` | `Promise<IItemData[]>` |
 
-By following these simple interfaces, you can seamlessly integrate your models and collections with **any** data source,
-while keeping your reactive logic clean and focused.
+Providers handle the complexity of API interactions while providing a clean interface for your reactive models. They
+validate responses, handle errors, and return only the necessary data, keeping your models focused on managing state.
