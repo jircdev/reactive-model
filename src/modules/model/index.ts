@@ -92,8 +92,7 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 				this.setInitialValues(props as Partial<T>);
 			}
 		}
-		// if (['LearningModule', 'LearningModuleAudience'].includes(this.constructor.name))
-		// 	console.log('instanciamos', this.constructor.name, props, this.initialValues);
+
 		this.defineReactiveProps(defaultProps as ReactiveProperty<T>[], this.initialValues);
 	}
 
@@ -182,9 +181,7 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 			}
 
 			const data = propKey as ReactiveObjectProperty<T>;
-
 			const name = data.name as string;
-
 			let initialValue = values?.[name] ?? descriptor?.value;
 			const specs = data.properties ?? {};
 
@@ -240,6 +237,15 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 	}
 	private isSameObject = (a: any, b: any) => JSON.stringify(a) === JSON.stringify(b);
 
+	/**
+	 * Validates the provided properties against the model's Zod schema.
+	 * Only validates properties that are defined in the model's properties array.
+	 *
+	 * @param {Partial<T>} properties - The properties to validate
+	 * @returns {{ valid: boolean; errors: PropertyValidationErrors<T> }} An object containing:
+	 *   - `valid`: boolean indicating if all properties are valid
+	 *   - `errors`: object containing validation errors for each invalid property
+	 */
 	validate(properties): { valid: boolean; errors: PropertyValidationErrors<T> } {
 		const keys = Object.keys(properties);
 		const errors: PropertyValidationErrors<T> = {};
@@ -311,6 +317,12 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 		return { updated, errors };
 	}
 
+	/**
+	 * Gets all properties of the model, including nested reactive objects and collections.
+	 * For collections, it returns the item properties instead of the collection instance.
+	 *
+	 * @returns {Partial<T>} An object containing all properties of the model
+	 */
 	getProperties(): Partial<T> {
 		const props = {} as Partial<T>;
 
@@ -335,16 +347,31 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 		return props;
 	}
 
+	/**
+	 * Reverts all properties of the model back to their initial values.
+	 * This is useful for discarding changes and restoring the model to its original state.
+	 */
 	revert() {
 		this.set(this.initialValues);
 	}
 
+	/**
+	 * Saves the current state of the model as the new initial state.
+	 * This marks the model as no longer being a draft and updates the initial values
+	 * to match the current state. Useful after successfully persisting changes.
+	 */
 	saveChanges() {
 		this.#initialValues = this.getProperties();
 		this.#isDraft = false;
 	}
 
-	triggerEvent(event = 'change', specs?) {
-		this.trigger('event', specs);
-	}
+	/**
+	 * Triggers an event after a specified delay.
+	 * @deprecated use trigger method instead.
+	 * @param {string} event - The name of the event to trigger.
+	 * @param {Record<string, any>} params - Additional parameters for the event, including an optional `delay` property.
+	 */
+	triggerEvent = (event: string = 'change', params: Record<string, any> = {}): void => {
+		this.trigger(event);
+	};
 }

@@ -1,4 +1,21 @@
-## 2.0.0
+## 2.0.4
+
+### Added
+
+-   Added comprehensive JSDoc documentation to key methods in ReactiveModel:
+    -   `validate`: Documents property validation against Zod schema
+    -   `getProperties`: Documents property retrieval including nested objects
+    -   `revert`: Documents state restoration functionality
+    -   `saveChanges`: Documents state persistence functionality
+
+## 2.0.3
+
+### Fixed
+
+-   Changed `triggerEvent` function in ReactiveModel to an arrow function to maintain proper `this` scope
+-   Defined `triggerEvent` as deprecated, it's recommended to use `trigger` method instead.
+
+## 2.0.1
 
 This release introduces **Zod** integration for validations, new event-driven enhancements for property changes, a
 reorganization of code structure, and a revised approach to how `Item` and `Collection` receive data from the provider.
