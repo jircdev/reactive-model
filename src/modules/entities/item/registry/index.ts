@@ -1,6 +1,15 @@
 import { ReactiveModel } from '@beyond-js/reactive/model';
 import { v4 as uuidv4 } from 'uuid';
 
+interface IRegistrySpecs {
+	id?: any;
+	properties?: any[];
+	instanceId?: any;
+	parent?: any;
+	register?: boolean;
+	[key: string]: any;
+}
+
 export class Registry extends ReactiveModel<Registry> {
 	#id: any;
 	#instanceId: any;
@@ -47,7 +56,7 @@ export class Registry extends ReactiveModel<Registry> {
 	}
 	#entity: string;
 
-	constructor(entity, { properties, ...data } = { id: undefined, properties: [], instanceId: undefined }) {
+	constructor(entity: string, { properties, parent, register, ...data }: IRegistrySpecs = {}) {
 		super({ properties: properties || [] });
 
 		this.#entity = entity;
@@ -56,42 +65,50 @@ export class Registry extends ReactiveModel<Registry> {
 
 		this.#id = id;
 		this.#draft = !id;
-		this.#values = { ...data, id: this.#id };
+		// Loop through data and ignore reactive objects
+		this.#values = Object.entries(data).reduce(
+			(acc, [key, value]) => {
+				if (typeof value === 'object' && value?.isReactive) {
+					return acc;
+				}
+				acc[key] = value;
+				return acc;
+			},
+			{ id: this.#id },
+		);
+
 		this.#state = this.#id ? 'published' : 'draft';
 		this.setValues(this.#values);
 	}
 
-	private updateValue(key, value): void {
-		this.#values[key] = value;
-	}
+	setValues(data: Record<string, any>, publish = false): boolean {
+		if (!data || Object.keys(data).length === 0) return false;
 
-	setValues(data, published = false): boolean {
-		if (!data) return false;
 		const baseState = this.#state;
-		if (published) this.#state = 'published';
 		let updated = false;
 
 		for (const key in data) {
 			if (Object.prototype.hasOwnProperty.call(data, key)) {
-				const property = key;
-				const value = data[property];
-				if (value === this.#values[property]) continue;
+				const value = data[key];
+				if (value === this.#values[key]) continue;
 
-				this.updateValue(property, value);
+				this.#values[key] = value;
 				updated = true;
 			}
 		}
 
-		if (baseState !== this.#state && this.#state === 'published') {
-			this.trigger('record.published', { ...this.#values });
-			return updated;
-		}
-		if (!updated) return updated;
+		if (!updated) return false;
 
 		this.trigger('change', { values: this.#values });
 		this.trigger('record.updated', { ...this.#values });
 
-		return updated;
+		// Solo dispara record.published si está en draft y publish = true
+		if (publish && baseState === 'draft') {
+			this.#state = 'published';
+			this.trigger('record.published', { ...this.#values });
+		}
+
+		return true;
 	}
 
 	getValues() {

@@ -24,21 +24,27 @@ export /*bundle */ class RegistryFactory<T> extends ReactiveModel<RegistryFactor
 			registry.on('record.published', registry => {
 				this.trigger('record.published', registry);
 			});
+			/**
+			 * If the register property is true, the registry is published and the event is triggered
+			 * This is used to register the registry in the collection
+			 */
+			if (data.register) this.trigger('record.published', registry.getValues());
 			registry.on('record.updated', registry => this.trigger('update.registry', registry));
 			registry.on('record.deleted', registry => this.trigger('record.deleted', registry));
 			id = registry.id;
+
 			this.items.set(id, registry);
 		}
 
 		const item = this.items.get(id) as Registry;
-		if (data) {
-			let specs = data;
-			if (!data.id) {
-				delete specs.id;
-			}
+		// if (data) {
+		// 	let specs = data;
+		// 	if (!data.id) {
+		// 		delete specs.id;
+		// 	}
 
-			item.setValues(data);
-		}
+		// 	item.setValues(data);
+		// }
 
 		return item;
 	}

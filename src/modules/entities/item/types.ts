@@ -10,6 +10,7 @@ export /*bundle*/ interface IItemProps<T, P extends IEntityProvider> {
 	provider: new (parent: any) => P;
 	entity: string;
 	properties: any;
+	register?: boolean;
 }
 
 export interface IItemProviderResponse<T> {

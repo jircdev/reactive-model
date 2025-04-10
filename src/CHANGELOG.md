@@ -1,3 +1,16 @@
+## 2.0.5
+
+### Added
+
+-   Introduced a new parameter `register` in the `Item` constructor within `IItemProps`.
+    -   **Type**: `boolean`
+    -   **Purpose**: Allows specification of whether collections subscribed to the defined entity need to be informed
+        about this item. This is particularly useful for creating items that already exist outside the application's
+        memory.
+    -   **Behavior**: If `register` is set to `true`, the registry will trigger an event when the item is created to
+        notify the collections. This ensures that collections are aware of items that are instantiated from external
+        sources.
+
 ## 2.0.4
 
 ### Added
@@ -24,7 +37,7 @@ defined via a `get` property.
 
 ---
 
-## Breaking Changes
+### Breaking Changes
 
 1. **Separate Subpaths for `Item` & `Collection`**
 
@@ -57,7 +70,7 @@ defined via a `get` property.
 
 ---
 
-## New Features & Enhancements
+### New Features & Enhancements
 
 1. **Zod Integration for Validations**
 
@@ -118,7 +131,7 @@ defined via a `get` property.
 
 ---
 
-## Removed
+### Removed
 
 1. **IndexedDB Core Integration**
     - The library no longer includes IndexedDB support by default.
@@ -128,7 +141,7 @@ defined via a `get` property.
 
 ### Summary
 
-**v1.2.0** significantly improves flexibility and type safety with **Zod** integration, adds more granular **event**
+**v2.0.1** significantly improves flexibility and type safety with **Zod** integration, adds more granular **event**
 handling, and refactors code structure into **separate subpaths**. The key **breaking changes** to watch out for
 include:
 

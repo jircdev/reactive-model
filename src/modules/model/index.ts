@@ -26,6 +26,9 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 	static isReactive() {
 		return true;
 	}
+	get isReactive() {
+		return true;
+	}
 	//TODO: Validate how to handle the properties
 	protected properties: EntityProperty<T>[] = [];
 	// properties of the object
