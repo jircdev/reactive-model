@@ -63,10 +63,40 @@ defined via a `get` property.
         ```
 
 3. **Constructor Parameters for `Item` & `Collection`**
+
     - Previously, constructors could receive properties for IndexedDB integration.
     - **IndexedDB support has been removed** from the core and will be handled via plugins.
     - **New** requirement: an `"entity"` property in the constructor to identify the entity name (for plugin
       integrations or custom usage).
+
+4. **Provider Response Format**
+    - Previously, the `load` methods in both `Item` and `Collection` expected providers to return responses with a
+      specific structure: `{ status: boolean, data: any }`.
+    - **Now**, providers should return the raw data directly:
+        - For `Collection.load()`: An array of items directly (`Item[]`)
+        - For `Item.load()`: The item's data object directly (`ItemData`)
+    - This change decouples the models from specific API response structures, allowing more flexibility in data
+      providers.
+    - Example (old approach):
+        ```ts
+        // Before (1.x.x)
+        async load() {
+            const response = await this.provider.load();
+            if (response.status) {
+                this.set(response.data);
+            }
+        }
+        ```
+    - Example (new approach):
+        ```ts
+        // Now (2.0.0)
+        async load() {
+            const data = await this.provider.load();
+            this.set(data);
+        }
+        ```
+    - **Migration**: Update your providers to handle API responses internally and return only the relevant data to the
+      models.
 
 ---
 
