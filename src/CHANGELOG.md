@@ -1,3 +1,11 @@
+## 2.0.6
+
+### Improved
+
+-   The `delete` method of `Item` now supports in-memory deletion and ensures communication between the registry and
+    subscribed collections. This integrated improvement guarantees that, when an item is deleted, the change is properly
+    reflected in memory and all related collections are notified, enhancing reactivity and state consistency.
+
 ## 2.0.5
 
 ### Added
@@ -296,3 +304,28 @@ interface IReactiveConstructorSpecs {
 -   New feature: Now the methods such as save, publish, and load can be overwritten in Children objects and call super
     method. This is useful when it's necessary to manage logic before executing the method or after it.
 -   Bug fix: Fixed an error when the same registry is instantiated multiple times.
+
+## [Unreleased]
+
+### Added
+
+-   **Bulk Deletion in Collections**: The `Collection` class now features a new `delete` method that enables the removal
+    of one or multiple items by their IDs. This method accepts either a single `ItemId` or an array of `ItemId` values.
+
+    -   **Provider Integration**: If the associated provider implements a `deleteMany` method, `Collection.delete` will
+        invoke it to synchronize deletions with an external data layer (such as a backend API or database). This ensures
+        that deletions are reflected both in memory and in the persistent data source.
+    -   **In-Memory Fallback**: If the provider does not define a `deleteMany` method, the `delete` method will remove
+        the specified items from the collection's in-memory map only.
+    -   **Usage**:
+
+        ```ts
+        // Delete a single item
+        await collection.delete(itemId);
+
+        // Delete multiple items
+        await collection.delete([itemId1, itemId2, itemId3]);
+        ```
+
+    -   **Return Value**: Returns a promise that resolves to an array of booleans, indicating the success of each
+        deletion operation.

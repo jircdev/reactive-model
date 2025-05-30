@@ -3,7 +3,7 @@ import { ReactiveModel } from '@beyond-js/reactive/model';
 import { ICollectionOptions, ICollectionProvider, ILoadSpecs } from './types';
 
 export /*bundle*/ class Collection<
-	T extends ReactiveModel<any>,
+	T extends Item<any>,
 	P extends IEntityProvider = IEntityProvider,
 > extends ReactiveModel<Collection<T, P>> {
 	#entity: string;
@@ -167,6 +167,17 @@ export /*bundle*/ class Collection<
 			this.triggerEvent('items.changed', { item: newItem });
 			this.triggerEvent('change');
 		}
+	}
+
+	async delete(ids: ItemId | ItemId[]): Promise<boolean[]> {
+		const toDelete = Array.isArray(ids) ? ids : [ids];
+		const existingItems = toDelete.map(id => this.#map.get(id)).filter(Boolean);
+
+		if (this.#provider && typeof this.#provider.deleteMany === 'function') {
+			await this.#provider.deleteMany(toDelete);
+		}
+
+		return await Promise.all(existingItems.map(item => item.delete({ skipProvider: true })));
 	}
 
 	onRegistryDeleted(registry) {

@@ -29,6 +29,7 @@ export /*bundle*/ interface IEntityProvider {
 	publish?(data: any): Promise<any>;
 	remove?(specs: any): Promise<any>;
 	delete?(specs?: any): Promise<any>;
+	deleteMany?(specs?: any): Promise<any>;
 }
 
 export /*bundle*/ type IRecordProps<T> = {

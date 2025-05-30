@@ -153,18 +153,24 @@ export /*bundle*/ class Item<T extends IItem, P extends IEntityProvider = IEntit
 		return this.getProperties();
 	}
 
-	async delete(id) {
+	async delete(options?: { skipProvider?: boolean }): Promise<boolean> {
 		try {
-			id = id ?? this.getProperty('id');
-			if (!this.provider || typeof this.provider.delete !== 'function') {
-				throw new Error('DataProvider is not defined or does not implement the delete() method.');
-			}
-			this.processing = true;
+			const id = this.getProperty('id');
+
 			this.#registry.deleted = true;
-			return this.provider.delete(id);
+			this.trigger('change');
+
+			if (!options?.skipProvider && this.provider && typeof this.provider.delete === 'function') {
+				this.processing = true;
+				await this.provider.delete(id);
+			}
+
 			return true;
 		} catch (e) {
 			console.error(e);
+			return false;
+		} finally {
+			this.processing = false;
 		}
 	}
 }
