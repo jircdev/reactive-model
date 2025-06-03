@@ -129,6 +129,12 @@ export /*bundle*/ class Collection<
 		});
 	}
 
+	addItems(data: T[]) {
+		this.setItems(data);
+		this.trigger('items.changed', { items: this.#map });
+		this.trigger('change');
+	}
+
 	set(data) {
 		super.set(data);
 
