@@ -1,0 +1,19 @@
+{
+  "name": "collection",
+  "txt": {
+    "path": "txt",
+    "files": "*"
+  },
+  "widget": {
+    "route": "/collection",
+    "is": "page",
+
+    "ts": {
+      "path": "/ts",
+      "files": ["*"]
+    },
+    "element": {
+      "name": "app-test-collection"
+    }
+  }
+}

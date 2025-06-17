@@ -1,3 +1,20 @@
+## 2.1.0
+
+### Added
+
+- Pagination support in the `load` method:
+  - The `load` method now supports paginated result fetching using an internal `next` parameter.
+  - The name of the `next` parameter can be configured using the `nextParamName` option.
+  - A `limit` parameter was added to specify the number of results per page.
+  - Providers can now return an object in the form `{ items, next, total }` in addition to a simple array.
+  - This allows more flexible integration with paginated APIs and improves incremental data loading.
+  - Example usage:
+    ```ts
+    collection.load({ limit: 20 });
+    // The load method will handle the `next` parameter internally.
+    // provider may return: { items: [...], next: 'nextCursor', total: 100 }
+    ```
+
 ## 2.0.6
 
 ### Improved

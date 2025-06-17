@@ -11,6 +11,28 @@ export /*bundle*/ class Collection<
   T extends Item<any>,
   P extends IEntityProvider = IEntityProvider
 > extends ReactiveModel<Collection<T, P>> {
+  private total: number = 0;
+  private next: unknown | null = null;
+  /**
+   * Name of the parameter used for pagination cursor (default: "next").
+   * Can be configured via the constructor using `nextParamName`.
+   */
+  #nextParamName = "next";
+  #defaultLimit: number;
+
+  /**
+   * Get the total number of items available (if provided by the provider).
+   */
+  public getTotal(): number {
+    return this.total;
+  }
+
+  /**
+   * Get the value of next page (if provided by the provider).
+   */
+  public getNext(): unknown | null {
+    return this.next;
+  }
   #entity: string;
   get entity(): string {
     return this.#entity;
@@ -37,7 +59,13 @@ export /*bundle*/ class Collection<
   }
   #filters;
   #registry: RegistryFactory<T>;
-  constructor({ entity, provider, item }: ICollectionOptions<T, P>) {
+  constructor({
+    entity,
+    provider,
+    item,
+    defaultLimit = 15,
+    nextParamName = "next",
+  }: ICollectionOptions<T, P> & { nextParamName?: string }) {
     super();
 
     this.#entity = entity;
@@ -52,6 +80,9 @@ export /*bundle*/ class Collection<
     this.#registry.on("record.published", this.onNewRegistry.bind(this));
     this.#registry.on("record.deleted", this.onRegistryDeleted.bind(this));
     this.#item = item;
+
+    this.#defaultLimit = defaultLimit;
+    if (nextParamName) this.#nextParamName = nextParamName;
   }
 
   /**
@@ -92,28 +123,57 @@ export /*bundle*/ class Collection<
    * @throws {Error} - If data cannot be loaded or processed.
    */
 
-  async load(args?: ILoadSpecs<T>): Promise<T[]> {
-    this.#filters = args?.where ? args.where : {};
+  /**
+   * Load items from the configured provider.
+   * If {@link ILoadSpecs.limit} is omitted, the collection's `defaultLimit`
+   * (configured in the constructor) is used.
+   *
+   * Pagination is handled internally: if the collection has a pagination cursor ("next"),
+   * it will be added to the request using the parameter name defined by `nextParamName`.
+   * You do not need to pass the `next` parameter manually.
+   */
+  async load(args: ILoadSpecs<T> = {}): Promise<T[]> {
+    // Ensure pagination defaults
+    if (typeof args.limit !== "number") args.limit = this.#defaultLimit;
+    if (this.next) args[this.#nextParamName] = this.next;
+    this.#filters = args.where ?? {};
 
-    if (!this.#provider || typeof this.#provider.list !== "function") {
+    if (
+      !this.#provider ||
+      typeof (this.#provider as ICollectionProvider).list !== "function"
+    ) {
       throw new Error(
         "DataProvider is not defined or does not implement the list() method."
       );
     }
 
     try {
-      const data = await this.#provider.list(args);
+      const data = await (this.#provider as ICollectionProvider).list(args);
+      let entries: T[];
+      const shouldUpdate = !!args.update;
 
       if (Array.isArray(data)) {
-        this.setItems(data, true);
+        entries = data;
+        this.total = 0;
+        this.next = null;
+        this.setItems(entries, true);
+      } else if (data && Array.isArray(data.items)) {
+        entries = data.items;
+        if (typeof data.total === "number") this.total = data.total;
+        if ("next" in data) this.next = data.next;
+        this.setItems(entries, !shouldUpdate);
       } else {
         throw new Error(
-          "DataProvider.load() did not return an array of items."
+          'DataProvider.list() must return an array or an object with an "entries" array.'
         );
       }
 
-      this.trigger("load", { items: this.#map });
-      return data;
+      this.trigger("load", {
+        items: entries,
+        total: this.total,
+        next: this.next,
+      });
+      return entries;
     } catch (error) {
       console.error("Error loading data:", error);
       throw error;
@@ -179,8 +239,8 @@ export /*bundle*/ class Collection<
       this.#map.set(registry.id, newItem);
 
       // Optionally trigger an event to notify that a new item was added
-      this.triggerEvent("items.changed", { item: newItem });
-      this.triggerEvent("change");
+      this.trigger("items.changed", { item: newItem });
+      this.trigger("change");
     }
   }
 
@@ -199,7 +259,7 @@ export /*bundle*/ class Collection<
     );
   }
 
-  onRegistryDeleted(registry) {
+  onRegistryDeleted(registry: Record<string, any>) {
     if (!this.#map.has(registry.id)) return;
     this.#map.delete(registry.id);
 

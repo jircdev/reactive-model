@@ -4,18 +4,23 @@ The `Collection` class extends `ReactiveModel` and represents a collection of re
 the loading, storing, and synchronization of a set of items, both in a local database and on a remote server.
 
 ```typescript
-import { Collection } from '@beyond-js/reactive/entities';
-import { User } from './index';
-import { UserProvider } from '@beyond-js/reactive-tests/backend/provider';
+import { Collection } from "@beyond-js/reactive/entities";
+import { User } from "./index";
+import { UserProvider } from "@beyond-js/reactive-tests/backend/provider";
 interface IUsers {
-	items: User[];
+  items: User[];
 }
 export /*bundle*/ class Users extends Collection {
-	item = User;
+  item = User;
 
-	constructor() {
-		super({ storeName: 'user', db: 'test', provider: UserProvider, item: User });
-	}
+  constructor() {
+    super({
+      storeName: "user",
+      db: "test",
+      provider: UserProvider,
+      item: User,
+    });
+  }
 }
 ```
 
@@ -51,7 +56,7 @@ Here's a summary of the main methods in the `Collection` object:
 
 7. `set(properties)`: Updates the properties of the `Collection` object with the given properties.
 
-8. `triggerEvent()`: Triggers an event to notify other parts of the application about changes in the collection.
+8. `trigger('change')`: Triggers an event to notify other parts of the application about changes in the collection.
 
 9. `setOffline()`: Let's you toggle the offline mode in the current collection.
 
