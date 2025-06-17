@@ -48,6 +48,7 @@ new Collection({
   entity: string;
   provider?: class implements ICollectionProvider;
   item: class extends Item;
+  nextParamName?: string; // Optional: name of the pagination parameter (default: "next")
 })
 ```
 
@@ -56,6 +57,7 @@ new Collection({
 -   `entity`: **(required)** Identifier for the collection type
 -   `provider`: **(optional)** Data provider for remote operations
 -   `item`: **(required)** The `Item` class to instantiate on data load
+-   `nextParamName`: **(optional)** Name of the pagination parameter sent to the provider. Defaults to `"next"`. Use this if your provider expects a different key (e.g., `"cursor"`, `"start"`).
 
 ---
 
@@ -81,6 +83,60 @@ new Collection({
 
 ---
 
+## 📖 Pagination
+
+### Internal Pagination Handling
+
+- The collection now manages pagination using an internal cursor (by default, the `next` property).
+- The parameter name for the cursor sent to the provider can be customized using the `nextParamName` option in the constructor.
+- When loading more data (pagination), simply call `load({ update: true })`. The collection will send the current cursor value to the provider using the configured parameter name.
+- The provider should return either an array or an object with `{ items, next, total }`.
+- The `next` (or custom) value will be updated automatically after each load.
+- The `getNext()` method returns the current cursor value, and `getTotal()` returns the total number of available items (if provided).
+
+### Example: Custom Pagination Parameter
+
+```ts
+class Users extends Collection<User, UserProvider> {
+  constructor() {
+    super({
+      entity: 'users',
+      provider: UserProvider,
+      item: User,
+      nextParamName: 'start', // Use 'start' as the pagination parameter
+    });
+  }
+}
+```
+
+### Example: Loading More Data
+
+```ts
+// Initial load
+await users.load({ limit: 20 });
+
+// Load next page (uses internal cursor)
+await users.load({ update: true });
+```
+
+### Example: Provider Response
+
+```ts
+// Provider may return:
+{
+  items: [...], // Array of items for this page
+  next: 'nextCursor', // Cursor for the next page (or null if no more pages)
+  total: 100 // (optional) Total number of items available
+}
+```
+
+### Migration Notes
+
+- If you previously passed the pagination cursor manually in `load`, update your code to rely on the internal handling.
+- Use `nextParamName` if your API expects a different cursor parameter name.
+
+---
+
 ## ⚙️ Methods
 
 ### `async load(args?: ILoadSpecs<T>): Promise<T[]>`
@@ -93,6 +149,10 @@ await users.load({
 	orderBy: { name: 'asc' },
 	limit: 20,
 });
+// Pagination is handled internally: you do not need to pass the pagination cursor.
+// If the collection has a pagination cursor (e.g., `next` or as configured by `nextParamName`), it will be sent automatically in the request.
+// The provider can return either an array or an object with `{ items, next, total }`.
+// To fetch the next page, call `load({ update: true })` and the collection will use the latest cursor.
 ```
 
 > 💡 **Note**: The filters used in the `where` clause are fully customizable.
