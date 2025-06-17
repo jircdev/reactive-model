@@ -112,7 +112,7 @@ export /*bundle*/ class Collection<
         );
       }
 
-      this.triggerEvent("load", { items: this.#map });
+      this.trigger("load", { items: this.#map });
       return data;
     } catch (error) {
       console.error("Error loading data:", error);
