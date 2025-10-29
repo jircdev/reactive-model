@@ -8,6 +8,9 @@ export /*bundle*/ class Collection<
 > extends ReactiveModel<Collection<T, P>> {
 	private total: number = 0;
 	private next: unknown | null = null;
+	get isCollection() {
+		return true;
+	}
 	/**
 	 * Name of the parameter used for pagination cursor (default: "next").
 	 * Can be configured via the constructor using `nextParamName`.

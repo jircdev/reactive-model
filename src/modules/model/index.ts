@@ -1,15 +1,15 @@
-import { ZodError, ZodTypeAny, ZodObject } from 'zod';
+import { ZodError, ZodObject, ZodTypeAny } from 'zod';
 import {
-	ValidatedPropertyType,
+	DefaultProps,
+	EntityProperty,
+	IReactiveModelOptions,
 	ModelProperties,
 	PropertyValidationErrors,
+	ReactiveObjectProperty,
+	ReactiveProperty,
 	SetPropertiesResult,
 	Timeout,
-	ReactiveObjectProperty,
-	DefaultProps,
-	IReactiveModelOptions,
-	ReactiveProperty,
-	EntityProperty,
+	ValidatedPropertyType,
 } from './types';
 
 import { Events } from '@beyond-js/events/events';
@@ -21,6 +21,7 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 	declare fetching: boolean;
 	loaded: boolean = false;
 	#ready: boolean = false;
+	#debug: string;
 
 	private _reactiveProps: Record<keyof T, any> = {} as Record<keyof T, any>;
 	static isReactive() {
@@ -37,6 +38,9 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 		return this.#isDraft;
 	}
 	#propertyNames = new Set();
+	get propertyNames() {
+		return this.#propertyNames;
+	}
 	get ready() {
 		return this.#ready;
 	}
@@ -88,6 +92,8 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 		} as Partial<IReactiveModelOptions<T>>,
 	) {
 		super();
+		// this.#debug = 'Courier';
+
 		const defaultProps: DefaultProps[] = ['fetching', 'fetched', 'processing', 'processed', 'loaded'];
 
 		if (properties) {
@@ -97,10 +103,33 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 				this.setInitialValues(props as Partial<T>);
 			}
 		}
-
+		this.debug('props', props, properties);
 		this.defineReactiveProps(defaultProps as ReactiveProperty<T>[], this.initialValues);
 	}
 
+	/**
+	 * Logs debug information to the console only when the #debug property matches the constructor name.
+	 * This allows for targeted debugging of specific model instances by setting the #debug property
+	 * to the class name you want to debug.
+	 *
+	 * @param args - Any arguments to be logged to the console
+	 */
+	private debug(...args: any[]): void {
+		if (this.#debug === this.constructor.name) {
+			console.log(...args);
+		}
+	}
+
+	/**
+	 * Sets the initial values for the model based on the provided specifications.
+	 * This method processes the model's properties and extracts their values from the specs object.
+	 * If no specs are provided, it returns the existing initial values.
+	 *
+	 * The method also determines if the model is a draft by checking if the specs object is empty.
+	 *
+	 * @param specs - Optional partial object containing property values to set as initial values
+	 * @returns The initial values object that was set
+	 */
 	protected setInitialValues(specs?: Partial<T>): Partial<T> {
 		if (!specs) return this.#initialValues;
 
@@ -113,15 +142,10 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 				values[property.name] = specs[property.name];
 				return;
 			}
-			// Explicitly check if the value exists in the specs object
-			if (specs.hasOwnProperty(property)) {
-				values[property] = specs[property] as T[keyof T];
-			} else {
-				values[property] = undefined as unknown as T[keyof T]; // Ensure compatibility with the expected type
-			}
+
+			values[property] = specs[property] as T[keyof T];
 		});
 		this.#isDraft = Object.keys(specs).length === 0;
-
 		this.#initialValues = values;
 
 		return this.#initialValues;
@@ -277,7 +301,7 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 		};
 		keys.forEach(onValidate);
 
-		return { valid: !!Object.keys(errors).length, errors };
+		return { valid: Object.keys(errors).length === 0, errors };
 	}
 
 	set(properties: Partial<T>): SetPropertiesResult {
@@ -291,25 +315,36 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 		const keys = Object.keys(properties);
 		let updated = false;
 		const errors: PropertyValidationErrors<T> = {};
-
+		this.debug(0, properties);
 		const onSet = prop => {
+			this.debug(prop, properties[prop]);
 			if (!this.#propertyNames.has(prop)) {
 				// console.trace(`is not a property`, prop, this.constructor.name);
 				return;
 			}
 
 			const validated = this.validateProperty(prop, properties[prop]);
+			this.debug(prop, properties[prop], validated);
 			// console.log('validated', validated, prop, properties[prop]);
 			if (!validated.valid) {
 				errors[prop] = validated;
 				// return;
 			}
-
+			if (prop === 'provinces') {
+			}
 			//@ts-ignore
 			if (this.getProperty(prop)?.isReactive) {
 				const instance = this.getProperty(prop) as unknown as ReactiveModel<T>;
+				// check if it is a collection
 
-				instance.set(properties[prop]);
+				//@ts-ignore
+				if (instance.isCollection) {
+					//@ts-ignore
+					instance.setItems(properties[prop]);
+				} else {
+					instance.set(properties[prop]);
+				}
+
 				if (instance.unpublished) updated = true;
 
 				return;
@@ -318,8 +353,11 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 			const isObject = typeof properties[prop] === 'object';
 			const isSameObject = isObject && this.isSameObject([prop], this[prop]);
 
-			if (this[prop] === properties[prop] || isSameObject) return;
+			if (this[prop] === properties[prop] || isSameObject) {
+				return;
+			}
 
+			this.trigger(`${prop}.changed`, { value: properties[prop], previous: this[prop] });
 			this[prop] = properties[prop]!;
 			updated = true;
 		};

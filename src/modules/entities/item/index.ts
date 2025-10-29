@@ -159,7 +159,7 @@ export /*bundle*/ class Item<T extends IItem, P extends IEntityProvider = IEntit
 
 			this.#registry.deleted = true;
 			this.trigger('change');
-
+			if (!this.provider) return true;
 			if (!options?.skipProvider && this.provider && typeof this.provider.delete === 'function') {
 				this.processing = true;
 				await this.provider.delete(id);
