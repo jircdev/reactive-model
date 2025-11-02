@@ -111,6 +111,7 @@ export /*bundle*/ class Item<T extends IItem, P extends IEntityProvider = IEntit
 			);
 		}
 
+		this.fetching = true;
 		try {
 			const response = await this.provider.load(args);
 
@@ -130,7 +131,10 @@ export /*bundle*/ class Item<T extends IItem, P extends IEntityProvider = IEntit
 			return response;
 		} catch (e) {
 			this.#found = false;
+			this.#fetched = false;
 			throw e;
+		} finally {
+			this.fetching = false;
 		}
 	}
 

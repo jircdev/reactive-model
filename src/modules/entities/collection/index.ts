@@ -166,7 +166,6 @@ export /*bundle*/ class Collection<
 			});
 			return entries;
 		} catch (error) {
-			console.error('Error loading data:', error);
 			throw error;
 		} finally {
 			this.fetching = false;
