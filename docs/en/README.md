@@ -7,13 +7,18 @@
 ![Bun](https://img.shields.io/badge/Bun-%23000000.svg?style=for-the-badge&logo=bun&logoColor=white)
 ![Browser](https://img.shields.io/badge/Browser-4285F4.svg?style=for-the-badge&logo=GoogleChrome&logoColor=white)
 
-`@beyond-js/reactive` is a powerful TypeScript library designed to provide a reactive data layer for your application. By offering tools to create and manage reactive data structures, it enables developers to construct performant and scalable applications with ease. It enhances data-driven views or components by reacting to changes and keeping everything in sync.
+`@beyond-js/reactive` is a powerful TypeScript library designed to provide a reactive data layer for your application.
+By offering tools to create and manage reactive data structures, it enables developers to construct performant and
+scalable applications with ease. It enhances data-driven views or components by reacting to changes and keeping
+everything in sync.
 
-This folder contains complete documentation on how the main components of the Reactive Model system work: **ReactiveModel**, **Items**, **Collections**, and **Nested Properties**.
+This folder contains complete documentation on how the main components of the Reactive Model system work:
+**ReactiveModel**, **Items**, **Collections**, and **Nested Properties**.
 
 ## ✨ Why Reactive Model?
 
-Reactive Model is a library that simplifies reactive data management in JavaScript/TypeScript applications. It offers the following main features:
+Reactive Model is a library that simplifies reactive data management in JavaScript/TypeScript applications. It offers
+the following main features:
 
 ### 🎯 Simplified Data Management
 
@@ -66,27 +71,40 @@ Reactive Model is a library that simplifies reactive data management in JavaScri
 ### Advanced Topics
 
 -   [Nested Properties](./nested-properties.md) - How to implement Items and Collections as properties
+-   [Providers](./providers.md) - Complete guide on implementing data providers for Items and Collections
 -   [Practical Examples](./examples.md) - Real-world usage examples of items and collections
+
+### Additional Resources
+
+-   [CHANGELOG](./CHANGELOG.md) - Version history and migration guides
 
 ## 🎯 Key Concepts
 
 ### ReactiveModel
 
-**ReactiveModel** is the base class that provides reactive functionality. It allows defining reactive properties, managing validation, handling lifecycle states, and working with events.
+**ReactiveModel** is the base class that provides reactive functionality. It allows defining reactive properties,
+managing validation, handling lifecycle states, and working with events.
 
 ### Items
 
-**Items** represent individual reactive entities (such as a user, product, etc.) that can be loaded, saved, and deleted through data providers. They extend `ReactiveModel` and integrate with a registry system.
+**Items** represent individual reactive entities (such as a user, product, etc.) that can be loaded, saved, and deleted
+through data providers. They extend `ReactiveModel` and integrate with a registry system.
 
 ### Collections
 
-**Collections** represent groups of items that can be loaded, filtered, and managed reactively. They also extend `ReactiveModel` and provide pagination and filtering capabilities.
+**Collections** represent groups of items that can be loaded, filtered, and managed reactively. They also extend
+`ReactiveModel` and provide pagination and filtering capabilities.
 
 ### Nested Properties
 
-**Nested Properties** allow an Item or ReactiveModel to have other instances of Item or Collection as properties, enabling modeling of complex relationships between entities.
+**Nested Properties** allow an Item or ReactiveModel to have other instances of Item or Collection as properties,
+enabling modeling of complex relationships between entities.
 
-Both concepts are designed to work with **Providers** that handle data access logic (APIs, databases, etc.).
+### Providers
+
+**Providers** are interfaces that decouple data access logic from reactive models. They handle communication with data
+sources (APIs, databases, etc.) and allow Items and Collections to remain agnostic of how data is fetched, stored, or
+updated.
 
 ## 🚀 Quick Start
 
@@ -242,9 +260,15 @@ This project is licensed under the [MIT License](../src/LICENSE).
 
 Copyright (c) @beyond-js
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit
+persons to whom the Software is furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

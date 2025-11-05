@@ -7,7 +7,10 @@
 ![Bun](https://img.shields.io/badge/Bun-%23000000.svg?style=for-the-badge&logo=bun&logoColor=white)
 ![Browser](https://img.shields.io/badge/Browser-4285F4.svg?style=for-the-badge&logo=GoogleChrome&logoColor=white)
 
-`@beyond-js/reactive` es una biblioteca TypeScript diseñada para proporcionar una capa de datos reactiva para tu aplicación. Al ofrecer herramientas para crear y gestionar estructuras de datos reactivas, permite a los desarrolladores construir aplicaciones performantes y escalables con facilidad. Mejora las vistas o componentes basados en datos reaccionando a cambios y manteniendo todo sincronizado.
+`@beyond-js/reactive` es una biblioteca TypeScript diseñada para proporcionar una capa de datos reactiva para tu
+aplicación. Al ofrecer herramientas para crear y gestionar estructuras de datos reactivas, permite a los desarrolladores
+construir aplicaciones performantes y escalables con facilidad. Mejora las vistas o componentes basados en datos
+reaccionando a cambios y manteniendo todo sincronizado.
 
 Esta carpeta contiene la documentación completa sobre cómo funcionan los componentes principales del sistema Reactive
 Model: **ReactiveModel**, **Items**, **Colecciones** y **Propiedades Anidadas**.
@@ -68,7 +71,12 @@ Ofrece las siguientes características principales:
 ### Temas Avanzados
 
 -   [Propiedades Anidadas](./nested-properties.md) - Cómo implementar Items y Collections como propiedades
+-   [Providers](./providers.md) - Guía completa sobre cómo implementar providers de datos para Items y Collections
 -   [Ejemplos Prácticos](./examples.md) - Ejemplos de uso real de items y colecciones
+
+### Recursos Adicionales
+
+-   [CHANGELOG](./CHANGELOG.md) - Historial de versiones y guías de migración
 
 ## 🎯 Conceptos Clave
 
@@ -93,8 +101,11 @@ extienden `ReactiveModel` y proporcionan funcionalidades de paginación y filtra
 Las **Propiedades Anidadas** permiten que un Item o ReactiveModel tenga otras instancias de Item o Collection como
 propiedades, permitiendo modelar relaciones complejas entre entidades.
 
-Ambos conceptos están diseñados para trabajar con **Providers** que manejan la lógica de acceso a datos (APIs, bases de
-datos, etc.).
+### Providers
+
+Los **Providers** son interfaces que desacoplan la lógica de acceso a datos de los modelos reactivos. Manejan la
+comunicación con fuentes de datos (APIs, bases de datos, etc.) y permiten que Items y Collections permanezcan agnósticos
+de cómo se obtienen, almacenan o actualizan los datos.
 
 ## 🚀 Inicio Rápido
 
@@ -195,7 +206,8 @@ npm install @beyond-js/reactive
 
 ## 🤝 Contribuir
 
-¡Las contribuciones, issues y solicitudes de características son bienvenidas! Agradecemos tu interés en mejorar `@beyond-js/reactive`.
+¡Las contribuciones, issues y solicitudes de características son bienvenidas! Agradecemos tu interés en mejorar
+`@beyond-js/reactive`.
 
 ### Cómo Contribuir
 
@@ -242,7 +254,8 @@ npm test
 
 ### Código de Conducta
 
-Al participar en este proyecto, te comprometes a mantener un ambiente respetuoso y acogedor para todos los contribuyentes.
+Al participar en este proyecto, te comprometes a mantener un ambiente respetuoso y acogedor para todos los
+contribuyentes.
 
 ## 📄 Licencia
 
@@ -250,8 +263,15 @@ Este proyecto está licenciado bajo la [Licencia MIT](../src/LICENSE).
 
 Copyright (c) @beyond-js
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit
+persons to whom the Software is furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

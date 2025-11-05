@@ -1,7 +1,6 @@
 # Summary
 
-## Languages
-
+-   [Introduction](README.md)
 -   [Languages](docs/langs.md)
 
 ## English
@@ -11,7 +10,18 @@
     -   [Items](docs/en/items.md)
     -   [Collections](docs/en/collections.md)
     -   [Nested Properties](docs/en/nested-properties.md)
+    -   [Providers](docs/en/providers.md)
     -   [Practical Examples](docs/en/examples.md)
+    -   [CHANGELOG](docs/en/CHANGELOG.md)
+    -   [Version 1.1.x](docs/en/v1.1.x/README.md)
+        -   [Item](docs/en/v1.1.x/item.md)
+        -   [Collection](docs/en/v1.1.x/collection.md)
+        -   [Model](docs/en/v1.1.x/model.md)
+        -   [HTTP Responses](docs/en/v1.1.x/http-responses.md)
+        -   [Settings](docs/en/v1.1.x/settings.md)
+        -   [Global Settings](docs/en/v1.1.x/global-settings.md)
+        -   [Adapters](docs/en/v1.1.x/adapters/README.md)
+            -   [Custom Adapters](docs/en/v1.1.x/adapters/custom-adapters.md)
 
 ## Español
 
@@ -20,23 +30,15 @@
     -   [Items](docs/es/items.md)
     -   [Colecciones](docs/es/collections.md)
     -   [Propiedades Anidadas](docs/es/nested-properties.md)
+    -   [Providers](docs/es/providers.md)
     -   [Ejemplos Prácticos](docs/es/examples.md)
-
-## Legacy Documentation (v1.1.x)
-
--   [Item](src/docs/item.md)
--   [Collection](src/docs/collection.md)
--   [Model](src/docs/model.md)
--   [Providers](src/docs/providers.md)
--   [HTTP Responses](src/docs/http-responses.md)
--   [Changelog](src/CHANGELOG.md)
-
--   [Versión 1.1.x](src/docs/v1.1.x/README.md)
-    -   [Item](src/docs/v1.1.x/item.md)
-    -   [Collection](src/docs/v1.1.x/collection.md)
-    -   [Model](src/docs/v1.1.x/model.md)
-    -   [HTTP Responses](src/docs/v1.1.x/http-responses.md)
-    -   [Settings](src/docs/v1.1.x/settings.md)
-    -   [Global Settings](src/docs/v1.1.x/global-settings.md)
-    -   [Adapters](src/docs/v1.1.x/adapters/README.md)
-        -   [Custom Adapters](src/docs/v1.1.x/adapters/custom-adapters.md)
+    -   [CHANGELOG](docs/es/CHANGELOG.md)
+    -   [Versión 1.1.x](docs/es/v1.1.x/README.md)
+        -   [Item](docs/es/v1.1.x/item.md)
+        -   [Collection](docs/es/v1.1.x/collection.md)
+        -   [Model](docs/es/v1.1.x/model.md)
+        -   [HTTP Responses](docs/es/v1.1.x/http-responses.md)
+        -   [Settings](docs/es/v1.1.x/settings.md)
+        -   [Global Settings](docs/es/v1.1.x/global-settings.md)
+        -   [Adapters](docs/es/v1.1.x/adapters/README.md)
+            -   [Custom Adapters](docs/es/v1.1.x/adapters/custom-adapters.md)
