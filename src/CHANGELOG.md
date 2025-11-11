@@ -1,3 +1,11 @@
+## 2.1.4
+
+### Fixed
+
+-   **Collection reset when updating via ReactiveModel.set**: Ensures collection properties clear their existing items when refreshed through the parent `set` method.
+    -   Previously, calling `set` with a new list of items on a collection property appended data without removing stale entries.
+    -   Now, `setItems` receives the `clear` flag so the underlying map is rebuilt before loading the incoming data, keeping the collection in sync with the provided payload.
+
 ## 2.1.2
 
 ### Fixed

@@ -1,3 +1,11 @@
+## 2.1.4
+
+### Fixed
+
+-   **Reinicio de colecciones al actualizar con ReactiveModel.set**: Garantiza que las propiedades de tipo colección limpien sus elementos antes de cargar nuevos datos cuando se actualizan desde el método `set` del modelo padre.
+    -   Anteriormente, al invocar `set` con una nueva lista de elementos en una propiedad colección, los registros obsoletos permanecían en memoria.
+    -   Ahora, `setItems` recibe la bandera `clear` para reconstruir el mapa interno antes de hidratar la colección, manteniendo la información alineada con el payload recibido.
+
 ## 2.1.2
 
 ### Fixed

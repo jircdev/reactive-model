@@ -92,8 +92,7 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 		} as Partial<IReactiveModelOptions<T>>,
 	) {
 		super();
-		// this.#debug = 'Courier';
-
+		//	this.#debug = 'Courier';
 		const defaultProps: DefaultProps[] = ['fetching', 'fetched', 'processing', 'processed', 'loaded'];
 
 		if (properties) {
@@ -156,6 +155,20 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 	}
 
 	property = this.getProperty;
+
+	private isReactiveModel(instance: unknown): instance is ReactiveModel<any> {
+		if (!instance || typeof instance !== 'object') return false;
+		return !!(instance as ReactiveModel<any>).isReactive;
+	}
+
+	private isCollectionModel(
+		instance: unknown,
+	): instance is { isCollection?: boolean; setItems: (...args: unknown[]) => void } {
+		if (!instance || typeof instance !== 'object') return false;
+
+		const candidate = instance as { isCollection?: boolean; setItems?: (...args: unknown[]) => void };
+		return !!candidate.isCollection && typeof candidate.setItems === 'function';
+	}
 
 	protected defineReactiveProp<K extends keyof T>(propKey: string, initialValue: any, model: boolean = false): void {
 		this._reactiveProps[propKey] = initialValue;
@@ -315,9 +328,8 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 		const keys = Object.keys(properties);
 		let updated = false;
 		const errors: PropertyValidationErrors<T> = {};
-		this.debug(0, properties);
+
 		const onSet = prop => {
-			this.debug(prop, properties[prop]);
 			if (!this.#propertyNames.has(prop)) {
 				// console.trace(`is not a property`, prop, this.constructor.name);
 				return;
@@ -330,17 +342,14 @@ export /*bundle */ class ReactiveModel<T> extends Events {
 				errors[prop] = validated;
 				// return;
 			}
-			if (prop === 'provinces') {
-			}
-			//@ts-ignore
-			if (this.getProperty(prop)?.isReactive) {
-				const instance = this.getProperty(prop) as unknown as ReactiveModel<T>;
+
+			const propertyValue = this.getProperty(prop);
+			if (this.isReactiveModel(propertyValue)) {
+				const instance = propertyValue as ReactiveModel<T>;
 				// check if it is a collection
 
-				//@ts-ignore
-				if (instance.isCollection) {
-					//@ts-ignore
-					instance.setItems(properties[prop]);
+				if (this.isCollectionModel(instance)) {
+					instance.setItems(properties[prop], true);
 				} else {
 					instance.set(properties[prop]);
 				}
