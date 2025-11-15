@@ -1,0 +1,17 @@
+{
+	"name": "test-package",
+	"version": "1.0.0",
+	"type": "module",
+	"description": "Test package to validate @beyond-js/reactive",
+	"main": "index.js",
+	"scripts": {
+		"start": "node index.js",
+		"test": "node index.js",
+		"serve": "cd .. && npx http-server . -p 8080 --cors"
+	},
+	"dependencies": {
+		"@beyond-js/reactive": "file:../src",
+		"uuid": "^9.0.0",
+		"zod": "^3.22.0"
+	}
+}

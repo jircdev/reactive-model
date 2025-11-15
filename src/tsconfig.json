@@ -1,0 +1,28 @@
+{
+	"compilerOptions": {
+		"target": "ES2018",
+		"module": "ESNext",
+		"lib": ["ES2018"],
+		"declaration": true,
+		"declarationMap": true,
+		"outDir": "./dist",
+		"rootDir": "./modules",
+		"moduleResolution": "node",
+		"allowSyntheticDefaultImports": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"strict": false,
+		"resolveJsonModule": true,
+		"experimentalDecorators": true,
+		"jsx": "react",
+		"baseUrl": ".",
+		"paths": {
+			"@beyond-js/reactive/events": ["./modules/events/index.ts"],
+			"@beyond-js/reactive/model": ["./modules/model/index.ts"],
+			"@beyond-js/reactive/entities/item": ["./modules/entities/item/index.ts"],
+			"@beyond-js/reactive/entities/collection": ["./modules/entities/collection/index.ts"]
+		}
+	},
+	"include": ["modules/**/*", "__tests__/**/*"],
+	"exclude": ["node_modules", "dist", ".beyond"]
+}

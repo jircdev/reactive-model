@@ -1,7 +1,11 @@
 import { ReactiveModel, SetPropertiesResult } from '@beyond-js/reactive/model';
 import { Registry } from './registry';
 import { RegistryFactory } from './registry/factory';
-import { IEntityProvider, IItem, IItemProps } from './types';
+import { IEntityProvider, IItem, IItemProps, ItemId } from './types';
+
+// Re-export types and classes for external use
+export type { IItem, IItemProps, IEntityProvider, ItemId };
+export { RegistryFactory };
 
 export /*bundle*/ class Item<T extends IItem, P extends IEntityProvider = IEntityProvider> extends ReactiveModel<T> {
 	#factory: RegistryFactory<T>;

@@ -2,6 +2,9 @@ import { Item, ItemId, IEntityProvider, RegistryFactory } from '@beyond-js/react
 import { ReactiveModel } from '@beyond-js/reactive/model';
 import { ICollectionOptions, ICollectionProvider, ILoadSpecs } from './types';
 
+// Re-export types for external use
+export type { ICollectionProvider, ICollectionOptions, ILoadSpecs };
+
 export /*bundle*/ class Collection<
 	T extends Item<any>,
 	P extends IEntityProvider = IEntityProvider,

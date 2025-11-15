@@ -1,0 +1,155 @@
+.app {
+	max-width: 1200px;
+	margin: 0 auto;
+}
+
+.header {
+	text-align: center;
+	color: white;
+	margin-bottom: 30px;
+}
+
+.header h1 {
+	font-size: 2.5rem;
+	margin-bottom: 10px;
+	text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.subtitle {
+	font-size: 1.1rem;
+	opacity: 0.9;
+}
+
+.loading {
+	text-align: center;
+	color: white;
+	font-size: 1.5rem;
+	padding: 50px;
+}
+
+.controls {
+	background: white;
+	border-radius: 12px;
+	padding: 20px;
+	margin-bottom: 30px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.filter-group {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.filter-group label {
+	font-weight: 600;
+	color: #333;
+}
+
+.filter-group select {
+	padding: 8px 12px;
+	border: 2px solid #e0e0e0;
+	border-radius: 6px;
+	font-size: 1rem;
+	cursor: pointer;
+	transition: border-color 0.2s;
+}
+
+.filter-group select:hover {
+	border-color: #667eea;
+}
+
+.filter-group select:focus {
+	outline: none;
+	border-color: #667eea;
+	box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.stats {
+	color: #666;
+	font-size: 0.95rem;
+}
+
+.stats strong {
+	color: #667eea;
+	font-size: 1.1rem;
+}
+
+.products-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+	gap: 20px;
+}
+
+.product-card {
+	background: white;
+	border-radius: 12px;
+	padding: 20px;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+	transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.product-card:hover {
+	transform: translateY(-4px);
+	box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+}
+
+.product-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	margin-bottom: 15px;
+	padding-bottom: 15px;
+	border-bottom: 2px solid #f0f0f0;
+}
+
+.product-header h3 {
+	font-size: 1.2rem;
+	color: #333;
+	flex: 1;
+	margin-right: 10px;
+}
+
+.price {
+	font-size: 1.3rem;
+	font-weight: bold;
+	color: #667eea;
+	white-space: nowrap;
+}
+
+.product-body {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.category {
+	display: inline-block;
+	background: #667eea;
+	color: white;
+	padding: 4px 12px;
+	border-radius: 20px;
+	font-size: 0.85rem;
+	font-weight: 600;
+	width: fit-content;
+}
+
+.description {
+	color: #666;
+	font-size: 0.95rem;
+	line-height: 1.5;
+}
+
+.empty-state {
+	text-align: center;
+	color: white;
+	padding: 50px;
+	font-size: 1.2rem;
+	background: rgba(255, 255, 255, 0.1);
+	border-radius: 12px;
+	backdrop-filter: blur(10px);
+}
+

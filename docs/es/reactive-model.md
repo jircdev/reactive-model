@@ -176,7 +176,7 @@ if (result.errors) {
 
 ### `getProperty<K extends keyof T>(key: K): T[K]`
 
-Retorna el valor actual de una propiedad reactiva específica. Útil para acceso dinámico a propiedades.
+Retorna el valor actual de una propiedad reactiva específica. **Usa este método solo cuando necesites acceso dinámico a propiedades** (cuando el nombre de la propiedad viene de una variable). Para acceso normal, usa acceso directo a la propiedad.
 
 **Parámetros:**
 
@@ -190,15 +190,26 @@ Retorna el valor actual de una propiedad reactiva específica. Útil para acceso
 
 -   `property` es un alias de `getProperty`
 
+**Cuándo usar:**
+
+-   ✅ **Usa acceso directo** (`user.name`) cuando conoces el nombre de la propiedad en tiempo de compilación (recomendado)
+-   ✅ **Usa `getProperty()`** cuando el nombre de la propiedad viene de una variable o se determina dinámicamente
+
 **Ejemplo:**
 
 ```typescript
-// Acceso dinámico
-const propName = 'name';
+// ✅ Recomendado: Acceso directo (más claro e idiomático)
+const name = user.name;
+const email = user.email;
+
+// ✅ Usa getProperty() para acceso dinámico
+const propName = 'name'; // Nombre de propiedad desde variable
 const value = user.getProperty(propName);
 
-// Acceso normal (recomendado)
-const name = user.name;
+// ✅ O cuando iteras sobre nombres de propiedades
+for (const prop of ['name', 'email']) {
+  const value = user.getProperty(prop as keyof User);
+}
 ```
 
 ### `setProperty(key: string, value: any): void`

@@ -1,0 +1,8 @@
+{
+	"imports": {
+		"@beyond-js/reactive/entities/collection": "../src/dist/entities/collection/index.mjs",
+		"@beyond-js/reactive/entities/item": "../src/dist/entities/item/index.mjs",
+		"@beyond-js/reactive/model": "../src/dist/model/index.mjs"
+	}
+}
+

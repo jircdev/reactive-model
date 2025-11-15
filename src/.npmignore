@@ -1,0 +1,33 @@
+# Source files
+modules/
+*.ts
+!*.d.ts
+
+# Build configuration
+rollup.config.js
+tsconfig.json
+
+# Development files
+.beyond/
+node_modules/
+*.log
+*.map
+
+# Test files
+**/*.test.ts
+**/*.test.js
+**/__tests__/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Beyond.js specific (mantener para compatibilidad pero no publicar)
+.beyond/
+

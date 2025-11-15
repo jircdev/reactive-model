@@ -1,9 +1,26 @@
 {
 	"name": "@beyond-js/reactive",
-	"version": "2.1.4",
+	"version": "2.2.0",
 	"title": "Reactive Model v2",
 	"description": "",
 	"license": "ISC",
+	"type": "module",
+	"main": "./dist/model/index.cjs",
+	"module": "./dist/model/index.mjs",
+	"types": "./dist/model/index.d.ts",
+	"scripts": {
+		"build": "rollup -c",
+		"build:watch": "rollup -c --watch",
+		"prepublishOnly": "npm run build",
+		"test": "jest --config=jest.config.cjs",
+		"test:source": "jest --config=jest.config.cjs __tests__/source",
+		"test:bundles": "jest --config=jest.config.bundles.cjs",
+		"test:model": "jest --testNamePattern='model'",
+		"test:item": "jest --testNamePattern='item'",
+		"test:collection": "jest --testNamePattern='collection'",
+		"test:watch": "jest --watch",
+		"test:coverage": "jest --coverage"
+	},
 	"template": "template/template.json",
 	"languages": {
 		"default": "en",
@@ -41,12 +58,42 @@
 		]
 	},
 	"dependencies": {
-		"@beyond-js/events": "^0.0.7",
-		"@beyond-js/kernel": "^0.1.14",
 		"uuid": "^11.0.3",
 		"zod": "^3.24.2"
 	},
 	"devDependencies": {
-		"react": "^18.3.1"
+		"@rollup/plugin-node-resolve": "^15.2.3",
+		"@rollup/plugin-typescript": "^11.1.5",
+		"@types/jest": "^29.5.11",
+		"@types/node": "^20.10.6",
+		"jest": "^29.7.0",
+		"react": "^18.3.1",
+		"rollup": "^4.9.0",
+		"rollup-plugin-dts": "^6.1.0",
+		"ts-jest": "^29.1.1",
+		"tslib": "^2.8.1",
+		"typescript": "^5.3.3"
+	},
+	"exports": {
+		"./events": {
+			"types": "./dist/events/index.d.ts",
+			"import": "./dist/events/index.mjs",
+			"require": "./dist/events/index.cjs"
+		},
+		"./model": {
+			"types": "./dist/model/index.d.ts",
+			"import": "./dist/model/index.mjs",
+			"require": "./dist/model/index.cjs"
+		},
+		"./entities/collection": {
+			"types": "./dist/entities/collection/index.d.ts",
+			"import": "./dist/entities/collection/index.mjs",
+			"require": "./dist/entities/collection/index.cjs"
+		},
+		"./entities/item": {
+			"types": "./dist/entities/item/index.d.ts",
+			"import": "./dist/entities/item/index.mjs",
+			"require": "./dist/entities/item/index.cjs"
+		}
 	}
 }

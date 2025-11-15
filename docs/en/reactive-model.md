@@ -166,7 +166,7 @@ if (result.errors) {
 
 ### `getProperty<K extends keyof T>(key: K): T[K]`
 
-Returns the current value of a specific reactive property. Useful for dynamic property access.
+Returns the current value of a specific reactive property. **Use this method only when you need dynamic property access** (when the property name comes from a variable). For normal access, use direct property access instead.
 
 **Parameters:**
 
@@ -180,15 +180,26 @@ Returns the current value of a specific reactive property. Useful for dynamic pr
 
 -   `property` is an alias of `getProperty`
 
+**When to use:**
+
+-   ✅ **Use direct access** (`user.name`) when you know the property name at compile time (recommended)
+-   ✅ **Use `getProperty()`** when the property name comes from a variable or is determined dynamically
+
 **Example:**
 
 ```typescript
-// Dynamic access
-const propName = 'name';
+// ✅ Recommended: Direct access (clearer and more idiomatic)
+const name = user.name;
+const email = user.email;
+
+// ✅ Use getProperty() for dynamic access
+const propName = 'name'; // Property name from variable
 const value = user.getProperty(propName);
 
-// Normal access (recommended)
-const name = user.name;
+// ✅ Or when iterating over property names
+for (const prop of ['name', 'email']) {
+  const value = user.getProperty(prop as keyof User);
+}
 ```
 
 ### `getProperties(): Partial<T>`

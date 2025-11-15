@@ -12,7 +12,10 @@ import {
 	ValidatedPropertyType,
 } from './types';
 
-import { Events } from '@beyond-js/events/events';
+import { Events } from '@beyond-js/reactive/events';
+
+// Re-export types for external use
+export type { SetPropertiesResult, PropertyValidationErrors, IReactiveModelOptions };
 
 export /*bundle */ class ReactiveModel<T> extends Events {
 	debounceTimeout: Timeout | null;
