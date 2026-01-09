@@ -1,3 +1,173 @@
+## 3.0.0
+
+### Breaking Changes
+
+-   **Collection.map is deprecated**: Direct access to the internal Map via `collection.map` now shows a deprecation warning. Use the new methods instead:
+    -   `collection.get(id)` - Get item by ID
+    -   `collection.has(id)` - Check if ID exists
+    -   `collection.size` - Number of items
+    -   `collection.keys()` / `collection.values()` / `collection.entries()` - Iterators
+    -   `collection.forEach(callback)` - Iterate items
+
+-   **Collection.delete() signature changed**: Now synchronous for `IReactiveContainer` compliance.
+    -   `collection.delete(id)` - Sync, returns boolean
+    -   `collection.deleteAsync(ids)` - Async with provider, returns Promise<boolean[]>
+
+-   **Type checking methods deprecated**: Use interface type guards instead:
+    -   ❌ `value.isCollection` / `value.isReactive`
+    -   ✅ `isReactiveContainer(value)` / `isReactiveValue(value)`
+
+### Added
+
+-   **Core Interfaces**: Unified interface system for all reactive values
+    -   `IReactiveValue<T>` - Base interface for reactive values
+    -   `IReactiveContainer<T, K>` - Interface for collection-like structures
+    -   `isReactiveValue()` / `isReactiveContainer()` - Type guard functions
+    -   All classes (ReactiveModel, Item, Collection) now implement these interfaces
+
+-   **ReactiveMap**: Reactive key-value Map structure
+    -   `@beyond-js/reactive/structures/map`
+    -   Emits `set`, `delete`, `clear`, `change` events
+    -   Implements `IReactiveContainer`
+    -   Supports keyExtractor for array-based operations
+    -   Change tracking with `hasUnpublishedChanges()`, `saveChanges()`, `revert()`
+
+-   **ReactiveArray**: Reactive Array structure
+    -   `@beyond-js/reactive/structures/array`
+    -   Reactive versions of: `push`, `pop`, `shift`, `unshift`, `splice`, `sort`, `reverse`
+    -   Emits `add`, `remove`, `update`, `reorder`, `change` events
+    -   Implements `IReactiveContainer`
+    -   Non-mutating methods: `filter`, `map`, `find`, `some`, `every`, `reduce`
+
+-   **ReactiveTree**: Reactive hierarchical tree structure
+    -   `@beyond-js/reactive/structures/tree`
+    -   Maintains parent/children relationships
+    -   Path-based access: `tree.getByPath('root.child.grandchild')`
+    -   Traversal: `walkDepthFirst()`, `walkBreadthFirst()`, `findNode()`, `findNodes()`
+    -   Node operations: `addNode()`, `removeNode()`, `moveNode()`, `updateNode()`
+    -   Emits `node.added`, `node.removed`, `node.moved`, `change` events
+
+-   **New Collection Methods**:
+    -   `get(id)` - Get item by ID
+    -   `has(id)` - Check if ID exists
+    -   `size` - Number of items (getter)
+    -   `keys()`, `values()`, `entries()` - Iterators
+    -   `forEach()` - Iterate with callback
+    -   `clear()` - Remove all items
+    -   `find()`, `filter()`, `mapItems()`, `some()`, `every()` - Query methods
+    -   `deleteAsync()` - Async delete with provider support
+
+-   **New ReactiveModel Methods** (IReactiveValue implementation):
+    -   `setValue(value)` - Alias for `set()`
+    -   `getValue()` - Alias for `getProperties()`
+    -   `serialize()` - JSON serialization
+    -   `hasUnpublishedChanges()` - Alias for `unpublished` getter
+
+-   **New Documentation**:
+    -   `docs/en/structures/reactive-map.md`
+    -   `docs/en/structures/reactive-array.md`
+    -   `docs/en/structures/reactive-tree.md`
+    -   `docs/en/interfaces.md`
+    -   `docs/en/migration-v3.md`
+
+### Changed
+
+-   **ReactiveModel**: Now implements `IReactiveValue<Partial<T>>`
+    -   Removed hardcoded `isReactiveModel()` and `isCollectionModel()` checks
+    -   Uses `isReactiveValue()` interface check for nested property handling
+    -   Uses `serialize()` for getting nested reactive property values
+
+-   **Item**: Now explicitly implements `IReactiveValue<Partial<T>>`
+    -   Added `serialize()` method
+
+-   **Collection**: Now implements `IReactiveContainer<T, ItemId>`
+    -   Added `isContainer: true` property
+    -   Static `isCollection` and `isContainer` properties (deprecated, use instance check)
+    -   `setItems()` now accepts `Map<ItemId, T>` in addition to arrays
+
+-   **Registry instanceId generation**: Changed from UUID v4 to UUID v7
+    -   UUID v7 includes timestamp, providing natural time-based ordering
+    -   Improves database index performance (reduces fragmentation)
+    -   Better cache efficiency and easier debugging
+    -   No breaking changes - same API, only ID format changes
+
+-   **AGENTS.md**: Updated with v3.0 changes, new structures, and interface documentation
+
+### Migration Guide
+
+See `docs/en/migration-v3.md` for detailed migration instructions from v2.x to v3.0.
+
+---
+
+## 2.3.0
+
+### Added
+
+-   **Lifecycle Hooks**: New protected methods for intercepting CRUD operations
+    -   `beforeLoad(args)` / `afterLoad(data)` - Transform load arguments and results
+    -   `beforePublish(data)` / `afterPublish(data)` - Transform and react to publish operations
+    -   `beforeDelete(id)` / `afterDelete(id)` - Validate and react to delete operations
+    -   `beforeSet(props)` / `afterSet(props, result)` - Transform and react to property changes
+    -   All hooks support async/await for asynchronous operations
+
+-   **Lifecycle Events**: New events emitted during CRUD operations
+    -   `pre:load`, `post:load` - Before and after load
+    -   `pre:publish`, `post:publish` - Before and after publish
+    -   `pre:delete`, `post:delete` - Before and after delete
+    -   `pre:set`, `post:set` - Before and after set (via `setAsync()`)
+
+-   **Plugin System**: Extensible architecture for adding cross-cutting concerns
+    -   `IReactivePlugin` interface for defining plugins
+    -   `PluginManager` for registering/unregistering plugins globally or per entity
+    -   Priority-based execution order (higher priority runs first)
+    -   Plugins can intercept and transform data at any lifecycle point
+    -   Ideal for caching, persistence, logging, validation, and offline sync
+
+-   **Computed Properties**: Derived properties that automatically recalculate
+    -   Define via `computed` array in constructor options
+    -   Specify dependencies for automatic cache invalidation
+    -   Emit `<name>.changed` events when values change
+    -   Values are cached until dependencies change
+
+-   **Transactions**: Batch multiple changes with single event emission
+    -   `model.transaction(() => { ... })` - Group changes
+    -   Only one `change` event emitted at the end
+    -   Useful for atomic updates of related properties
+
+-   **Partial Updates**: Track and publish only changed properties
+    -   `item.changedProperties` - Array of modified property names
+    -   `item.getChangedValues()` - Object with only changed values
+    -   `item.publish(undefined, { partial: true })` - Send only changes
+    -   `item.clearChangedProperties()` - Reset tracking
+
+-   **Async Set**: New `setAsync()` method that properly awaits lifecycle hooks
+    -   Use when you need hooks to complete before continuing
+    -   Emits `pre:set` and `post:set` events
+
+-   **New Documentation**:
+    -   `docs/en/services.md` - Guide for implementing service layer
+    -   `docs/en/backend-usage.md` - Using ReactiveModel in Node.js/Bun
+    -   `docs/en/plugins.md` - Plugin system documentation
+
+### Changed
+
+-   **Improved TypeScript Types**: Removed most `any` types for better type safety
+    -   `IItemProps`, `IEntityProvider`, `ICollectionProvider` now use proper generics
+    -   `SetPropertiesResult.errors` properly typed
+    -   `ModelProperties<T>` now returns `Partial<T>` instead of `any`
+
+-   **Updated AGENTS.md**: Comprehensive templates and conventions for AI agents
+    -   Code templates for Item, Collection, Provider, Service
+    -   Naming conventions and folder structure
+    -   Common errors and solutions
+    -   Implementation checklist
+
+### Fixed
+
+-   **Registry type safety**: Better typing for registry operations
+
+---
+
 ## 2.2.0
 
 ### Changed
