@@ -1,5 +1,5 @@
 import { ReactiveModel } from "@beyond-js/reactive/model";
-import { v4 as uuidv4 } from "uuid";
+import { v7 as uuidv7 } from "uuid";
 
 interface IRegistrySpecs {
   id?: any;
@@ -64,7 +64,7 @@ export class Registry extends ReactiveModel<Registry> {
 
     this.#entity = entity;
     const { id } = data;
-    this.#instanceId = data?.instanceId ? data.instanceId : uuidv4();
+    this.#instanceId = data?.instanceId ? data.instanceId : uuidv7();
 
     this.#id = id;
     this.#draft = !id;
