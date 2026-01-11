@@ -36,12 +36,257 @@ typeof SuppressedError === "function" ? SuppressedError : function (error, suppr
     return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
 };
 
-var _ReactiveModel_ready, _ReactiveModel_debug, _ReactiveModel_isDraft, _ReactiveModel_propertyNames, _ReactiveModel_initialValues;
-class ReactiveModel extends Events {
-    static isReactive() {
-        return true;
+/**
+ * Type guard to check if a value implements IReactiveValue.
+ */
+function isReactiveValue(value) {
+    return (value !== null &&
+        typeof value === 'object' &&
+        'isReactive' in value &&
+        value.isReactive === true);
+}
+
+/**
+ * Type guard to check if a value implements IReactiveContainer.
+ */
+function isReactiveContainer(value) {
+    return (value !== null &&
+        typeof value === 'object' &&
+        'isContainer' in value &&
+        value.isContainer === true);
+}
+
+/**
+ * Plugin Manager for ReactiveModel
+ *
+ * Manages the registration and execution of plugins across all reactive models.
+ * Plugins are executed in priority order (higher priority = runs first).
+ */
+var _a, _PluginManager_globalPlugins, _PluginManager_entityPlugins;
+/**
+ * Manages plugins for the ReactiveModel system.
+ * Provides methods to register, unregister, and execute plugin hooks.
+ *
+ * @example
+ * ```typescript
+ * // Register a plugin globally
+ * PluginManager.register({
+ *   name: 'logging',
+ *   priority: 100,
+ *   onBeforeLoad: async (item, args) => {
+ *     console.log('Loading:', args);
+ *     return args;
+ *   }
+ * });
+ *
+ * // Register for specific entities
+ * PluginManager.register(myPlugin, { entities: ['users', 'products'] });
+ *
+ * // Unregister
+ * PluginManager.unregister('logging');
+ * ```
+ */
+class PluginManager {
+    /**
+     * Registers a plugin.
+     *
+     * @param plugin - The plugin to register
+     * @param options - Registration options
+     */
+    static register(plugin, options = { global: true }) {
+        if (!plugin.name) {
+            throw new Error('Plugin must have a name');
+        }
+        if (options.entities && options.entities.length > 0) {
+            // Register for specific entities
+            for (const entity of options.entities) {
+                if (!__classPrivateFieldGet(this, _a, "f", _PluginManager_entityPlugins).has(entity)) {
+                    __classPrivateFieldGet(this, _a, "f", _PluginManager_entityPlugins).set(entity, new Map());
+                }
+                __classPrivateFieldGet(this, _a, "f", _PluginManager_entityPlugins).get(entity).set(plugin.name, plugin);
+            }
+        }
+        else {
+            // Register globally
+            __classPrivateFieldGet(this, _a, "f", _PluginManager_globalPlugins).set(plugin.name, plugin);
+        }
     }
-    get isReactive() {
+    /**
+     * Unregisters a plugin by name.
+     *
+     * @param name - Name of the plugin to unregister
+     * @param entity - Optional entity to unregister from (if not provided, unregisters globally)
+     */
+    static unregister(name, entity) {
+        var _b;
+        if (entity) {
+            (_b = __classPrivateFieldGet(this, _a, "f", _PluginManager_entityPlugins).get(entity)) === null || _b === void 0 ? void 0 : _b.delete(name);
+        }
+        else {
+            __classPrivateFieldGet(this, _a, "f", _PluginManager_globalPlugins).delete(name);
+            // Also remove from all entities
+            for (const entityPlugins of __classPrivateFieldGet(this, _a, "f", _PluginManager_entityPlugins).values()) {
+                entityPlugins.delete(name);
+            }
+        }
+    }
+    /**
+     * Gets all plugins applicable to an entity.
+     *
+     * @param entity - Optional entity name to get plugins for
+     * @returns Array of plugins sorted by priority (highest first)
+     */
+    static getPlugins(entity) {
+        const plugins = [...__classPrivateFieldGet(this, _a, "f", _PluginManager_globalPlugins).values()];
+        if (entity && __classPrivateFieldGet(this, _a, "f", _PluginManager_entityPlugins).has(entity)) {
+            plugins.push(...__classPrivateFieldGet(this, _a, "f", _PluginManager_entityPlugins).get(entity).values());
+        }
+        // Sort by priority (higher first)
+        return plugins.sort((a, b) => { var _b, _c; return ((_b = b.priority) !== null && _b !== void 0 ? _b : 0) - ((_c = a.priority) !== null && _c !== void 0 ? _c : 0); });
+    }
+    /**
+     * Checks if a plugin is registered.
+     *
+     * @param name - Name of the plugin
+     * @param entity - Optional entity to check
+     */
+    static hasPlugin(name, entity) {
+        var _b;
+        if (__classPrivateFieldGet(this, _a, "f", _PluginManager_globalPlugins).has(name))
+            return true;
+        if (entity && ((_b = __classPrivateFieldGet(this, _a, "f", _PluginManager_entityPlugins).get(entity)) === null || _b === void 0 ? void 0 : _b.has(name)))
+            return true;
+        return false;
+    }
+    /**
+     * Clears all registered plugins.
+     * Useful for testing.
+     */
+    static clear() {
+        __classPrivateFieldGet(this, _a, "f", _PluginManager_globalPlugins).clear();
+        __classPrivateFieldGet(this, _a, "f", _PluginManager_entityPlugins).clear();
+    }
+    /**
+     * Runs a hook through all applicable plugins.
+     * Plugins are executed in priority order.
+     * Each plugin can transform the value, which is passed to the next plugin.
+     *
+     * @param hookName - Name of the hook to run
+     * @param target - The model/item/collection the hook is running on
+     * @param value - The initial value to pass through plugins
+     * @param entity - Optional entity name to include entity-specific plugins
+     * @returns The final value after all plugins have processed it
+     *
+     * @example
+     * ```typescript
+     * const modifiedArgs = await PluginManager.runHook(
+     *   'onBeforeLoad',
+     *   itemInstance,
+     *   loadArgs,
+     *   'users'
+     * );
+     * ```
+     */
+    static async runHook(hookName, target, value, entity) {
+        const plugins = this.getPlugins(entity);
+        const errors = [];
+        let currentValue = value;
+        let cancelled = false;
+        for (const plugin of plugins) {
+            const hook = plugin[hookName];
+            if (typeof hook !== 'function')
+                continue;
+            try {
+                const result = await hook(target, currentValue);
+                // Handle cancellation for delete hooks
+                if (hookName === 'onBeforeDelete' && result === false) {
+                    cancelled = true;
+                    break;
+                }
+                // Update value if result is provided
+                if (result !== undefined && result !== null) {
+                    currentValue = result;
+                }
+            }
+            catch (error) {
+                errors.push(error);
+                console.error(`Plugin "${plugin.name}" error in ${String(hookName)}:`, error);
+            }
+        }
+        return { value: currentValue, cancelled, errors };
+    }
+    /**
+     * Runs a hook synchronously through all applicable plugins.
+     * Use this only when you know all plugins implement the hook synchronously.
+     *
+     * @param hookName - Name of the hook to run
+     * @param target - The model/item/collection the hook is running on
+     * @param value - The initial value to pass through plugins
+     * @param entity - Optional entity name to include entity-specific plugins
+     * @returns The final value after all plugins have processed it
+     */
+    static runHookSync(hookName, target, value, entity) {
+        const plugins = this.getPlugins(entity);
+        let currentValue = value;
+        for (const plugin of plugins) {
+            const hook = plugin[hookName];
+            if (typeof hook !== 'function')
+                continue;
+            try {
+                const result = hook(target, currentValue);
+                if (result !== undefined && result !== null) {
+                    currentValue = result;
+                }
+            }
+            catch (error) {
+                console.error(`Plugin "${plugin.name}" error in ${String(hookName)}:`, error);
+            }
+        }
+        return currentValue;
+    }
+    /**
+     * Runs a void hook (like afterPublish) through all applicable plugins.
+     * Does not expect a return value.
+     *
+     * @param hookName - Name of the hook to run
+     * @param target - The model/item/collection the hook is running on
+     * @param args - Arguments to pass to the hook
+     * @param entity - Optional entity name to include entity-specific plugins
+     */
+    static async runVoidHook(hookName, target, args, entity) {
+        const plugins = this.getPlugins(entity);
+        for (const plugin of plugins) {
+            const hook = plugin[hookName];
+            if (typeof hook !== 'function')
+                continue;
+            try {
+                await hook(target, ...args);
+            }
+            catch (error) {
+                console.error(`Plugin "${plugin.name}" error in ${String(hookName)}:`, error);
+            }
+        }
+    }
+}
+_a = PluginManager;
+/** Global plugins applied to all models */
+_PluginManager_globalPlugins = { value: new Map() };
+/** Entity-specific plugins */
+_PluginManager_entityPlugins = { value: new Map() };
+
+var _ReactiveModel_ready, _ReactiveModel_debug, _ReactiveModel_isDraft, _ReactiveModel_propertyNames, _ReactiveModel_initialValues, _ReactiveModel_inTransaction, _ReactiveModel_pendingChanges, _ReactiveModel_computedProperties, _ReactiveModel_computedCache;
+/**
+ * Base class for reactive models.
+ * Implements IReactiveValue for unified reactive value handling.
+ *
+ * @template T - The type of the model's properties
+ */
+class ReactiveModel extends Events {
+    /**
+     * Static method to check if a class is reactive.
+     * @deprecated Use isReactiveValue() type guard instead
+     */
+    static isReactive() {
         return true;
     }
     get isDraft() {
@@ -77,8 +322,10 @@ class ReactiveModel extends Events {
                 return JSON.stringify(properties[prop]) !== JSON.stringify(__classPrivateFieldGet(this, _ReactiveModel_initialValues, "f")[prop]);
             }
             if (typeof properties[prop] === 'object') {
-                if (this[prop] instanceof ReactiveModel) {
-                    return this[prop].unpublished;
+                const propValue = this[prop];
+                // Use interface check instead of instanceof
+                if (isReactiveValue(propValue)) {
+                    return propValue.hasUnpublishedChanges();
                 }
                 return JSON.stringify(properties[prop]) !== JSON.stringify(__classPrivateFieldGet(this, _ReactiveModel_initialValues, "f")[prop]);
             }
@@ -91,9 +338,7 @@ class ReactiveModel extends Events {
     get isUnpublished() {
         return this.unpublished;
     }
-    constructor({ properties, ...props } = {
-        properties: [],
-    }) {
+    constructor(options = {}) {
         super();
         this.processing = false;
         this.processed = false;
@@ -101,12 +346,23 @@ class ReactiveModel extends Events {
         _ReactiveModel_ready.set(this, false);
         _ReactiveModel_debug.set(this, void 0);
         this._reactiveProps = {};
+        /**
+         * Instance property identifying this as a reactive value.
+         * Required by IReactiveValue interface.
+         */
+        this.isReactive = true;
         //TODO: Validate how to handle the properties
         this.properties = [];
         // properties of the object
         _ReactiveModel_isDraft.set(this, false);
         _ReactiveModel_propertyNames.set(this, new Set());
         _ReactiveModel_initialValues.set(this, {});
+        // Transaction support
+        _ReactiveModel_inTransaction.set(this, false);
+        _ReactiveModel_pendingChanges.set(this, {});
+        // Computed properties support
+        _ReactiveModel_computedProperties.set(this, []);
+        _ReactiveModel_computedCache.set(this, new Map());
         this.property = this.getProperty;
         this.isSameObject = (a, b) => JSON.stringify(a) === JSON.stringify(b);
         /**
@@ -119,6 +375,7 @@ class ReactiveModel extends Events {
             this.trigger(event);
         };
         //	this.#debug = 'Courier';
+        const { properties, computed, ...props } = options;
         const defaultProps = ['fetching', 'fetched', 'processing', 'processed', 'loaded'];
         if (properties) {
             this.properties = properties;
@@ -127,9 +384,49 @@ class ReactiveModel extends Events {
                 this.setInitialValues(props);
             }
         }
+        // Initialize computed properties
+        if (computed && computed.length > 0) {
+            __classPrivateFieldSet(this, _ReactiveModel_computedProperties, computed, "f");
+            this.defineComputedProperties(computed);
+        }
         this.debug('props', props, properties);
         this.defineReactiveProps(defaultProps, this.initialValues);
     }
+    // ==========================================
+    // IReactiveValue Implementation
+    // ==========================================
+    /**
+     * Sets the value of this reactive model.
+     * Alias for set() to satisfy IReactiveValue interface.
+     *
+     * @param value - Partial properties to update
+     */
+    setValue(value) {
+        this.set(value);
+    }
+    /**
+     * Gets all properties of this reactive model.
+     * Alias for getProperties() to satisfy IReactiveValue interface.
+     */
+    getValue() {
+        return this.getProperties();
+    }
+    /**
+     * Serializes the model to a plain object for JSON output.
+     */
+    serialize() {
+        return this.getProperties();
+    }
+    /**
+     * Checks if this model has unpublished changes.
+     * Alias for unpublished getter to satisfy IReactiveValue interface.
+     */
+    hasUnpublishedChanges() {
+        return this.unpublished;
+    }
+    // ==========================================
+    // Private Methods
+    // ==========================================
     /**
      * Logs debug information to the console only when the #debug property matches the constructor name.
      * This allows for targeted debugging of specific model instances by setting the #debug property
@@ -141,6 +438,111 @@ class ReactiveModel extends Events {
         if (__classPrivateFieldGet(this, _ReactiveModel_debug, "f") === this.constructor.name) {
             console.log(...args);
         }
+    }
+    /**
+     * Defines computed properties that automatically recalculate when their dependencies change.
+     * Computed properties are read-only and their values are cached until a dependency changes.
+     *
+     * @param computed - Array of computed property definitions
+     */
+    defineComputedProperties(computed) {
+        for (const prop of computed) {
+            const name = prop.name;
+            // Define getter for computed property
+            Object.defineProperty(this, name, {
+                get: () => {
+                    // Check cache first
+                    if (__classPrivateFieldGet(this, _ReactiveModel_computedCache, "f").has(name)) {
+                        return __classPrivateFieldGet(this, _ReactiveModel_computedCache, "f").get(name);
+                    }
+                    // Compute and cache value
+                    const value = prop.compute(this);
+                    __classPrivateFieldGet(this, _ReactiveModel_computedCache, "f").set(name, value);
+                    return value;
+                },
+                enumerable: true,
+                configurable: true,
+            });
+            // Listen to dependency changes to invalidate cache
+            for (const dep of prop.dependencies) {
+                this.on(`${String(dep)}.changed`, () => {
+                    const oldValue = __classPrivateFieldGet(this, _ReactiveModel_computedCache, "f").get(name);
+                    __classPrivateFieldGet(this, _ReactiveModel_computedCache, "f").delete(name);
+                    const newValue = this[name];
+                    this.trigger(`${name}.changed`, { value: newValue, previous: oldValue });
+                });
+            }
+        }
+    }
+    /**
+     * Executes multiple property changes within a transaction.
+     * All changes are batched and only one 'change' event is emitted at the end.
+     * This is useful for making multiple related changes without triggering
+     * intermediate events.
+     *
+     * @param callback - Function containing the changes to make
+     * @returns The result of applying all pending changes
+     *
+     * @example
+     * ```typescript
+     * model.transaction(() => {
+     *   model.name = 'John';
+     *   model.email = 'john@example.com';
+     *   model.age = 30;
+     * });
+     * // Only one 'change' event is emitted
+     * ```
+     */
+    transaction(callback) {
+        __classPrivateFieldSet(this, _ReactiveModel_inTransaction, true, "f");
+        __classPrivateFieldSet(this, _ReactiveModel_pendingChanges, {}, "f");
+        try {
+            callback();
+            // Apply all pending changes at once
+            const result = this.set(__classPrivateFieldGet(this, _ReactiveModel_pendingChanges, "f"));
+            return result;
+        }
+        finally {
+            __classPrivateFieldSet(this, _ReactiveModel_inTransaction, false, "f");
+            __classPrivateFieldSet(this, _ReactiveModel_pendingChanges, {}, "f");
+        }
+    }
+    /**
+     * Lifecycle hook called before set() applies changes.
+     * Override this method to intercept and modify properties before they are set.
+     *
+     * @param properties - The properties about to be set
+     * @returns The properties to actually set (can be modified)
+     *
+     * @example
+     * ```typescript
+     * protected async beforeSet(properties: Partial<T>): Promise<Partial<T>> {
+     *   // Add timestamp to every update
+     *   return { ...properties, updatedAt: new Date() };
+     * }
+     * ```
+     */
+    async beforeSet(properties) {
+        return properties;
+    }
+    /**
+     * Lifecycle hook called after set() completes.
+     * Override this method to perform actions after properties have been set.
+     *
+     * @param properties - The properties that were set
+     * @param result - The result of the set operation
+     *
+     * @example
+     * ```typescript
+     * protected async afterSet(properties: Partial<T>, result: SetPropertiesResult): Promise<void> {
+     *   if (result.updated) {
+     *     console.log('Model was updated:', properties);
+     *   }
+     * }
+     * ```
+     */
+    async afterSet(properties, result) {
+        // Default implementation does nothing
     }
     /**
      * Sets the initial values for the model based on the provided specifications.
@@ -158,8 +560,8 @@ class ReactiveModel extends Events {
         const values = {};
         this.properties.forEach(property => {
             if (typeof property !== 'string') {
-                property = property;
-                values[property.name] = specs[property.name];
+                const objProp = property;
+                values[objProp.name] = specs[objProp.name];
                 return;
             }
             values[property] = specs[property];
@@ -171,32 +573,21 @@ class ReactiveModel extends Events {
     getProperty(key) {
         return this._reactiveProps[key]; // Type-safe access.
     }
-    isReactiveModel(instance) {
-        if (!instance || typeof instance !== 'object')
-            return false;
-        return !!instance.isReactive;
-    }
-    isCollectionModel(instance) {
-        if (!instance || typeof instance !== 'object')
-            return false;
-        const candidate = instance;
-        return !!candidate.isCollection && typeof candidate.setItems === 'function';
-    }
-    defineReactiveProp(propKey, initialValue, model = false) {
+    defineReactiveProp(propKey, initialValue, isReactiveProperty = false) {
         this._reactiveProps[propKey] = initialValue;
         Object.defineProperty(this, propKey, {
             get: () => {
                 return this._reactiveProps[propKey];
             },
             set: (newVal) => {
-                if (model) {
+                if (isReactiveProperty) {
                     const instance = this._reactiveProps[propKey];
                     this.trigger(`${propKey}.changed`, {
                         value: newVal,
-                        previous: instance.getProperties(),
+                        previous: instance.getValue(),
                     });
                     this.trigger('change');
-                    this._reactiveProps[propKey].set(newVal);
+                    instance.setValue(newVal);
                     return;
                 }
                 if (newVal !== undefined && newVal === this._reactiveProps[propKey])
@@ -211,14 +602,14 @@ class ReactiveModel extends Events {
         });
     }
     /**
-     *  Defines the reactive properties of the object.
+     * Defines the reactive properties of the object.
      * The properties are defined as an array of strings or objects.
      * The objects must have a `name` property with the name of the property and a `value` property with the class of the object.
      * The `value` property can be a class or an object.
-     * If the `value` property is a class, the class must extend the `ReactiveModel` class.
+     * If the `value` property is a class, the class must implement IReactiveValue.
      *
-     * @param props
-     * @param values
+     * @param props - Array of property definitions
+     * @param values - Initial values for properties
      */
     defineReactiveProps(props, values) {
         var _a, _b, _c;
@@ -237,13 +628,17 @@ class ReactiveModel extends Events {
             let initialValue = (_b = values === null || values === void 0 ? void 0 : values[name]) !== null && _b !== void 0 ? _b : descriptor === null || descriptor === void 0 ? void 0 : descriptor.value;
             const specs = (_c = data.properties) !== null && _c !== void 0 ? _c : {};
             if (typeof data.value !== 'function' && typeof data.value !== 'object') {
-                console.warn(`Invalid value type for  ${name}`);
+                console.warn(`Invalid value type for ${name}`);
                 continue;
             }
-            const parameters = data.value.isCollection ? { parent: this } : { parent: this, ...initialValue, ...specs };
+            // Check if the class implements IReactiveContainer (has isContainer)
+            const isContainer = !!data.value.isContainer;
+            // Create instance with appropriate parameters
+            const parameters = isContainer ? { parent: this } : { parent: this, ...initialValue, ...specs };
             const instance = new data.value(parameters);
-            if (data.value.isCollection) {
-                instance.setItems(initialValue);
+            // If it's a container, use setItems to initialize
+            if (isReactiveContainer(instance)) {
+                instance.setItems(initialValue, true);
             }
             __classPrivateFieldGet(this, _ReactiveModel_propertyNames, "f").add(name);
             this.defineReactiveProp(name, instance, true);
@@ -291,19 +686,27 @@ class ReactiveModel extends Events {
     validate(properties) {
         const keys = Object.keys(properties);
         const errors = {};
-        const onValidate = prop => {
+        const onValidate = (prop) => {
             if (!this.properties || !this.properties.includes(prop)) {
                 console.trace(`is not a property`, prop);
                 return;
             }
             const validated = this.validateProperty(prop, properties[prop]);
             if (!validated.valid) {
-                errors[prop] = validated.error;
+                errors[prop] = validated;
             }
         };
         keys.forEach(onValidate);
         return { valid: Object.keys(errors).length === 0, errors };
     }
+    /**
+     * Sets one or more reactive properties on the model.
+     * Automatically validates against the schema if defined.
+     * Triggers lifecycle hooks (beforeSet/afterSet) and events (pre:set/post:set).
+     *
+     * @param properties - Partial object with properties to update
+     * @returns Result containing updated status and any validation errors
+     */
     set(properties) {
         if (!properties) {
             console.warn('you are trying to set an empty object', this.constructor.name, properties);
@@ -311,42 +714,73 @@ class ReactiveModel extends Events {
                 updated: false,
             };
         }
+        // If in transaction, accumulate changes instead of applying immediately
+        if (__classPrivateFieldGet(this, _ReactiveModel_inTransaction, "f")) {
+            __classPrivateFieldSet(this, _ReactiveModel_pendingChanges, { ...__classPrivateFieldGet(this, _ReactiveModel_pendingChanges, "f"), ...properties }, "f");
+            return { updated: false };
+        }
+        // Use synchronous version internally, async hooks are called separately
+        return this._setSync(properties);
+    }
+    /**
+     * Async version of set that properly awaits lifecycle hooks.
+     * Use this when you need to ensure hooks complete before continuing.
+     *
+     * @param properties - Partial object with properties to update
+     * @returns Promise resolving to result with updated status and errors
+     */
+    async setAsync(properties) {
+        if (!properties) {
+            console.warn('you are trying to set an empty object', this.constructor.name, properties);
+            return { updated: false };
+        }
+        // Call beforeSet hook
+        const modifiedProps = await this.beforeSet(properties);
+        // Emit pre:set event
+        this.trigger('pre:set', modifiedProps);
+        // Apply changes
+        const result = this._setSync(modifiedProps);
+        // Call afterSet hook
+        await this.afterSet(modifiedProps, result);
+        // Emit post:set event
+        this.trigger('post:set', { properties: modifiedProps, result });
+        return result;
+    }
+    /**
+     * Internal synchronous set implementation.
+     * @internal
+     */
+    _setSync(properties) {
         const keys = Object.keys(properties);
         let updated = false;
         const errors = {};
-        const onSet = prop => {
+        const onSet = (prop) => {
             if (!__classPrivateFieldGet(this, _ReactiveModel_propertyNames, "f").has(prop)) {
-                // console.trace(`is not a property`, prop, this.constructor.name);
                 return;
             }
             const validated = this.validateProperty(prop, properties[prop]);
             this.debug(prop, properties[prop], validated);
-            // console.log('validated', validated, prop, properties[prop]);
             if (!validated.valid) {
                 errors[prop] = validated;
-                // return;
             }
             const propertyValue = this.getProperty(prop);
-            if (this.isReactiveModel(propertyValue)) {
-                const instance = propertyValue;
-                // check if it is a collection
-                if (this.isCollectionModel(instance)) {
-                    instance.setItems(properties[prop], true);
-                }
-                else {
-                    instance.set(properties[prop]);
-                }
-                if (instance.unpublished)
+            // Use unified interface check instead of hardcoded type checks
+            if (isReactiveValue(propertyValue)) {
+                // Use setValue from the interface
+                propertyValue.setValue(properties[prop]);
+                if (propertyValue.hasUnpublishedChanges())
                     updated = true;
                 return;
             }
-            const isObject = typeof properties[prop] === 'object';
-            const isSameObject = isObject && this.isSameObject([prop], this[prop]);
-            if (this[prop] === properties[prop] || isSameObject) {
+            const propValue = properties[prop];
+            const isObject = typeof propValue === 'object';
+            const currentValue = this[prop];
+            const isSameObject = isObject && this.isSameObject(propValue, currentValue);
+            if (currentValue === propValue || isSameObject) {
                 return;
             }
-            this.trigger(`${prop}.changed`, { value: properties[prop], previous: this[prop] });
-            this[prop] = properties[prop];
+            this.trigger(`${prop}.changed`, { value: propValue, previous: currentValue });
+            this[prop] = propValue;
             updated = true;
         };
         keys.forEach(onSet);
@@ -358,26 +792,25 @@ class ReactiveModel extends Events {
     }
     /**
      * Gets all properties of the model, including nested reactive objects and collections.
-     * For collections, it returns the item properties instead of the collection instance.
+     * Uses IReactiveValue.serialize() for nested reactive values.
      *
      * @returns {Partial<T>} An object containing all properties of the model
      */
     getProperties() {
         const props = {};
-        const loop = property => {
-            var _a;
+        const loop = (property) => {
             let name = property;
-            if (typeof property === 'object' && property.value.isReactive) {
-                name = property.name;
-                /**
-                 * If the property is a collection, we return the items.
-                 */
-                props[String(name)] = property.value.isCollection
-                    ? this[name].getItemProperties()
-                    : (_a = this[name]) === null || _a === void 0 ? void 0 : _a.getProperties();
-                return;
+            if (typeof property === 'object') {
+                const objProp = property;
+                name = objProp.name;
+                const value = this[name];
+                // Use interface check and serialize method
+                if (isReactiveValue(value)) {
+                    props[name] = value.serialize();
+                    return;
+                }
             }
-            props[String(name)] = this[name];
+            props[name] = this[name];
         };
         this.properties.forEach(loop);
         return props;
@@ -399,7 +832,7 @@ class ReactiveModel extends Events {
         __classPrivateFieldSet(this, _ReactiveModel_isDraft, false, "f");
     }
 }
-_ReactiveModel_ready = new WeakMap(), _ReactiveModel_debug = new WeakMap(), _ReactiveModel_isDraft = new WeakMap(), _ReactiveModel_propertyNames = new WeakMap(), _ReactiveModel_initialValues = new WeakMap();
+_ReactiveModel_ready = new WeakMap(), _ReactiveModel_debug = new WeakMap(), _ReactiveModel_isDraft = new WeakMap(), _ReactiveModel_propertyNames = new WeakMap(), _ReactiveModel_initialValues = new WeakMap(), _ReactiveModel_inTransaction = new WeakMap(), _ReactiveModel_pendingChanges = new WeakMap(), _ReactiveModel_computedProperties = new WeakMap(), _ReactiveModel_computedCache = new WeakMap();
 
-export { ReactiveModel };
+export { PluginManager, ReactiveModel, isReactiveContainer, isReactiveValue };
 //# sourceMappingURL=index.mjs.map

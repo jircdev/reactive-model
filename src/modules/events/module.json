@@ -1,7 +1,0 @@
-{
-	"name": "events",
-	"description": "Events System",
-	"platforms": "*",
-	"bundle": "ts",
-	"files": "*"
-}

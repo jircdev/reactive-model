@@ -20,7 +20,10 @@
 			"@beyond-js/reactive/events": ["./modules/events/index.ts"],
 			"@beyond-js/reactive/model": ["./modules/model/index.ts"],
 			"@beyond-js/reactive/entities/item": ["./modules/entities/item/index.ts"],
-			"@beyond-js/reactive/entities/collection": ["./modules/entities/collection/index.ts"]
+			"@beyond-js/reactive/entities/collection": ["./modules/entities/collection/index.ts"],
+			"@beyond-js/reactive/structures/map": ["./modules/structures/map/index.ts"],
+			"@beyond-js/reactive/structures/array": ["./modules/structures/array/index.ts"],
+			"@beyond-js/reactive/structures/tree": ["./modules/structures/tree/index.ts"]
 		}
 	},
 	"include": ["modules/**/*", "__tests__/**/*"],

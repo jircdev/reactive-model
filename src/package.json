@@ -1,6 +1,6 @@
 {
 	"name": "@beyond-js/reactive",
-	"version": "2.2.0",
+	"version": "3.0.0",
 	"title": "Reactive Model v2",
 	"description": "",
 	"license": "ISC",
@@ -94,6 +94,21 @@
 			"types": "./dist/entities/item/index.d.ts",
 			"import": "./dist/entities/item/index.mjs",
 			"require": "./dist/entities/item/index.cjs"
+		},
+		"./structures/map": {
+			"types": "./dist/structures/map/index.d.ts",
+			"import": "./dist/structures/map/index.mjs",
+			"require": "./dist/structures/map/index.cjs"
+		},
+		"./structures/array": {
+			"types": "./dist/structures/array/index.d.ts",
+			"import": "./dist/structures/array/index.mjs",
+			"require": "./dist/structures/array/index.cjs"
+		},
+		"./structures/tree": {
+			"types": "./dist/structures/tree/index.d.ts",
+			"import": "./dist/structures/tree/index.mjs",
+			"require": "./dist/structures/tree/index.cjs"
 		}
 	}
 }

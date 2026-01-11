@@ -309,7 +309,7 @@ describe('Collection - Source Code Tests', () => {
 			await collection.load();
 			expect(collection.items).toHaveLength(2);
 
-			const results = await collection.delete(['1', '2']);
+			const results = await collection.deleteAsync(['1', '2']);
 
 			expect(deleteManySpy).toHaveBeenCalledWith(['1', '2']);
 			expect(results).toHaveLength(2);
@@ -394,8 +394,8 @@ describe('Collection - Source Code Tests', () => {
 			const props = collection.getItemProperties();
 
 			expect(props).toHaveLength(2);
-			expect(props[0].name).toBe('John');
-			expect(props[1].name).toBe('Jane');
+			expect((props[0] as { name: string }).name).toBe('John');
+			expect((props[1] as { name: string }).name).toBe('Jane');
 		});
 	});
 });

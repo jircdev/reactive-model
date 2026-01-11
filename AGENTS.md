@@ -9,7 +9,8 @@ este proyecto.
 **Tipo:** Librería TypeScript  
 **Versión:** 3.0.0  
 **Descripción:** Librería reactiva para gestión de datos con soporte para Items, Collections, modelos reactivos,
-lifecycle hooks, computed properties, sistema de plugins, y estructuras de datos reactivas (ReactiveMap, ReactiveArray, ReactiveTree).
+lifecycle hooks, computed properties, sistema de plugins, y estructuras de datos reactivas (ReactiveMap, ReactiveArray,
+ReactiveTree).
 
 ## 🏗️ Estructura del Proyecto
 
@@ -82,12 +83,13 @@ interface IReactiveContainer<T, K> extends IReactiveValue<T[]> {
 ```
 
 **Implementaciones:**
-- `ReactiveModel` → `IReactiveValue`
-- `Item` → `IReactiveValue`
-- `Collection` → `IReactiveContainer`
-- `ReactiveMap` → `IReactiveContainer`
-- `ReactiveArray` → `IReactiveContainer`
-- `ReactiveTree` → `IReactiveValue`
+
+-   `ReactiveModel` → `IReactiveValue`
+-   `Item` → `IReactiveValue`
+-   `Collection` → `IReactiveContainer`
+-   `ReactiveMap` → `IReactiveContainer`
+-   `ReactiveArray` → `IReactiveContainer`
+-   `ReactiveTree` → `IReactiveValue`
 
 ### Imports
 
@@ -114,15 +116,7 @@ export /*bundle*/ class ReactiveModel<T> extends Events {
 
 ### Module.json
 
-Los archivos `module.json` se **mantienen** para compatibilidad:
-
-```json
-{
-	"name": "model",
-	"bundle": "ts",
-	"files": "*"
-}
-```
+~~Los archivos `module.json` se **mantienen** para compatibilidad~~ **Ya no son necesarios** - fueron eliminados ya que el build con Rollup no los requiere.
 
 ## 🛠️ Comandos Disponibles
 
@@ -155,7 +149,8 @@ npm run test:coverage      # Con cobertura
 -   `uuid` - Generación de IDs
 -   `zod` - Validación
 
-> **Nota**: El sistema de eventos (`Events`) está incluido localmente en `@beyond-js/reactive/events`, no es una dependencia externa.
+> **Nota**: El sistema de eventos (`Events`) está incluido localmente en `@beyond-js/reactive/events`, no es una
+> dependencia externa.
 
 ### Desarrollo
 
@@ -231,9 +226,8 @@ npm run test:coverage     # Verificar cobertura
 
 1. **NO cambiar imports a relativos** - Mantener bare specifiers
 2. **NO eliminar magic comments** `/*bundle*/` - Son para compatibilidad
-3. **NO eliminar module.json** - Se mantienen para compatibilidad
-4. **NO incluir dependencias internas en bundles** - Deben ser externas
-5. **NO modificar exports en package.json** sin actualizar rollup.config.js
+3. **NO incluir dependencias internas en bundles** - Deben ser externas
+4. **NO modificar exports en package.json** sin actualizar rollup.config.js
 
 ### ✅ Hacer
 

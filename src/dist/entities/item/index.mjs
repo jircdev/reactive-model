@@ -1,5 +1,5 @@
-import { ReactiveModel } from '@beyond-js/reactive/model';
-import { v4 } from 'uuid';
+import { ReactiveModel, PluginManager } from '@beyond-js/reactive/model';
+import { v7 } from 'uuid';
 
 /******************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -80,7 +80,7 @@ class Registry extends ReactiveModel {
         _Registry_entity.set(this, void 0);
         __classPrivateFieldSet(this, _Registry_entity, entity, "f");
         const { id } = data;
-        __classPrivateFieldSet(this, _Registry_instanceId, (data === null || data === void 0 ? void 0 : data.instanceId) ? data.instanceId : v4(), "f");
+        __classPrivateFieldSet(this, _Registry_instanceId, (data === null || data === void 0 ? void 0 : data.instanceId) ? data.instanceId : v7(), "f");
         __classPrivateFieldSet(this, _Registry_id, id, "f");
         __classPrivateFieldSet(this, _Registry_draft, !id, "f");
         // Loop through data and ignore reactive objects
@@ -175,7 +175,14 @@ class RegistryFactory extends ReactiveModel {
 _a = RegistryFactory, _RegistryFactory_name = new WeakMap();
 _RegistryFactory_instances = { value: new Map() };
 
-var _Item_factory, _Item_entity, _Item_registry, _Item_fetched, _Item_found, _Item_draft;
+var _Item_factory, _Item_entity, _Item_registry, _Item_fetched, _Item_found, _Item_draft, _Item_changedProperties;
+/**
+ * Item class for managing individual domain entities.
+ * Implements IReactiveValue for unified reactive value handling.
+ *
+ * @template T - The entity type (must extend IItem)
+ * @template P - The provider type
+ */
 class Item extends ReactiveModel {
     get entity() {
         return __classPrivateFieldGet(this, _Item_entity, "f");
@@ -201,15 +208,44 @@ class Item extends ReactiveModel {
     get draft() {
         return __classPrivateFieldGet(this, _Item_draft, "f");
     }
+    /**
+     * Returns the list of properties that have been modified since the last publish.
+     */
+    get changedProperties() {
+        return [...__classPrivateFieldGet(this, _Item_changedProperties, "f")];
+    }
+    /**
+     * Returns only the properties that have changed since the last publish.
+     * Useful for partial updates to avoid sending unchanged data.
+     */
+    getChangedValues() {
+        const changed = {};
+        for (const prop of __classPrivateFieldGet(this, _Item_changedProperties, "f")) {
+            changed[prop] = this.getProperty(prop);
+        }
+        // Always include id for identification
+        if (this.getProperty('id')) {
+            changed['id'] = this.getProperty('id');
+        }
+        return changed;
+    }
+    /**
+     * Clears the tracked changed properties.
+     * Called automatically after successful publish.
+     */
+    clearChangedProperties() {
+        __classPrivateFieldGet(this, _Item_changedProperties, "f").clear();
+    }
     constructor({ entity, provider, properties, ...args } = {}) {
-        super({ ...args, properties });
+        super({ properties, ...args });
         _Item_factory.set(this, void 0);
         _Item_entity.set(this, void 0);
         _Item_registry.set(this, void 0);
-        _Item_fetched.set(this, void 0);
+        _Item_fetched.set(this, false);
         _Item_found.set(this, false);
         _Item_draft.set(this, void 0);
-        // if (this.constructor.name === 'Assignment')
+        // Tracking changed properties for partial updates
+        _Item_changedProperties.set(this, new Set());
         if (!entity)
             throw new Error('Entity is required');
         if (provider && typeof provider !== 'function') {
@@ -248,34 +284,136 @@ class Item extends ReactiveModel {
         });
     }
     set(values) {
+        // Track which properties are being changed
+        if (values) {
+            for (const key of Object.keys(values)) {
+                __classPrivateFieldGet(this, _Item_changedProperties, "f").add(key);
+            }
+        }
         const response = super.set(values);
         return response;
+    }
+    // ==========================================
+    // IReactiveValue Implementation (explicit overrides)
+    // ==========================================
+    /**
+     * Serializes the item to a plain object for JSON output.
+     * Returns the item's properties without the Item instance wrapper.
+     */
+    serialize() {
+        return this.getProperties();
     }
     onSet() {
         var _a;
         (_a = __classPrivateFieldGet(this, _Item_registry, "f")) === null || _a === void 0 ? void 0 : _a.setValues(this.getProperties());
     }
+    // ==========================================
+    // LIFECYCLE HOOKS - Override in subclasses
+    // ==========================================
+    /**
+     * Lifecycle hook called before load() executes.
+     * Override to modify load arguments or perform pre-load actions.
+     *
+     * @param args - Arguments to be passed to provider.load()
+     * @returns Modified arguments or original args
+     */
+    async beforeLoad(args) {
+        return args;
+    }
+    /**
+     * Lifecycle hook called after load() completes successfully.
+     * Override to transform loaded data or perform post-load actions.
+     *
+     * @param data - Data returned from provider.load()
+     * @returns Modified data or original data
+     */
+    async afterLoad(data) {
+        return data;
+    }
+    /**
+     * Lifecycle hook called before publish() executes.
+     * Override to modify data before saving or perform validation.
+     *
+     * @param data - Data to be published
+     * @returns Modified data or original data
+     */
+    async beforePublish(data) {
+        return data;
+    }
+    /**
+     * Lifecycle hook called after publish() completes successfully.
+     * Override to perform post-save actions.
+     *
+     * @param data - Data that was saved
+     */
+    async afterPublish(data) {
+        // Default implementation does nothing
+    }
+    /**
+     * Lifecycle hook called before delete() executes.
+     * Override to perform validation or cleanup before deletion.
+     * Return false to cancel the deletion.
+     *
+     * @param id - ID of the item being deleted
+     * @returns true to proceed with deletion, false to cancel
+     */
+    async beforeDelete(id) {
+        return true;
+    }
+    /**
+     * Lifecycle hook called after delete() completes successfully.
+     * Override to perform post-deletion cleanup.
+     *
+     * @param id - ID of the deleted item
+     */
+    async afterDelete(id) {
+        // Default implementation does nothing
+    }
+    // ==========================================
+    // CRUD OPERATIONS WITH LIFECYCLE HOOKS
+    // ==========================================
     _load(args) { }
-    // Define optional methods with a default implementation that gives a warning message
+    /**
+     * Loads the item from the provider.
+     * Executes lifecycle hooks: beforeLoad -> load -> afterLoad
+     * Runs plugins: onBeforeLoad -> onAfterLoad
+     * Emits events: pre:load -> load -> post:load
+     */
     async load(args) {
         if (!this.provider || typeof this.provider.load !== 'function') {
             throw new Error(`DataProvider is not defined or does not implement the load() method in object ${this.constructor.name}`);
         }
         this.fetching = true;
         try {
-            const response = await this.provider.load(args);
-            const data = response;
-            if (!data) {
+            // 1. Execute beforeLoad hook (class method)
+            let loadArgs = await this.beforeLoad(args);
+            // 2. Execute plugins beforeLoad
+            const pluginResult = await PluginManager.runHook('onBeforeLoad', this, loadArgs, __classPrivateFieldGet(this, _Item_entity, "f"));
+            loadArgs = pluginResult.value;
+            // 3. Emit pre:load event
+            this.trigger('pre:load', loadArgs);
+            // 4. Execute provider load
+            const response = await this.provider.load(loadArgs);
+            if (!response) {
                 __classPrivateFieldSet(this, _Item_found, false, "f");
                 throw new Error('Provider.load() did not return an item.');
             }
+            // 5. Execute afterLoad hook (class method)
+            let data = await this.afterLoad(response);
+            // 6. Execute plugins afterLoad
+            const afterPluginResult = await PluginManager.runHook('onAfterLoad', this, data, __classPrivateFieldGet(this, _Item_entity, "f"));
+            data = afterPluginResult.value;
             __classPrivateFieldSet(this, _Item_found, true, "f");
             __classPrivateFieldSet(this, _Item_fetched, true, "f");
             this.set(data);
             this.setInitialValues(data);
+            // Clear changed properties since we just loaded fresh data
+            this.clearChangedProperties();
+            // 7. Emit load and post:load events
             this.trigger('load', { ...this.getProperties() });
+            this.trigger('post:load', data);
             this.trigger('change');
-            return response;
+            return data;
         }
         catch (e) {
             __classPrivateFieldSet(this, _Item_found, false, "f");
@@ -286,32 +424,102 @@ class Item extends ReactiveModel {
             this.fetching = false;
         }
     }
-    async publish(data) {
-        data = data ? data : this.getProperties();
-        this.set({ ...this.getProperties(), ...data });
-        __classPrivateFieldGet(this, _Item_registry, "f").setValues(this.getProperties, true);
-        super.saveChanges();
-        if (this.provider && typeof this.provider.publish === 'function') {
-            const updated = await this.provider.publish(data);
-            if (!updated.status) {
-                throw new Error('Error saving item');
-            }
-            this.set(updated.data);
-            return updated.data;
+    /**
+     * Publishes (saves) the item via the provider.
+     * Executes lifecycle hooks: beforePublish -> publish -> afterPublish
+     * Runs plugins: onBeforePublish -> onAfterPublish
+     * Emits events: pre:publish -> publish -> post:publish
+     *
+     * @param data - Optional data to publish. If not provided, uses current properties.
+     * @param options - Options for publish behavior
+     * @param options.partial - If true, only sends changed properties
+     */
+    async publish(data, options = {}) {
+        // Determine what data to publish
+        let publishData;
+        if (data) {
+            publishData = data;
         }
-        return this.getProperties();
-    }
-    async delete(options) {
+        else if (options.partial) {
+            publishData = this.getChangedValues();
+        }
+        else {
+            publishData = this.getProperties();
+        }
+        this.processing = true;
         try {
-            const id = this.getProperty('id');
-            __classPrivateFieldGet(this, _Item_registry, "f").deleted = true;
-            this.trigger('change');
-            if (!this.provider)
-                return true;
+            // 1. Execute beforePublish hook (class method)
+            publishData = await this.beforePublish(publishData);
+            // 2. Execute plugins beforePublish
+            const pluginResult = await PluginManager.runHook('onBeforePublish', this, publishData, __classPrivateFieldGet(this, _Item_entity, "f"));
+            publishData = pluginResult.value;
+            // 3. Emit pre:publish event
+            this.trigger('pre:publish', publishData);
+            // 4. Apply changes locally
+            this.set({ ...this.getProperties(), ...publishData });
+            __classPrivateFieldGet(this, _Item_registry, "f").setValues(this.getProperties(), true);
+            super.saveChanges();
+            let result = this.getProperties();
+            // 5. Execute provider publish if available
+            if (this.provider && typeof this.provider.publish === 'function') {
+                const updated = await this.provider.publish(publishData);
+                if (!updated.status) {
+                    throw new Error('Error saving item');
+                }
+                this.set(updated.data);
+                result = updated.data;
+            }
+            // 6. Execute afterPublish hook (class method)
+            await this.afterPublish(result);
+            // 7. Execute plugins afterPublish
+            await PluginManager.runVoidHook('onAfterPublish', this, [result], __classPrivateFieldGet(this, _Item_entity, "f"));
+            // 8. Clear changed properties after successful publish
+            this.clearChangedProperties();
+            // 9. Emit publish and post:publish events
+            this.trigger('publish', result);
+            this.trigger('post:publish', result);
+            return result;
+        }
+        finally {
+            this.processing = false;
+        }
+    }
+    /**
+     * Deletes the item via the provider.
+     * Executes lifecycle hooks: beforeDelete -> delete -> afterDelete
+     * Runs plugins: onBeforeDelete -> onAfterDelete
+     * Emits events: pre:delete -> delete -> post:delete
+     */
+    async delete(options) {
+        const id = this.getProperty('id');
+        try {
+            // 1. Execute beforeDelete hook (class method)
+            const shouldDelete = await this.beforeDelete(id);
+            if (!shouldDelete) {
+                return false;
+            }
+            // 2. Execute plugins beforeDelete
+            const pluginResult = await PluginManager.runHook('onBeforeDelete', this, id, __classPrivateFieldGet(this, _Item_entity, "f"));
+            if (pluginResult.cancelled) {
+                return false;
+            }
+            // 3. Emit pre:delete event
+            this.trigger('pre:delete', { id });
+            this.processing = true;
+            // 4. Execute provider delete if applicable
             if (!(options === null || options === void 0 ? void 0 : options.skipProvider) && this.provider && typeof this.provider.delete === 'function') {
-                this.processing = true;
                 await this.provider.delete(id);
             }
+            // 5. Mark as deleted in registry
+            __classPrivateFieldGet(this, _Item_registry, "f").deleted = true;
+            // 6. Execute afterDelete hook (class method)
+            await this.afterDelete(id);
+            // 7. Execute plugins afterDelete
+            await PluginManager.runVoidHook('onAfterDelete', this, [id], __classPrivateFieldGet(this, _Item_entity, "f"));
+            // 8. Emit delete and post:delete events
+            this.trigger('delete', { id });
+            this.trigger('post:delete', { id });
+            this.trigger('change');
             return true;
         }
         catch (e) {
@@ -323,7 +531,7 @@ class Item extends ReactiveModel {
         }
     }
 }
-_Item_factory = new WeakMap(), _Item_entity = new WeakMap(), _Item_registry = new WeakMap(), _Item_fetched = new WeakMap(), _Item_found = new WeakMap(), _Item_draft = new WeakMap();
+_Item_factory = new WeakMap(), _Item_entity = new WeakMap(), _Item_registry = new WeakMap(), _Item_fetched = new WeakMap(), _Item_found = new WeakMap(), _Item_draft = new WeakMap(), _Item_changedProperties = new WeakMap();
 
 export { Item, RegistryFactory };
 //# sourceMappingURL=index.mjs.map

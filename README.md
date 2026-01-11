@@ -3,267 +3,59 @@
 ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E)
 ![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
-![Deno JS](https://img.shields.io/badge/deno%20js-000000.svg?style=for-the-badge&logo=deno&logoColor=white)
-![Bun](https://img.shields.io/badge/Bun-%23000000.svg?style=for-the-badge&logo=bun&logoColor=white)
 ![Browser](https://img.shields.io/badge/Browser-4285F4.svg?style=for-the-badge&logo=GoogleChrome&logoColor=white)
 
-`@beyond-js/reactive` is a powerful TypeScript library designed to provide a reactive data layer for your application.
-By offering tools to create and manage reactive data structures, it enables developers to construct performant and
-scalable applications with ease. It enhances data-driven views or components by reacting to changes and keeping
-everything in sync.
+**The Data Intelligence Layer for Modern Applications.** 🚀
 
-This library provides complete documentation on how the main components of the Reactive Model system work:
-**ReactiveModel**, **Items**, **Collections**, and **Nested Properties**.
+`@beyond-js/reactive` is a powerful TypeScript library that centralizes business logic, validation, and reactivity within your data structures. It provides a dedicated layer that handles the "truth" of your application, leaving UI frameworks to focus purely on presentation.
 
-## ✨ Why Reactive Model?
+---
 
-Reactive Model is a library that simplifies reactive data management in JavaScript/TypeScript applications. It offers
-the following main features:
+## ✨ Key Benefits
 
-### 🎯 Simplified Data Management
+-   **🎯 Data-First Design**: Business logic belongs to your data, not your UI components.
+-   **🤖 AI-Ready**: Highly structured models that AI agents (Cursor, Copilot) can reason about with zero effort.
+-   **🔌 Framework Agnostic**: Works perfectly with React, Vue, Svelte, or Node.js.
+-   **🤝 Complements UI State Managers**: Co-exists seamlessly with **Zustand**, Redux, or Pinia.
+-   **✅ Zod Integration**: Native validation for robust data integrity.
 
--   **Items**: Complete lifecycle management of individual entities (load, save, delete)
--   **Collections**: Management of item groups with filtering, sorting, and automatic pagination
--   **Nested Properties**: Model complex relationships between entities naturally
-
-### 📡 Reactive Event System
-
--   **Property events**: Listen to specific changes (`user.on('name.changed', ...)`)
--   **Global events**: React to any change (`user.on('change', ...)`)
--   **Custom events**: Trigger your own events with `trigger()`
--   **Granular reactivity**: Precise UI updates without unnecessary re-renders
-
-### ✅ Zod Validation
-
--   **Native integration**: Define Zod schemas using a `schema` getter
--   **Automatic validation**: Validates automatically when updating properties
--   **Manual validation**: Validate data without updating using `validate()`
--   **Custom messages**: Define specific error messages for each rule
-
-### 🔌 Data Source Decoupling
-
--   **Providers**: Data access logic completely separated from the model
--   **Flexibility**: Works with any source (REST APIs, GraphQL, IndexedDB, localStorage, etc.)
--   **Testable**: Easy to mock providers for testing
--   **Reusable**: The same model can use different providers depending on context
-
-### 🎨 TypeScript and Autocomplete
-
--   **Type-safe**: TypeScript knows the types of all properties
--   **Autocomplete**: IDE automatically completes property names and types
--   **Type validation**: Type errors detected at compile time
-
-### 🔄 State Management
-
--   **Unpublished state**: Automatically detects if the model has been modified
--   **Draft state**: Identifies new unsaved models
--   **Revert changes**: Restores initial state with `revert()`
--   **Save changes**: Marks state as saved with `saveChanges()`
+---
 
 ## 📚 Documentation
 
-The documentation is available in multiple languages:
+-   **[English Documentation](./docs/en/README.md)**
+-   **[Documentación en Español](./docs/es/README.md)**
 
--   [English](./docs/en/README.md) - Complete documentation in English
--   [Español](./docs/es/README.md) - Documentación completa en Español
+### Quick Navigation (EN)
+- [Philosophy & Vision](./docs/en/philosophy.md) | [Getting Started](./docs/en/getting-started.md)
+- [Integration with React & Zustand](./docs/en/architecture/integration-guide.md)
+- [ReactiveModel](./docs/en/fundamentals/reactive-model.md) | [Items](./docs/en/entities/items.md) | [Collections](./docs/en/entities/collections.md)
+- [ReactiveMap](./docs/en/structures/reactive-map.md) | [ReactiveArray](./docs/en/structures/reactive-array.md) | [ReactiveTree](./docs/en/structures/reactive-tree.md)
 
-### Quick Links
-
--   [ReactiveModel](./docs/en/reactive-model.md) - Base class for reactive models
--   [Items](./docs/en/items.md) - Individual entity management
--   [Collections](./docs/en/collections.md) - Item group management
--   [Nested Properties](./docs/en/nested-properties.md) - Complex relationship modeling
--   [Practical Examples](./docs/en/examples.md) - Real-world usage examples
-
-## 🎯 Key Concepts
-
-### ReactiveModel
-
-**ReactiveModel** is the base class that provides reactive functionality. It allows defining reactive properties,
-managing validation, handling lifecycle states, and working with events.
-
-### Items
-
-**Items** represent individual reactive entities (such as a user, product, etc.) that can be loaded, saved, and deleted
-through data providers. They extend `ReactiveModel` and integrate with a registry system.
-
-### Collections
-
-**Collections** represent groups of items that can be loaded, filtered, and managed reactively. They also extend
-`ReactiveModel` and provide pagination and filtering capabilities.
-
-### Nested Properties
-
-**Nested Properties** allow an Item or ReactiveModel to have other instances of Item or Collection as properties,
-enabling modeling of complex relationships between entities.
-
-Both concepts are designed to work with **Providers** that handle data access logic (APIs, databases, etc.).
+---
 
 ## 🚀 Quick Start
 
-### Basic Item
+```bash
+npm install @beyond-js/reactive zod
+```
 
 ```typescript
-import { Item } from '@beyond-js/reactive/entities/item';
+import { ReactiveModel } from '@beyond-js/reactive/model';
 
-class User extends Item<IUser, UserProvider> {
-	constructor() {
-		super({
-			entity: 'users',
-			provider: UserProvider,
-			properties: ['id', 'name', 'email'],
-		});
-	}
+class User extends ReactiveModel<IUser> {
+  declare name: string;
+  constructor(data) {
+    super({ properties: ['name'], ...data });
+  }
 }
 
-const user = new User({ id: '1' });
-await user.load();
-
-// Direct property access
-console.log(user.name, user.email);
-
-// Listen to changes
-user.on('name.changed', ({ value }) => {
-	console.log('Name changed to:', value);
-});
-
-// Destructuring works normally
-const { name, email } = user;
+const user = new User({ name: 'John' });
+user.on('change', () => updateUI());
+user.name = 'Jane'; // Triggers reactivity
 ```
 
-### Basic Collection
-
-```typescript
-import { Collection } from '@beyond-js/reactive/entities/collection';
-
-class Users extends Collection<User, UserProvider> {
-	constructor() {
-		super({
-			entity: 'users',
-			provider: UserProvider,
-			item: User,
-		});
-	}
-}
-
-const users = new Users();
-await users.load();
-
-// Direct access to items
-users.items.forEach(user => {
-	console.log(user.name);
-});
-
-// Filtering and search
-await users.load({
-	where: {
-		name: { contains: 'John' },
-		age: { gte: 18 },
-	},
-});
-```
-
-## 📖 More Information
-
-For more details, consult the specific documentation for each component:
-
-### Fundamentals
-
--   [ReactiveModel - Detailed documentation](./docs/en/reactive-model.md) - Base class with all its features
--   [Items - Detailed documentation](./docs/en/items.md) - Individual entity management
--   [Collections - Detailed documentation](./docs/en/collections.md) - Item group management
-
-### Advanced Topics
-
--   [Nested Properties - Detailed documentation](./docs/en/nested-properties.md) - Items and Collections as properties
--   [Practical examples](./docs/en/examples.md) - Real-world use cases and common patterns
-
-## 🔗 Recommended Reading Order
-
-If you're new to Reactive Model, we recommend reading the documentation in this order:
-
-1. **[ReactiveModel](./docs/en/reactive-model.md)** - Understand the fundamentals of reactivity
-2. **[Items](./docs/en/items.md)** - Learn to work with individual entities
-3. **[Collections](./docs/en/collections.md)** - Learn to manage item groups
-4. **[Nested Properties](./docs/en/nested-properties.md)** - Model complex relationships
-5. **[Practical Examples](./docs/en/examples.md)** - See real implementation examples
-
-## 📦 Installation
-
-To add `@beyond-js/reactive` to your project, run:
-
-```bash
-npm install @beyond-js/reactive
-```
-
-## 🤝 Contributing
-
-Contributions, issues, and feature requests are welcome! We appreciate your interest in improving `@beyond-js/reactive`.
-
-### How to Contribute
-
-1. **Fork the repository** and clone it to your local machine:
-
-```bash
-git clone https://github.com/jircdev/reactive-model.git
-cd reactive-model
-```
-
-2. **Install dependencies**:
-
-```bash
-# For the library
-npm install
-
-# For tests
-cd tests
-npm install
-```
-
-3. **Create a branch** for your feature or fix:
-
-```bash
-git checkout -b feature/my-new-feature
-```
-
-4. **Run the development server**:
-
-```bash
-beyond run
-```
-
-Access the server at `http://localhost:950` to test your changes.
-
-5. **Run tests** to ensure everything works:
-
-```bash
-cd tests
-npm test
-```
-
-6. **Commit** your changes and **submit a Pull Request** with a clear description of the changes.
-
-For more detailed information, see our [Contributing Guide](./contributing.md).
-
-### Code of Conduct
-
-By participating in this project, you agree to maintain a respectful and welcoming environment for all contributors.
+---
 
 ## 📄 License
-
-This project is licensed under the [MIT License](./src/LICENSE).
-
-Copyright (c) @beyond-js
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
-rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit
-persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
-Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
-WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+MIT © @beyond-js
