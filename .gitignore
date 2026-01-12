@@ -3,4 +3,3 @@
 node_modules
 .beyond/
 compiled/
-package-lock.json
