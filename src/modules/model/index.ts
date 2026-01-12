@@ -19,7 +19,7 @@ import { isReactiveValue } from './interfaces/reactive-value';
 import { isReactiveContainer } from './interfaces/reactive-container';
 
 // Re-export types for external use
-export type { SetPropertiesResult, PropertyValidationErrors, IReactiveModelOptions, ComputedProperty };
+export type { SetPropertiesResult, PropertyValidationErrors, IReactiveModelOptions, ComputedProperty, EntityProperty };
 
 // Re-export interfaces
 export { IReactiveValue, isReactiveValue } from './interfaces/reactive-value';
