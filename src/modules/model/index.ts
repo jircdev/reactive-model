@@ -355,7 +355,7 @@ export /*bundle */ class ReactiveModel<T> extends Events implements IReactiveVal
 	protected defineReactiveProp<K extends keyof T>(
 		propKey: string,
 		initialValue: unknown,
-		isReactiveProperty: boolean = false
+		isReactiveProperty: boolean = false,
 	): void {
 		this._reactiveProps[propKey] = initialValue;
 

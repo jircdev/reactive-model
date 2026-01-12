@@ -645,4 +645,4 @@ declare class ReactiveModel<T> extends Events implements IReactiveValue<Partial<
 }
 
 export { PluginManager, ReactiveModel, isReactiveContainer, isReactiveValue };
-export type { ComputedProperty, IHookResult, IPersistencePluginConfig, IReactiveContainer, IReactiveModelOptions, IReactivePlugin, IReactiveValue, PropertyValidationErrors, SetPropertiesResult };
+export type { ComputedProperty, EntityProperty, IHookResult, IPersistencePluginConfig, IReactiveContainer, IReactiveModelOptions, IReactivePlugin, IReactiveValue, PropertyValidationErrors, SetPropertiesResult };
