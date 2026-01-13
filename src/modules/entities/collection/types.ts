@@ -3,7 +3,7 @@ import {
 	IItem,
 	Item,
 	ItemId,
-} from '@beyond-js/reactive/entities/item';
+} from 'reactive/entities/item';
 import type { Collection } from './';
 
 /**

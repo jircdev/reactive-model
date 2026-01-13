@@ -1,13 +1,13 @@
 # Inicio Rápido
 
-Configura y usa `@beyond-js/reactive` en menos de 2 minutos.
+Configura y usa `reactive` en menos de 2 minutos.
 
 ## 1. Instalación
 
 Instala el paquete y su dependencia `zod`:
 
 ```bash
-npm install @beyond-js/reactive zod
+npm install reactive zod
 ```
 
 ## 2. Tu Primer Modelo Reactivo
@@ -15,7 +15,7 @@ npm install @beyond-js/reactive zod
 `ReactiveModel` es la clase base para crear objetos reactivos con validación.
 
 ```typescript
-import { ReactiveModel } from '@beyond-js/reactive/model';
+import { ReactiveModel } from 'reactive/model';
 import { z } from 'zod';
 
 interface IUser {

@@ -7,7 +7,7 @@ El Sistema de Plugins te permite extender el comportamiento de ReactiveModel sin
 ### Creando un Plugin
 
 ```typescript
-import { IReactivePlugin, PluginManager } from '@beyond-js/reactive/model';
+import { IReactivePlugin, PluginManager } from 'reactive/model';
 
 const loggingPlugin: IReactivePlugin = {
   name: 'logging',

@@ -1,4 +1,4 @@
-# @beyond-js/reactive
+# reactive
 
 ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E)
@@ -7,7 +7,7 @@
 
 **The Data Intelligence Layer for Modern Applications.** 🚀
 
-`@beyond-js/reactive` is a powerful TypeScript library that centralizes business logic, validation, and reactivity within your data structures. It provides a dedicated layer that handles the "truth" of your application, leaving UI frameworks to focus purely on presentation.
+`reactive` is a powerful TypeScript library that centralizes business logic, validation, and reactivity within your data structures. It provides a dedicated layer that handles the "truth" of your application, leaving UI frameworks to focus purely on presentation.
 
 ---
 
@@ -37,11 +37,13 @@
 ## 🚀 Quick Start
 
 ```bash
-npm install @beyond-js/reactive zod
+npm install reactive zod
 ```
 
+**Note:** `zod` is a peer dependency and must be installed separately. This allows you to control the zod version used in your project.
+
 ```typescript
-import { ReactiveModel } from '@beyond-js/reactive/model';
+import { ReactiveModel } from 'reactive/model';
 
 class User extends ReactiveModel<IUser> {
   declare name: string;

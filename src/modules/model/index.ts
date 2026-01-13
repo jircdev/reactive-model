@@ -13,7 +13,7 @@ import {
 	ValidatedPropertyType,
 } from './types';
 
-import { Events } from '@beyond-js/reactive/events';
+import { Events } from 'reactive/events';
 import type { IReactiveValue } from './interfaces/reactive-value';
 import { isReactiveValue } from './interfaces/reactive-value';
 import { isReactiveContainer } from './interfaces/reactive-container';

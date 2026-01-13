@@ -1,6 +1,6 @@
-# @beyond-js/reactive - Testing Package
+# reactive - Testing Package
 
-Este es un paquete de prueba para validar el funcionamiento de `@beyond-js/reactive` con React y Vite.
+Este es un paquete de prueba para validar el funcionamiento de `reactive` con React y Vite.
 
 ## 🚀 Inicio Rápido
 
@@ -32,7 +32,7 @@ npm run preview
 
 ## 📦 Dependencias
 
-- **@beyond-js/reactive**: La librería reactiva (versión 2.2.0+)
+- **reactive**: La librería reactiva (versión 2.2.0+)
 - **React**: Framework de UI
 - **Vite**: Build tool y dev server
 - **TypeScript**: Tipado estático
@@ -53,6 +53,6 @@ Este paquete de prueba demuestra:
 - Actualmente está configurado para usar la versión local del paquete desde `../src`
 - Para usar la versión publicada en npm, actualiza `package.json`:
   ```json
-  "@beyond-js/reactive": "^2.2.0"
+  "reactive": "^2.2.0"
   ```
 

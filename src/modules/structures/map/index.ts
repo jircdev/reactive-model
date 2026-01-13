@@ -1,5 +1,5 @@
-import { Events } from '@beyond-js/reactive/events';
-import type { IReactiveContainer } from '@beyond-js/reactive/model';
+import { Events } from 'reactive/events';
+import type { IReactiveContainer } from 'reactive/model';
 import type { IReactiveMapOptions, IMapSetEvent, IMapDeleteEvent, IMapClearEvent } from './types';
 
 // Re-export types

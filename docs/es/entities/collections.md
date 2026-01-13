@@ -312,7 +312,7 @@ interface ICollectionProvider {
 ### Ejemplo de Proveedor de Colección
 
 ```typescript
-import { ICollectionProvider } from '@beyond-js/reactive/entities/collection';
+import { ICollectionProvider } from 'reactive/entities/collection';
 
 export class UsersProvider implements ICollectionProvider {
   constructor(private parent: any) {}
@@ -364,7 +364,7 @@ El método `list()` puede retornar:
 ## 📝 Ejemplo Completo
 
 ```typescript
-import { Collection } from '@beyond-js/reactive/entities/collection';
+import { Collection } from 'reactive/entities/collection';
 import { User } from './user';
 import { UsersProvider } from './users-provider';
 

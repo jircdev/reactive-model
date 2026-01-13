@@ -60,7 +60,7 @@ export interface IEntityProvider {
 ### Example
 
 ```ts
-import { IEntityProvider } from '@beyond-js/reactive/entities/item';
+import { IEntityProvider } from 'reactive/entities/item';
 
 interface IUser {
 	id: string;
@@ -115,7 +115,7 @@ export class UserProvider implements IEntityProvider {
 ### Usage in Item
 
 ```ts
-import { Item } from '@beyond-js/reactive/entities/item';
+import { Item } from 'reactive/entities/item';
 import { UserProvider } from './user-provider';
 
 class User extends Item<IUser, UserProvider> {
@@ -168,7 +168,7 @@ export interface ICollectionProvider {
 ### Example
 
 ```ts
-import { ICollectionProvider } from '@beyond-js/reactive/entities/collection';
+import { ICollectionProvider } from 'reactive/entities/collection';
 
 interface ILoadSpecs {
 	where?: any;
@@ -233,7 +233,7 @@ export class UserCollectionProvider implements ICollectionProvider {
 ### Usage in Collection
 
 ```ts
-import { Collection } from '@beyond-js/reactive/entities/collection';
+import { Collection } from 'reactive/entities/collection';
 import { User } from './user';
 import { UserCollectionProvider } from './user-collection-provider';
 

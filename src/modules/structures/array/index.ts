@@ -1,5 +1,5 @@
-import { Events } from '@beyond-js/reactive/events';
-import type { IReactiveContainer } from '@beyond-js/reactive/model';
+import { Events } from 'reactive/events';
+import type { IReactiveContainer } from 'reactive/model';
 import type {
 	IReactiveArrayOptions,
 	IArrayAddEvent,
@@ -9,13 +9,7 @@ import type {
 } from './types';
 
 // Re-export types
-export type {
-	IReactiveArrayOptions,
-	IArrayAddEvent,
-	IArrayRemoveEvent,
-	IArrayUpdateEvent,
-	IArrayReorderEvent,
-};
+export type { IReactiveArrayOptions, IArrayAddEvent, IArrayRemoveEvent, IArrayUpdateEvent, IArrayReorderEvent };
 
 /**
  * A reactive Array implementation that emits events on changes.
@@ -34,10 +28,7 @@ export type {
  * arr.set(0, 'A');
  * ```
  */
-export /*bundle*/ class ReactiveArray<T = unknown>
-	extends Events
-	implements IReactiveContainer<T, number>
-{
+export /*bundle*/ class ReactiveArray<T = unknown> extends Events implements IReactiveContainer<T, number> {
 	readonly isReactive: true = true;
 	readonly isContainer: true = true;
 

@@ -1,4 +1,4 @@
-import { ReactiveModel, SetPropertiesResult, PluginManager, IReactiveValue } from '@beyond-js/reactive/model';
+import { ReactiveModel, SetPropertiesResult, PluginManager, IReactiveValue } from 'reactive/model';
 import { Registry } from './registry';
 import { RegistryFactory } from './registry/factory';
 import { IEntityProvider, IItem, IItemProps, ItemId } from './types';

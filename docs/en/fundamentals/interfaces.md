@@ -41,7 +41,7 @@ interface IReactiveValue<T = unknown> {
 ### Type Guard
 
 ```typescript
-import { isReactiveValue } from '@beyond-js/reactive/model';
+import { isReactiveValue } from 'reactive/model';
 
 function processValue(value: unknown) {
 	if (isReactiveValue(value)) {
@@ -91,7 +91,7 @@ interface IReactiveContainer<T, K = string | number> extends IReactiveValue<T[]>
 ### Type Guard
 
 ```typescript
-import { isReactiveContainer } from '@beyond-js/reactive/model';
+import { isReactiveContainer } from 'reactive/model';
 
 function processContainer(value: unknown) {
 	if (isReactiveContainer(value)) {
@@ -194,8 +194,8 @@ function processData(value: IReactiveValue): void {
 ## Creating Custom Reactive Types
 
 ```typescript
-import { Events } from '@beyond-js/reactive/events';
-import type { IReactiveValue } from '@beyond-js/reactive/model';
+import { Events } from 'reactive/events';
+import type { IReactiveValue } from 'reactive/model';
 
 class ReactiveGraph<T> extends Events implements IReactiveValue<T[]> {
 	readonly isReactive: true = true;

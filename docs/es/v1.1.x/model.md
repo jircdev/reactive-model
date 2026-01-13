@@ -12,7 +12,7 @@ any JavaScript environment and is agnostic to any framework.
 Installation To install ReactiveModel, you can use your favorite package manager. For example, with npm:
 
 ```
-npm install @beyond-js/reactive
+npm install reactive
 ```
 
 ## Usage
@@ -20,7 +20,7 @@ npm install @beyond-js/reactive
 To create a new `ReactiveModel`, simply instantiate the class with the desired properties:
 
 ```ts
-import { ReactiveModel } from '@beyond-js/reactive/model';
+import { ReactiveModel } from 'reactive/model';
 
 interface IPerson {
 	name: string;

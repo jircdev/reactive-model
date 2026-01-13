@@ -11,7 +11,7 @@ serialization/deserialization.
 To access the `ReactiveConfig` class, you should import it from the package as follows:
 
 ```typescript
-import { ReactiveConfig } from '@beyond-js/reactive/settings';
+import { ReactiveConfig } from 'reactive/settings';
 ```
 
 ## Interfaces

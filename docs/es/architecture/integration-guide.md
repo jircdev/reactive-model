@@ -1,6 +1,6 @@
 # Guía de Integración: React & Zustand
 
-`@beyond-js/reactive` es agnóstico al framework. No reemplaza tus herramientas de gestión de estado de UI como Zustand, Redux o React Context; las complementa proporcionando una capa robusta para la **Lógica de Negocio e Inteligencia de Datos**.
+`reactive` es agnóstico al framework. No reemplaza tus herramientas de gestión de estado de UI como Zustand, Redux o React Context; las complementa proporcionando una capa robusta para la **Lógica de Negocio e Inteligencia de Datos**.
 
 ## Separación de Responsabilidades
 
@@ -9,7 +9,7 @@ Para construir aplicaciones escalables, recomendamos separar el **Estado de UI**
 | Capa | Responsabilidad | Herramienta Recomendada |
 |-------|----------------|-------------------------|
 | **Estado de UI** | Modales, pestañas, filtros de búsqueda, estados de carga, tema. | Zustand, Redux, `useState`. |
-| **Datos de Dominio** | Lógica de negocio, validación, relaciones, persistencia. | `@beyond-js/reactive` (Items, Collections). |
+| **Datos de Dominio** | Lógica de negocio, validación, relaciones, persistencia. | `reactive` (Items, Collections). |
 
 ---
 
@@ -20,7 +20,7 @@ Zustand es excelente para el acceso al estado global. Puedes almacenar tus insta
 ### 1. Define tu Modelo Reactivo
 
 ```typescript
-import { Item } from '@beyond-js/reactive/entities/item';
+import { Item } from 'reactive/entities/item';
 
 export class UserProfile extends Item<IUser> {
   constructor() {

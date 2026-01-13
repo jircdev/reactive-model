@@ -6,7 +6,7 @@ export function IndexPage() {
 	return (
 		<div className="index-page">
 			<header className="index-header">
-				<h1>@beyond-js/reactive</h1>
+				<h1>reactive</h1>
 				<p className="subtitle">
 					Librería reactiva para gestión de datos con soporte para Items, Collections, 
 					lifecycle hooks, computed properties y sistema de plugins.

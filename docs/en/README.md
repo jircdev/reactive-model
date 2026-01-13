@@ -1,11 +1,11 @@
-# @beyond-js/reactive
+# reactive
 
 ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E)
 ![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
 ![Browser](https://img.shields.io/badge/Browser-4285F4.svg?style=for-the-badge&logo=GoogleChrome&logoColor=white)
 
-`@beyond-js/reactive` is a powerful TypeScript library designed to provide a **Data Intelligence Layer** for your
+`reactive` is a powerful TypeScript library designed to provide a **Data Intelligence Layer** for your
 application. By centralizing business logic, validation, and reactivity within your data structures, it enables
 developers to build scalable, framework-agnostic applications that are incredibly easy for AI agents to understand and
 maintain.
@@ -14,7 +14,7 @@ maintain.
 
 ## 🧭 Documentation Journey
 
-Choose your path to master `@beyond-js/reactive`:
+Choose your path to master `reactive`:
 
 ### 1. Vision and Basics
 
@@ -77,7 +77,7 @@ handle the UI state.
 ## 🚀 Quick Start Snippet
 
 ```typescript
-import { Item } from '@beyond-js/reactive/entities/item';
+import { Item } from 'reactive/entities/item';
 
 class Product extends Item<IProduct> {
 	constructor(data) {

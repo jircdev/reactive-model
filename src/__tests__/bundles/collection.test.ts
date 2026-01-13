@@ -1,5 +1,5 @@
-import { Collection, ICollectionProvider } from '@beyond-js/reactive/entities/collection';
-import { Item, IEntityProvider, IItem } from '@beyond-js/reactive/entities/item';
+import { Collection, ICollectionProvider } from 'reactive/entities/collection';
+import { Item, IEntityProvider, IItem } from 'reactive/entities/item';
 
 // Test interfaces
 interface IUser extends IItem {

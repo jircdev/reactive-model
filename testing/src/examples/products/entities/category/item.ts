@@ -1,4 +1,4 @@
-import { Item } from '@beyond-js/reactive/entities/item';
+import { Item } from 'reactive/entities/item';
 import { CategoryProvider } from './provider';
 import type { ICategory } from './types';
 

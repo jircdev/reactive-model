@@ -1,6 +1,6 @@
 'use strict';
 
-var events = require('@beyond-js/reactive/events');
+var events = require('reactive/events');
 
 /******************************************************************************
 Copyright (c) Microsoft Corporation.

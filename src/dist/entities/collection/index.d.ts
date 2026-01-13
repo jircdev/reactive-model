@@ -1,5 +1,5 @@
-import { ItemId, Item, IItem, IEntityProvider } from '@beyond-js/reactive/entities/item';
-import { ReactiveModel } from '@beyond-js/reactive/model';
+import { ItemId, Item, IItem, IEntityProvider } from 'reactive/entities/item';
+import { ReactiveModel } from 'reactive/model';
 
 /**
  * Standard response format from collection provider operations.

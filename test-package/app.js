@@ -1,6 +1,6 @@
 // Importar usando import maps (definidos en index.html)
-import { Collection } from '@beyond-js/reactive/entities/collection';
-import { Item } from '@beyond-js/reactive/entities/item';
+import { Collection } from 'reactive/entities/collection';
+import { Item } from 'reactive/entities/item';
 
 // Definir interfaz para un Producto
 class Product extends Item {

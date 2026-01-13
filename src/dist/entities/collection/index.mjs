@@ -1,5 +1,5 @@
-import { RegistryFactory } from '@beyond-js/reactive/entities/item';
-import { ReactiveModel, PluginManager } from '@beyond-js/reactive/model';
+import { RegistryFactory } from 'reactive/entities/item';
+import { ReactiveModel, PluginManager } from 'reactive/model';
 
 /******************************************************************************
 Copyright (c) Microsoft Corporation.

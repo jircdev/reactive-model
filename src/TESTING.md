@@ -1,6 +1,6 @@
 # Guía de Testing
 
-Esta guía explica cómo ejecutar y escribir tests para `@beyond-js/reactive`.
+Esta guía explica cómo ejecutar y escribir tests para `reactive`.
 
 ## Estructura de Tests
 
@@ -64,7 +64,7 @@ npm run test:collection
 Los tests en `__tests__/source/` importan directamente desde el código fuente:
 
 ```typescript
-import { ReactiveModel } from '@beyond-js/reactive/model';
+import { ReactiveModel } from 'reactive/model';
 
 describe('Mi Test', () => {
   test('debe funcionar', () => {
@@ -84,7 +84,7 @@ describe('Mi Test', () => {
 Los tests en `__tests__/bundles/` importan desde los bundles compilados:
 
 ```typescript
-import { ReactiveModel } from '@beyond-js/reactive/model';
+import { ReactiveModel } from 'reactive/model';
 
 describe('Mi Test Bundle', () => {
   test('debe funcionar desde bundle', () => {
@@ -179,7 +179,7 @@ const item = new MyItem({ id: '1' });
 ## Ejemplo Completo
 
 ```typescript
-import { Item, IEntityProvider, IItem } from '@beyond-js/reactive/entities/item';
+import { Item, IEntityProvider, IItem } from 'reactive/entities/item';
 
 interface IUser extends IItem {
   name: string;
@@ -219,7 +219,7 @@ describe('User Item', () => {
 
 ## Troubleshooting
 
-### Error: "Cannot find module '@beyond-js/reactive/model'"
+### Error: "Cannot find module 'reactive/model'"
 
 **Para tests sobre código fuente:**
 - Verifica que `jest.config.js` tenga el `moduleNameMapper` correcto

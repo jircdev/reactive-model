@@ -5,7 +5,7 @@ A reactive Map implementation that emits events on changes. Implements `IReactiv
 ## Installation
 
 ```typescript
-import { ReactiveMap } from '@beyond-js/reactive/structures/map';
+import { ReactiveMap } from 'reactive/structures/map';
 ```
 
 ## Basic Usage

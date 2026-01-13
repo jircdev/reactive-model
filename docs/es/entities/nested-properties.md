@@ -41,7 +41,7 @@ properties: [
 ### Item con otro Item como Propiedad
 
 ```typescript
-import { Item } from '@beyond-js/reactive/entities/item';
+import { Item } from 'reactive/entities/item';
 
 // Definir el Item anidado
 interface IProfile {
@@ -124,8 +124,8 @@ user.profile.on('change', () => {
 ### Item con Collection como Propiedad
 
 ```typescript
-import { Item } from '@beyond-js/reactive/entities/item';
-import { Collection } from '@beyond-js/reactive/entities/collection';
+import { Item } from 'reactive/entities/item';
+import { Collection } from 'reactive/entities/collection';
 
 // Item de comentarios
 interface IComment {

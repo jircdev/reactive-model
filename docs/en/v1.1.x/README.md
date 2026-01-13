@@ -1,4 +1,4 @@
-# @beyond-js/reactive
+# reactive
 
 ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E)
@@ -7,7 +7,7 @@
 ![Bun](https://img.shields.io/badge/Bun-%23000000.svg?style=for-the-badge&logo=bun&logoColor=white)
 ![Browser](https://img.shields.io/badge/Browser-4285F4?style=for-the-badge&logo=GoogleChrome&logoColor=white)
 
-`@beyond-js/reactive` is a powerful TypeScript library designed to provide a reactive data layer for your application.
+`reactive` is a powerful TypeScript library designed to provide a reactive data layer for your application.
 By offering tools to create and manage reactive data structures, it enables developers to construct performant and
 scalable applications with ease. It enhances data-driven views or components by reacting to changes and keeping
 everything in sync.
@@ -37,10 +37,10 @@ saving, publishing, and syncing data between a local database (like IndexedDB) a
 
 ## Installation
 
-To add `@beyond-js/reactive` to your project, run:
+To add `reactive` to your project, run:
 
 ```
-npm install @beyond-js/reactive
+npm install reactive
 ```
 
 For more detailed information about the library and how to use it, refer to the individual READMEs of

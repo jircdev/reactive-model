@@ -1,4 +1,4 @@
-import { ReactiveModel, PluginManager } from '@beyond-js/reactive/model';
+import { ReactiveModel, PluginManager } from 'reactive/model';
 import { v7 } from 'uuid';
 
 /******************************************************************************

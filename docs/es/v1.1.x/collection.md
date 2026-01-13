@@ -4,9 +4,9 @@ The `Collection` class extends `ReactiveModel` and represents a collection of re
 the loading, storing, and synchronization of a set of items, both in a local database and on a remote server.
 
 ```typescript
-import { Collection } from "@beyond-js/reactive/entities";
+import { Collection } from "reactive/entities";
 import { User } from "./index";
-import { UserProvider } from "@beyond-js/reactive-tests/backend/provider";
+import { UserProvider } from "reactive-tests/backend/provider";
 interface IUsers {
   items: User[];
 }

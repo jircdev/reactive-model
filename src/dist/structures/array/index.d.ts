@@ -1,5 +1,5 @@
-import { Events } from '@beyond-js/reactive/events';
-import { IReactiveContainer } from '@beyond-js/reactive/model';
+import { Events } from 'reactive/events';
+import { IReactiveContainer } from 'reactive/model';
 
 /**
  * Options for creating a ReactiveArray instance.

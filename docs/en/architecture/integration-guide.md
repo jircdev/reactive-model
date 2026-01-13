@@ -1,6 +1,6 @@
 # Integration Guide: React & Zustand
 
-`@beyond-js/reactive` is framework-agnostic. It doesn't replace your UI state management tools like Zustand, Redux, or React Context; it complements them by providing a robust layer for **Domain Logic and Data Intelligence**.
+`reactive` is framework-agnostic. It doesn't replace your UI state management tools like Zustand, Redux, or React Context; it complements them by providing a robust layer for **Domain Logic and Data Intelligence**.
 
 ## The Separation of Concerns
 
@@ -9,7 +9,7 @@ To build scalable applications, we recommend separating **UI State** from **Doma
 | Layer | Responsibility | Recommended Tool |
 |-------|----------------|------------------|
 | **UI State** | Modals, tabs, search filters, loading states, theme. | Zustand, Redux, `useState`. |
-| **Domain Data** | Business logic, validation, relationships, persistence. | `@beyond-js/reactive` (Items, Collections). |
+| **Domain Data** | Business logic, validation, relationships, persistence. | `reactive` (Items, Collections). |
 
 ---
 
@@ -20,7 +20,7 @@ Zustand is excellent for global state access. You can store your Reactive Model 
 ### 1. Define your Reactive Model
 
 ```typescript
-import { Item } from '@beyond-js/reactive/entities/item';
+import { Item } from 'reactive/entities/item';
 
 export class UserProfile extends Item<IUser> {
   constructor() {

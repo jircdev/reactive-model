@@ -1,5 +1,5 @@
-import { Events } from '@beyond-js/reactive/events';
-import { IReactiveValue } from '@beyond-js/reactive/model';
+import { Events } from 'reactive/events';
+import { IReactiveValue } from 'reactive/model';
 
 /**
  * Base interface for tree node data.

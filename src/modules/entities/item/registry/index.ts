@@ -1,4 +1,4 @@
-import { ReactiveModel } from "@beyond-js/reactive/model";
+import { ReactiveModel } from "reactive/model";
 import { v7 as uuidv7 } from "uuid";
 
 interface IRegistrySpecs {

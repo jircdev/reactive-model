@@ -1,6 +1,6 @@
-# Test Package - @beyond-js/reactive
+# Test Package - reactive
 
-Este es un paquete de prueba simple para validar que `@beyond-js/reactive` funciona correctamente como dependencia local.
+Este es un paquete de prueba simple para validar que `reactive` funciona correctamente como dependencia local.
 
 ## Estructura
 
@@ -19,7 +19,7 @@ cd test-package
 npm install
 ```
 
-Esto instalará `@beyond-js/reactive` desde `../src` como dependencia local.
+Esto instalará `reactive` desde `../src` como dependencia local.
 
 ## Ejecución
 
@@ -80,7 +80,7 @@ El paquete incluye 8 productos de ejemplo en diferentes categorías:
 
 Este paquete valida:
 - ✅ Instalación de dependencia local
-- ✅ Importación de bundles (`@beyond-js/reactive/entities/collection`)
+- ✅ Importación de bundles (`reactive/entities/collection`)
 - ✅ Creación de Items y Collections
 - ✅ Carga de datos desde provider
 - ✅ Filtrado de datos

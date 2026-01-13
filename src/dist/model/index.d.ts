@@ -1,5 +1,5 @@
 import { ZodError, ZodObject, ZodTypeAny } from 'zod';
-import { Events } from '@beyond-js/reactive/events';
+import { Events } from 'reactive/events';
 
 type PropertyValidationErrors<T> = Partial<Record<keyof T, ValidatedPropertyType>>;
 /**

@@ -1,4 +1,4 @@
-# @beyond-js/reactive
+# reactive
 
 ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E)
@@ -7,7 +7,7 @@
 ![Bun](https://img.shields.io/badge/Bun-%23000000.svg?style=for-the-badge&logo=bun&logoColor=white)
 ![Browser](https://img.shields.io/badge/Browser-4285F4.svg?style=for-the-badge&logo=GoogleChrome&logoColor=white)
 
-`@beyond-js/reactive` is a powerful TypeScript library designed to provide a reactive data layer for your application.
+`reactive` is a powerful TypeScript library designed to provide a reactive data layer for your application.
 By offering tools to create and manage reactive data structures, it enables developers to construct performant and
 scalable applications with ease. It enhances data-driven views or components by reacting to changes and keeping
 everything in sync.
@@ -104,7 +104,7 @@ Both concepts are designed to work with **Providers** that handle data access lo
 ### Basic Item
 
 ```typescript
-import { Item } from '@beyond-js/reactive/entities/item';
+import { Item } from 'reactive/entities/item';
 
 class User extends Item<IUser, UserProvider> {
 	constructor() {
@@ -134,7 +134,7 @@ const { name, email } = user;
 ### Basic Collection
 
 ```typescript
-import { Collection } from '@beyond-js/reactive/entities/collection';
+import { Collection } from 'reactive/entities/collection';
 
 class Users extends Collection<User, UserProvider> {
 	constructor() {
@@ -190,15 +190,15 @@ If you're new to Reactive Model, we recommend reading the documentation in this 
 
 ## 📦 Installation
 
-To add `@beyond-js/reactive` to your project, run:
+To add `reactive` to your project, run:
 
 ```bash
-npm install @beyond-js/reactive
+npm install reactive
 ```
 
 ## 🤝 Contributing
 
-Contributions, issues, and feature requests are welcome! We appreciate your interest in improving `@beyond-js/reactive`.
+Contributions, issues, and feature requests are welcome! We appreciate your interest in improving `reactive`.
 
 ### How to Contribute
 

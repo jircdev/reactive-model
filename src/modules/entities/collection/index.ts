@@ -1,5 +1,5 @@
-import { Item, ItemId, IEntityProvider, RegistryFactory, IItem } from '@beyond-js/reactive/entities/item';
-import { ReactiveModel, PluginManager } from '@beyond-js/reactive/model';
+import { Item, ItemId, IEntityProvider, RegistryFactory, IItem } from 'reactive/entities/item';
+import { ReactiveModel, PluginManager } from 'reactive/model';
 import { ICollectionOptions, ICollectionProvider, ILoadSpecs } from './types';
 
 // Re-export types for external use

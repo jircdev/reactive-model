@@ -1,17 +1,17 @@
-# @beyond-js/reactive
+# reactive
 
 ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E)
 ![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
 ![Browser](https://img.shields.io/badge/Browser-4285F4.svg?style=for-the-badge&logo=GoogleChrome&logoColor=white)
 
-`@beyond-js/reactive` es una potente librería TypeScript diseñada para proporcionar una **Capa de Inteligencia de Datos** para tu aplicación. Al centralizar la lógica de negocio, la validación y la reactividad dentro de tus estructuras de datos, permite a los desarrolladores construir aplicaciones escalables y agnósticas al framework que son increíblemente fáciles de entender y mantener para agentes de IA.
+`reactive` es una potente librería TypeScript diseñada para proporcionar una **Capa de Inteligencia de Datos** para tu aplicación. Al centralizar la lógica de negocio, la validación y la reactividad dentro de tus estructuras de datos, permite a los desarrolladores construir aplicaciones escalables y agnósticas al framework que son increíblemente fáciles de entender y mantener para agentes de IA.
 
 ---
 
 ## 🧭 Ruta de Aprendizaje
 
-Elige tu camino para dominar `@beyond-js/reactive`:
+Elige tu camino para dominar `reactive`:
 
 ### 1. Visión y Conceptos Básicos
 -   **[Filosofía y Visión](./philosophy.md)**: Por qué la lógica de negocio pertenece a los datos y cómo impacta en el desarrollo con IA.
@@ -60,7 +60,7 @@ Compatible con React, Vue, Svelte o Node.js. No reemplaza a Zustand o Redux; man
 ## 🚀 Fragmento de Inicio Rápido
 
 ```typescript
-import { Item } from '@beyond-js/reactive/entities/item';
+import { Item } from 'reactive/entities/item';
 
 class Producto extends Item<IProduct> {
   constructor(data) {

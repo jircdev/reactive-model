@@ -5,7 +5,7 @@ Una estructura de datos de árbol reactivo para datos jerárquicos. Cada nodo im
 ## Instalación
 
 ```typescript
-import { ReactiveTree, ReactiveTreeNode, ITreeNodeData } from '@beyond-js/reactive/structures/tree';
+import { ReactiveTree, ReactiveTreeNode, ITreeNodeData } from 'reactive/structures/tree';
 ```
 
 ## Uso Básico
