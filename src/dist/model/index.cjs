@@ -1,7 +1,7 @@
 'use strict';
 
 var zod = require('zod');
-var events = require('@beyond-js/reactive/events');
+var events = require('reactive/events');
 
 /******************************************************************************
 Copyright (c) Microsoft Corporation.

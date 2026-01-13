@@ -1,4 +1,4 @@
-import { ReactiveModel, EntityProperty, IReactiveValue, SetPropertiesResult } from '@beyond-js/reactive/model';
+import { ReactiveModel, EntityProperty, IReactiveValue, SetPropertiesResult } from 'reactive/model';
 
 interface IRegistrySpecs {
     id?: any;

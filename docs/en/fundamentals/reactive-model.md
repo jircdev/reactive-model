@@ -85,7 +85,7 @@ interface IReactiveModelOptions<T> {
 ### Basic Example
 
 ```typescript
-import { ReactiveModel } from '@beyond-js/reactive/model';
+import { ReactiveModel } from 'reactive/model';
 
 interface IUser {
 	id: string;
@@ -284,7 +284,7 @@ Define the schema using a **`schema` getter** (not a normal property):
 
 ```typescript
 import { z } from 'zod';
-import { ReactiveModel } from '@beyond-js/reactive/model';
+import { ReactiveModel } from 'reactive/model';
 
 interface IUser {
 	id: string;
@@ -599,7 +599,7 @@ await model.setAsync({ name: 'Test' });
 ReactiveModel includes a plugin system for extending behavior globally. See the [Plugins documentation](../advanced/plugins.md) for details.
 
 ```typescript
-import { PluginManager, IReactivePlugin } from '@beyond-js/reactive/model';
+import { PluginManager, IReactivePlugin } from 'reactive/model';
 
 const loggingPlugin: IReactivePlugin = {
   name: 'logging',

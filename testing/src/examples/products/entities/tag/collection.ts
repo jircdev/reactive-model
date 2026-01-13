@@ -1,4 +1,4 @@
-import { Collection } from '@beyond-js/reactive/entities/collection';
+import { Collection } from 'reactive/entities/collection';
 import { Tag } from './item';
 import { TagProvider } from './provider';
 

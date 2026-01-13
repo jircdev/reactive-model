@@ -5,7 +5,7 @@ A reactive tree data structure for hierarchical data. Each node implements `IRea
 ## Installation
 
 ```typescript
-import { ReactiveTree, ReactiveTreeNode, ITreeNodeData } from '@beyond-js/reactive/structures/tree';
+import { ReactiveTree, ReactiveTreeNode, ITreeNodeData } from 'reactive/structures/tree';
 ```
 
 ## Basic Usage

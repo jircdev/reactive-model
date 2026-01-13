@@ -41,7 +41,7 @@ properties: [
 ### Item with another Item as a Property
 
 ```typescript
-import { Item } from '@beyond-js/reactive/entities/item';
+import { Item } from 'reactive/entities/item';
 
 // Define the nested Item
 interface IProfile {
@@ -124,8 +124,8 @@ user.profile.on('change', () => {
 ### Item with a Collection as a Property
 
 ```typescript
-import { Item } from '@beyond-js/reactive/entities/item';
-import { Collection } from '@beyond-js/reactive/entities/collection';
+import { Item } from 'reactive/entities/item';
+import { Collection } from 'reactive/entities/collection';
 
 // Comment item
 interface IComment {

@@ -5,7 +5,7 @@ este proyecto.
 
 ## 📋 Información del Proyecto
 
-**Nombre:** `@beyond-js/reactive`  
+**Nombre:** `reactive`  
 **Tipo:** Librería TypeScript  
 **Versión:** 3.0.0  
 **Descripción:** Librería reactiva para gestión de datos con soporte para Items, Collections, modelos reactivos,
@@ -97,8 +97,8 @@ Los imports usan **bare specifiers** (no relativos):
 
 ```typescript
 // ✅ Correcto
-import { ReactiveModel } from '@beyond-js/reactive/model';
-import { Item } from '@beyond-js/reactive/entities/item';
+import { ReactiveModel } from 'reactive/model';
+import { Item } from 'reactive/entities/item';
 
 // ❌ Incorrecto (no usar imports relativos)
 import { ReactiveModel } from '../../model/index';
@@ -149,7 +149,7 @@ npm run test:coverage      # Con cobertura
 -   `uuid` - Generación de IDs
 -   `zod` - Validación
 
-> **Nota**: El sistema de eventos (`Events`) está incluido localmente en `@beyond-js/reactive/events`, no es una
+> **Nota**: El sistema de eventos (`Events`) está incluido localmente en `reactive/events`, no es una
 > dependencia externa.
 
 ### Desarrollo
@@ -204,7 +204,7 @@ npm run test:coverage     # Verificar cobertura
 
 ### Imports
 
--   **Siempre** usar bare specifiers: `@beyond-js/reactive/model`
+-   **Siempre** usar bare specifiers: `reactive/model`
 -   **Nunca** usar imports relativos entre bundles
 
 ### TypeScript
@@ -281,7 +281,7 @@ npm run test:coverage     # Verificar cobertura
 
 ### Imports no resuelven
 
--   Verificar que se usen bare specifiers: `@beyond-js/reactive/model`
+-   Verificar que se usen bare specifiers: `reactive/model`
 -   Verificar `moduleNameMapper` en configuración Jest
 -   Verificar `exports` en `package.json`
 
@@ -311,16 +311,16 @@ El paquete exporta 7 bundles:
 
 ```typescript
 // Core
-import { ReactiveModel, IReactiveValue, isReactiveValue } from '@beyond-js/reactive/model';
+import { ReactiveModel, IReactiveValue, isReactiveValue } from 'reactive/model';
 
 // Entities
-import { Item } from '@beyond-js/reactive/entities/item';
-import { Collection } from '@beyond-js/reactive/entities/collection';
+import { Item } from 'reactive/entities/item';
+import { Collection } from 'reactive/entities/collection';
 
 // Structures (v3.0)
-import { ReactiveMap } from '@beyond-js/reactive/structures/map';
-import { ReactiveArray } from '@beyond-js/reactive/structures/array';
-import { ReactiveTree } from '@beyond-js/reactive/structures/tree';
+import { ReactiveMap } from 'reactive/structures/map';
+import { ReactiveArray } from 'reactive/structures/array';
+import { ReactiveTree } from 'reactive/structures/tree';
 ```
 
 ## 💡 Tips para Agentes AI
@@ -367,7 +367,7 @@ tree.addNode('root', { id: 'electronics', name: 'Electronics' });
 ### Type Guards
 
 ```typescript
-import { isReactiveValue, isReactiveContainer } from '@beyond-js/reactive/model';
+import { isReactiveValue, isReactiveContainer } from 'reactive/model';
 
 // ✅ Correcto (v3.0)
 if (isReactiveValue(value)) {
@@ -409,7 +409,7 @@ export interface I${EntityName} {
 
 ```typescript
 // item.ts
-import { Item } from '@beyond-js/reactive/entities/item';
+import { Item } from 'reactive/entities/item';
 import { ${EntityName}Provider } from './provider';
 import type { I${EntityName} } from './types';
 
@@ -444,7 +444,7 @@ export class ${EntityName} extends Item<I${EntityName}, ${EntityName}Provider> {
 
 ```typescript
 // collection.ts
-import { Collection } from '@beyond-js/reactive/entities/collection';
+import { Collection } from 'reactive/entities/collection';
 import { ${EntityName} } from './item';
 import { ${EntityName}sProvider } from './provider';
 
@@ -476,7 +476,7 @@ export class ${EntityName}s extends Collection<${EntityName}, ${EntityName}sProv
 
 ```typescript
 // provider.ts
-import { IEntityProvider, IItemProviderResponse } from '@beyond-js/reactive/entities/item';
+import { IEntityProvider, IItemProviderResponse } from 'reactive/entities/item';
 import type { I${EntityName} } from './types';
 
 export class ${EntityName}Provider implements IEntityProvider {
@@ -526,7 +526,7 @@ export class ${EntityName}Provider implements IEntityProvider {
 
 ```typescript
 // collection-provider.ts
-import { ICollectionProvider, IListResponse } from '@beyond-js/reactive/entities/collection';
+import { ICollectionProvider, IListResponse } from 'reactive/entities/collection';
 import type { I${EntityName} } from './types';
 
 export class ${EntityName}sProvider implements ICollectionProvider {
@@ -616,7 +616,7 @@ export class ${EntityName}Service {
 
 ```typescript
 // item-with-computed.ts
-import { Item } from '@beyond-js/reactive/entities/item';
+import { Item } from 'reactive/entities/item';
 
 interface IOrder {
 	id: string;
@@ -654,7 +654,7 @@ export class Order extends Item<IOrder> {
 
 ```typescript
 // my-plugin.ts
-import { IReactivePlugin, PluginManager } from '@beyond-js/reactive/model';
+import { IReactivePlugin, PluginManager } from 'reactive/model';
 
 const myPlugin: IReactivePlugin = {
 	name: 'my-plugin',

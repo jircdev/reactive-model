@@ -1,5 +1,5 @@
 import type { IProduct } from './types';
-import type { IItemProviderResponse } from '@beyond-js/reactive/entities/item';
+import type { IItemProviderResponse } from 'reactive/entities/item';
 
 /**
  * Mock data for products

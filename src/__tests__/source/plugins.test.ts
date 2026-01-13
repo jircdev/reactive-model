@@ -1,6 +1,6 @@
-import { PluginManager, IReactivePlugin } from '@beyond-js/reactive/model';
-import { Item } from '@beyond-js/reactive/entities/item';
-import { Collection } from '@beyond-js/reactive/entities/collection';
+import { PluginManager, IReactivePlugin } from 'reactive/model';
+import { Item } from 'reactive/entities/item';
+import { Collection } from 'reactive/entities/collection';
 
 interface ITestItem {
 	id: string;

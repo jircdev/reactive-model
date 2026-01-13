@@ -37,7 +37,7 @@ class MyCustomAdapter implements IResponseAdapter {
 To set the custom adapter as the default for all instances:
 
 ```typescript
-import { ReactiveConfig } from '@beyond-js/reactive/settings';
+import { ReactiveConfig } from 'reactive/settings';
 
 ReactiveConfig.set({
 	adapter: MyCustomAdapter,

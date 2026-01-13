@@ -87,7 +87,7 @@ interface IReactiveModelOptions<T> {
 ### Ejemplo Básico
 
 ```typescript
-import { ReactiveModel } from '@beyond-js/reactive/model';
+import { ReactiveModel } from 'reactive/model';
 
 interface IUser {
 	id: string;
@@ -362,7 +362,7 @@ Define el esquema usando un **getter `schema`** (no una propiedad normal):
 
 ```typescript
 import { z } from 'zod';
-import { ReactiveModel } from '@beyond-js/reactive/model';
+import { ReactiveModel } from 'reactive/model';
 
 interface IUser {
 	id: string;
@@ -723,7 +723,7 @@ properties: [
 ## 📚 Ejemplo Completo
 
 ```typescript
-import { ReactiveModel } from '@beyond-js/reactive/model';
+import { ReactiveModel } from 'reactive/model';
 import { z } from 'zod';
 
 interface IUser {

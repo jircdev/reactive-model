@@ -1,4 +1,4 @@
-import { Item } from '@beyond-js/reactive/entities/item';
+import { Item } from 'reactive/entities/item';
 import { ProductProvider } from './provider';
 import type { IProduct } from './types';
 

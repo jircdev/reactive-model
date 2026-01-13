@@ -1,5 +1,5 @@
-import { Collection } from '@beyond-js/reactive/entities/collection';
-import { Item } from '@beyond-js/reactive/entities/item';
+import { Collection } from 'reactive/entities/collection';
+import { Item } from 'reactive/entities/item';
 
 // Definir interfaz para un Producto
 class Product extends Item {
@@ -98,7 +98,7 @@ function displayProducts(products) {
 
 // Función principal
 async function main() {
-	console.log('🚀 Iniciando test de @beyond-js/reactive\n');
+	console.log('🚀 Iniciando test de reactive\n');
 
 	try {
 		// Crear colección

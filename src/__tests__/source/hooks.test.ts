@@ -1,6 +1,6 @@
-import { ReactiveModel, SetPropertiesResult } from '@beyond-js/reactive/model';
-import { Item } from '@beyond-js/reactive/entities/item';
-import { Collection } from '@beyond-js/reactive/entities/collection';
+import { ReactiveModel, SetPropertiesResult } from 'reactive/model';
+import { Item } from 'reactive/entities/item';
+import { Collection } from 'reactive/entities/collection';
 
 // Test interfaces
 interface ITestModel {

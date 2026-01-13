@@ -2,7 +2,7 @@
 
 ## Data-First, Framework-Agnostic
 
-`@beyond-js/reactive` is built on the belief that **business logic belongs to the data**, not the UI components. In modern frontend development, we often leak complex validation, relationship management, and state logic into our React components or UI state managers like Zustand or Redux.
+`reactive` is built on the belief that **business logic belongs to the data**, not the UI components. In modern frontend development, we often leak complex validation, relationship management, and state logic into our React components or UI state managers like Zustand or Redux.
 
 This library provides a dedicated **Data Intelligence Layer** that handles the "truth" of your application, while your favorite UI tools handle the "presentation".
 
@@ -25,7 +25,7 @@ When an AI reads a `ReactiveModel` or `Item`, it immediately understands:
 -   The relationships between entities (nested properties).
 
 ### 2. Reduced Hallucination
-AI agents often guess how to update state or where to find a specific logic. With `@beyond-js/reactive`, the logic is encapsulated within the model. The AI doesn't need to "invent" a way to save a user; it simply calls `user.publish()`.
+AI agents often guess how to update state or where to find a specific logic. With `reactive`, the logic is encapsulated within the model. The AI doesn't need to "invent" a way to save a user; it simply calls `user.publish()`.
 
 ### 3. Clear Intent
 Because the models emit specific events (e.g., `name.changed`), the AI can reason about the side effects of an action without having to trace complex UI state flows.

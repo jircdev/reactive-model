@@ -1,7 +1,7 @@
 'use strict';
 
-var item = require('@beyond-js/reactive/entities/item');
-var model = require('@beyond-js/reactive/model');
+var item = require('reactive/entities/item');
+var model = require('reactive/model');
 
 /******************************************************************************
 Copyright (c) Microsoft Corporation.

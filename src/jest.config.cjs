@@ -5,10 +5,13 @@ module.exports = {
 	testMatch: ['**/__tests__/source/**/*.test.ts'],
 	moduleNameMapper: {
 		// Para tests sobre código fuente: mapear a modules/
-		'^@beyond-js/reactive/events$': '<rootDir>/modules/events/index.ts',
-		'^@beyond-js/reactive/model$': '<rootDir>/modules/model/index.ts',
-		'^@beyond-js/reactive/entities/item$': '<rootDir>/modules/entities/item/index.ts',
-		'^@beyond-js/reactive/entities/collection$': '<rootDir>/modules/entities/collection/index.ts',
+		'^reactive/events$': '<rootDir>/modules/events/index.ts',
+		'^reactive/model$': '<rootDir>/modules/model/index.ts',
+		'^reactive/entities/item$': '<rootDir>/modules/entities/item/index.ts',
+		'^reactive/entities/collection$': '<rootDir>/modules/entities/collection/index.ts',
+		'^reactive/structures/map$': '<rootDir>/modules/structures/map/index.ts',
+		'^reactive/structures/array$': '<rootDir>/modules/structures/array/index.ts',
+		'^reactive/structures/tree$': '<rootDir>/modules/structures/tree/index.ts',
 	},
 	transform: {
 		'^.+\\.ts$': [

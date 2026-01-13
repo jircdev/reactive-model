@@ -5,9 +5,9 @@ module.exports = {
 	testMatch: ['**/__tests__/bundles/**/*.test.ts'],
 	moduleNameMapper: {
 		// Para tests sobre bundles: mapear a dist/
-		'^@beyond-js/reactive/model$': '<rootDir>/dist/model/index.mjs',
-		'^@beyond-js/reactive/entities/item$': '<rootDir>/dist/entities/item/index.mjs',
-		'^@beyond-js/reactive/entities/collection$': '<rootDir>/dist/entities/collection/index.mjs',
+		'^reactive/model$': '<rootDir>/dist/model/index.mjs',
+		'^reactive/entities/item$': '<rootDir>/dist/entities/item/index.mjs',
+		'^reactive/entities/collection$': '<rootDir>/dist/entities/collection/index.mjs',
 	},
 	transform: {
 		'^.+\\.ts$': [

@@ -7,7 +7,7 @@ export function Layout() {
 		<div className="layout">
 			<aside className="sidebar">
 				<div className="sidebar-header">
-					<h1>@beyond-js/reactive</h1>
+					<h1>reactive</h1>
 					<span className="version">v2.3.0</span>
 				</div>
 				<nav className="nav">

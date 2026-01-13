@@ -6,13 +6,13 @@ import { nodeResolve } from '@rollup/plugin-node-resolve';
 const baseExternal = [
 	'zod',
 	'uuid',
-	'@beyond-js/reactive/model',
-	'@beyond-js/reactive/entities/item',
-	'@beyond-js/reactive/entities/collection',
-	'@beyond-js/reactive/events',
-	'@beyond-js/reactive/structures/map',
-	'@beyond-js/reactive/structures/array',
-	'@beyond-js/reactive/structures/tree',
+	'reactive/model',
+	'reactive/entities/item',
+	'reactive/entities/collection',
+	'reactive/events',
+	'reactive/structures/map',
+	'reactive/structures/array',
+	'reactive/structures/tree',
 ];
 
 // Función para verificar si un módulo es externo
@@ -72,34 +72,34 @@ export default [
 	...createBundleConfig('modules/events/index.ts', 'dist/events', 'events', []),
 
 	// Bundle: model (depende de events)
-	...createBundleConfig('modules/model/index.ts', 'dist/model', 'model', ['@beyond-js/reactive/events']),
+	...createBundleConfig('modules/model/index.ts', 'dist/model', 'model', ['reactive/events']),
 
 	// Bundle: structures/map (depende de events y model)
 	...createBundleConfig('modules/structures/map/index.ts', 'dist/structures/map', 'structures/map', [
-		'@beyond-js/reactive/events',
-		'@beyond-js/reactive/model',
+		'reactive/events',
+		'reactive/model',
 	]),
 
 	// Bundle: structures/array (depende de events y model)
 	...createBundleConfig('modules/structures/array/index.ts', 'dist/structures/array', 'structures/array', [
-		'@beyond-js/reactive/events',
-		'@beyond-js/reactive/model',
+		'reactive/events',
+		'reactive/model',
 	]),
 
 	// Bundle: structures/tree (depende de events y model)
 	...createBundleConfig('modules/structures/tree/index.ts', 'dist/structures/tree', 'structures/tree', [
-		'@beyond-js/reactive/events',
-		'@beyond-js/reactive/model',
+		'reactive/events',
+		'reactive/model',
 	]),
 
 	// Bundle: entities/item
 	...createBundleConfig('modules/entities/item/index.ts', 'dist/entities/item', 'entities/item', [
-		'@beyond-js/reactive/model',
+		'reactive/model',
 	]),
 
 	// Bundle: entities/collection
 	...createBundleConfig('modules/entities/collection/index.ts', 'dist/entities/collection', 'entities/collection', [
-		'@beyond-js/reactive/model',
-		'@beyond-js/reactive/entities/item',
+		'reactive/model',
+		'reactive/entities/item',
 	]),
 ];

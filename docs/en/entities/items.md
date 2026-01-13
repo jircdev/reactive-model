@@ -164,7 +164,7 @@ interface IEntityProvider {
 ### Provider Example
 
 ```typescript
-import { IEntityProvider } from '@beyond-js/reactive/entities/item';
+import { IEntityProvider } from 'reactive/entities/item';
 
 export class UserProvider implements IEntityProvider {
   constructor(private parent: any) {}

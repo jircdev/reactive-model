@@ -1,4 +1,4 @@
-import { Item, IEntityProvider, IItem } from '@beyond-js/reactive/entities/item';
+import { Item, IEntityProvider, IItem } from 'reactive/entities/item';
 
 // Test interface
 interface IUser extends IItem {

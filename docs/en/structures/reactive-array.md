@@ -5,7 +5,7 @@ A reactive Array implementation that emits events on changes. Implements `IReact
 ## Installation
 
 ```typescript
-import { ReactiveArray } from '@beyond-js/reactive/structures/array';
+import { ReactiveArray } from 'reactive/structures/array';
 ```
 
 ## Basic Usage

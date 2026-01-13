@@ -1,4 +1,4 @@
-import { ReactiveModel } from '@beyond-js/reactive/model';
+import { ReactiveModel } from 'reactive/model';
 import type { ICart, ICartItem } from './types';
 import type { Product } from '../product';
 

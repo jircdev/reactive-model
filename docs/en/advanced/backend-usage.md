@@ -15,14 +15,14 @@ ReactiveModel is designed to work seamlessly on both frontend and backend. This 
 ### Node.js / Bun
 
 ```bash
-npm install @beyond-js/reactive
+npm install reactive
 ```
 
 ```typescript
 // Import the same way as on frontend
-import { ReactiveModel } from '@beyond-js/reactive/model';
-import { Item } from '@beyond-js/reactive/entities/item';
-import { Collection } from '@beyond-js/reactive/entities/collection';
+import { ReactiveModel } from 'reactive/model';
+import { Item } from 'reactive/entities/item';
+import { Collection } from 'reactive/entities/collection';
 ```
 
 ## Universal Code Architecture
@@ -59,7 +59,7 @@ The key to universal code is separating the domain logic (shared) from the data 
 
 ```typescript
 // packages/core/entities/user/item.ts
-import { Item } from '@beyond-js/reactive/entities/item';
+import { Item } from 'reactive/entities/item';
 import type { IUser, IUserProvider } from './types';
 
 export class User extends Item<IUser, IUserProvider> {
@@ -228,8 +228,8 @@ export default router;
 
 ```typescript
 // websocket/room.ts
-import { ReactiveModel } from '@beyond-js/reactive/model';
-import { Collection } from '@beyond-js/reactive/entities/collection';
+import { ReactiveModel } from 'reactive/model';
+import { Collection } from 'reactive/entities/collection';
 
 interface IRoomState {
   id: string;
@@ -296,7 +296,7 @@ class RoomManager {
 
 ```typescript
 // jobs/sync.job.ts
-import { ReactiveModel } from '@beyond-js/reactive/model';
+import { ReactiveModel } from 'reactive/model';
 
 interface ISyncJobState {
   id: string;
@@ -371,7 +371,7 @@ await job.run(items);
 
 ```typescript
 // events/event-store.ts
-import { ReactiveModel } from '@beyond-js/reactive/model';
+import { ReactiveModel } from 'reactive/model';
 
 interface IAggregate {
   id: string;
@@ -486,7 +486,7 @@ The Registry (Identity Map) caches entities in memory. On backend, you may want 
 
 ```typescript
 // Clear registries periodically for long-running processes
-import { RegistryFactory } from '@beyond-js/reactive/entities/item';
+import { RegistryFactory } from 'reactive/entities/item';
 
 // Clear all registries
 RegistryFactory.clearAll();

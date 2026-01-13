@@ -17,13 +17,13 @@
 		"jsx": "react",
 		"baseUrl": ".",
 		"paths": {
-			"@beyond-js/reactive/events": ["./modules/events/index.ts"],
-			"@beyond-js/reactive/model": ["./modules/model/index.ts"],
-			"@beyond-js/reactive/entities/item": ["./modules/entities/item/index.ts"],
-			"@beyond-js/reactive/entities/collection": ["./modules/entities/collection/index.ts"],
-			"@beyond-js/reactive/structures/map": ["./modules/structures/map/index.ts"],
-			"@beyond-js/reactive/structures/array": ["./modules/structures/array/index.ts"],
-			"@beyond-js/reactive/structures/tree": ["./modules/structures/tree/index.ts"]
+			"reactive/events": ["./modules/events/index.ts"],
+			"reactive/model": ["./modules/model/index.ts"],
+			"reactive/entities/item": ["./modules/entities/item/index.ts"],
+			"reactive/entities/collection": ["./modules/entities/collection/index.ts"],
+			"reactive/structures/map": ["./modules/structures/map/index.ts"],
+			"reactive/structures/array": ["./modules/structures/array/index.ts"],
+			"reactive/structures/tree": ["./modules/structures/tree/index.ts"]
 		}
 	},
 	"include": ["modules/**/*", "__tests__/**/*"],

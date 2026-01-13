@@ -1,5 +1,5 @@
 import { ZodError } from 'zod';
-import { Events } from '@beyond-js/reactive/events';
+import { Events } from 'reactive/events';
 
 /******************************************************************************
 Copyright (c) Microsoft Corporation.

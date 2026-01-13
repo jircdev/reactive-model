@@ -1,4 +1,4 @@
-import { Events } from '@beyond-js/reactive/events';
+import { Events } from 'reactive/events';
 import type { ITreeNodeData, IReactiveTreeNode } from './types';
 
 /**

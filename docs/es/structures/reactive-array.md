@@ -5,7 +5,7 @@ Una implementación de Array reactivo que emite eventos en cambios. Implementa `
 ## Instalación
 
 ```typescript
-import { ReactiveArray } from '@beyond-js/reactive/structures/array';
+import { ReactiveArray } from 'reactive/structures/array';
 ```
 
 ## Uso Básico

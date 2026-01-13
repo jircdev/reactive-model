@@ -2,11 +2,11 @@
 
 ### Changed
 
--   **Events System Integration**: The `@beyond-js/events` dependency has been removed and the Events system is now included as part of the `@beyond-js/reactive` package.
-    -   Previously, `@beyond-js/reactive` depended on `@beyond-js/events` as an external dependency.
-    -   Now, the Events class and its related types are bundled as part of the package under the `@beyond-js/reactive/events` export.
+-   **Events System Integration**: The `@beyond-js/events` dependency has been removed and the Events system is now included as part of the `reactive` package.
+    -   Previously, `reactive` depended on `@beyond-js/events` as an external dependency.
+    -   Now, the Events class and its related types are bundled as part of the package under the `reactive/events` export.
     -   This change eliminates the need for `@beyond-js/events` and `@beyond-js/kernel` as external dependencies, making the package more self-contained.
-    -   **Migration**: If you were importing `Events` from `@beyond-js/events/events`, update your imports to use `@beyond-js/reactive/events` instead.
+    -   **Migration**: If you were importing `Events` from `@beyond-js/events/events`, update your imports to use `reactive/events` instead.
     -   **Impact**: This is a minor version bump as it maintains API compatibility while reducing external dependencies.
 
 ## 2.1.4
@@ -115,8 +115,8 @@ defined via a `get` property.
 
     - In versions `1.1.x`, both `Item` and `Collection` objects were located under a single subpath.
     - Now, each has its **own** subpath:
-        - `@beyond-js/reactive/entities/item`
-        - `@beyond-js/reactive/entities/collection`
+        - `reactive/entities/item`
+        - `reactive/entities/collection`
     - This change **requires updating your imports**.
 
 2. **Constructor Property Definitions**

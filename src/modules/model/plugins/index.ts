@@ -6,7 +6,7 @@
  *
  * @example
  * ```typescript
- * import { PluginManager, IReactivePlugin } from '@beyond-js/reactive/model';
+ * import { PluginManager, IReactivePlugin } from 'reactive/model';
  *
  * // Create a simple logging plugin
  * const loggingPlugin: IReactivePlugin = {

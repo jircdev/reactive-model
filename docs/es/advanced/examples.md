@@ -23,7 +23,7 @@ Este documento contiene ejemplos prácticos de uso de **Items** y **Colecciones*
 ### Crear un Item básico
 
 ```typescript
-import { Item } from '@beyond-js/reactive/entities/item';
+import { Item } from 'reactive/entities/item';
 
 interface IProduct {
   id: string;
@@ -73,7 +73,7 @@ console.log(product.formattedPrice); // "$999.99"
 ### Item con Provider
 
 ```typescript
-import { Item, IEntityProvider } from '@beyond-js/reactive/entities/item';
+import { Item, IEntityProvider } from 'reactive/entities/item';
 
 class ProductProvider implements IEntityProvider {
   constructor(private parent: Product) {}
@@ -161,7 +161,7 @@ async function ejemplo() {
 ### Colección básica
 
 ```typescript
-import { Collection } from '@beyond-js/reactive/entities/collection';
+import { Collection } from 'reactive/entities/collection';
 import { Product } from './product';
 
 class ProductsProvider {
@@ -211,7 +211,7 @@ async function ejemplo() {
 ### Filtros y búsqueda
 
 ```typescript
-import { Collection } from '@beyond-js/reactive/entities/collection';
+import { Collection } from 'reactive/entities/collection';
 import { User } from './user';
 
 export class Users extends Collection<User> {
@@ -260,10 +260,10 @@ async function ejemplo() {
 ### Sistema de usuarios completo
 
 ```typescript
-import { Item } from '@beyond-js/reactive/entities/item';
-import { Collection } from '@beyond-js/reactive/entities/collection';
-import { IEntityProvider } from '@beyond-js/reactive/entities/item';
-import { ICollectionProvider } from '@beyond-js/reactive/entities/collection';
+import { Item } from 'reactive/entities/item';
+import { Collection } from 'reactive/entities/collection';
+import { IEntityProvider } from 'reactive/entities/item';
+import { ICollectionProvider } from 'reactive/entities/collection';
 
 interface IUser {
   id: string;

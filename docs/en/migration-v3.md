@@ -63,7 +63,7 @@ if (instance.isCollection) {
 
 **After (v3.0):**
 ```typescript
-import { isReactiveValue, isReactiveContainer } from '@beyond-js/reactive/model';
+import { isReactiveValue, isReactiveContainer } from 'reactive/model';
 
 if (isReactiveContainer(instance)) {
 	instance.setItems(data);
@@ -165,7 +165,7 @@ collection.deleteAsync(ids);
 ### ReactiveMap
 
 ```typescript
-import { ReactiveMap } from '@beyond-js/reactive/structures/map';
+import { ReactiveMap } from 'reactive/structures/map';
 
 const map = new ReactiveMap<string, User>({
 	keyExtractor: user => user.id,
@@ -178,7 +178,7 @@ map.on('change', () => console.log('Changed'));
 ### ReactiveArray
 
 ```typescript
-import { ReactiveArray } from '@beyond-js/reactive/structures/array';
+import { ReactiveArray } from 'reactive/structures/array';
 
 const arr = new ReactiveArray<number>({ items: [1, 2, 3] });
 
@@ -189,7 +189,7 @@ arr.on('add', ({ items }) => console.log('Added:', items));
 ### ReactiveTree
 
 ```typescript
-import { ReactiveTree } from '@beyond-js/reactive/structures/tree';
+import { ReactiveTree } from 'reactive/structures/tree';
 
 const tree = new ReactiveTree<Category>({
 	root: { id: 'root', name: 'Categories' },
@@ -206,7 +206,7 @@ tree.addNode('electronics', { id: 'phones', name: 'Phones' });
 ### Step 1: Update Package
 
 ```bash
-npm install @beyond-js/reactive@^3.0.0
+npm install reactive@^3.0.0
 ```
 
 ### Step 2: Fix Collection.map Usage
@@ -230,7 +230,7 @@ if (value.isReactive)
 
 With:
 ```typescript
-import { isReactiveValue, isReactiveContainer } from '@beyond-js/reactive/model';
+import { isReactiveValue, isReactiveContainer } from 'reactive/model';
 
 if (isReactiveContainer(value))
 if (isReactiveValue(value))

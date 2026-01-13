@@ -1,6 +1,6 @@
 'use strict';
 
-var model = require('@beyond-js/reactive/model');
+var model = require('reactive/model');
 var uuid = require('uuid');
 
 /******************************************************************************

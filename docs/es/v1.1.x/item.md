@@ -14,8 +14,8 @@ respectively. These managers work in conjunction with the local and remote provi
 The following usage example creates a `User` class that extends `Item`:
 
 ```ts
-import { Item, IItem } from '@beyond-js/reactive/entities';
-import { UserProvider } from '@beyond-js/reactive-tests/backend/provider';
+import { Item, IItem } from 'reactive/entities';
+import { UserProvider } from 'reactive-tests/backend/provider';
 
 interface IUser {
 	name?: string;

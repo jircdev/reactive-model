@@ -1,5 +1,5 @@
 import type { Item } from './index';
-import type { EntityProperty } from '@beyond-js/reactive/model';
+import type { EntityProperty } from 'reactive/model';
 
 /**
  * Base interface for Item entities.

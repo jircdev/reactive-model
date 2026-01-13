@@ -14,9 +14,9 @@ ReactiveModel está diseñado para funcionar sin problemas tanto en frontend com
 
 ```typescript
 // Importar de la misma manera que en frontend
-import { ReactiveModel } from '@beyond-js/reactive/model';
-import { Item } from '@beyond-js/reactive/entities/item';
-import { Collection } from '@beyond-js/reactive/entities/collection';
+import { ReactiveModel } from 'reactive/model';
+import { Item } from 'reactive/entities/item';
+import { Collection } from 'reactive/entities/collection';
 ```
 
 ## Arquitectura de Código Universal
