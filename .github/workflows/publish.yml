@@ -20,8 +20,10 @@ jobs:
               uses: actions/setup-node@v4
               with:
                   node-version: '18'
-                  # Do not set registry-url when using Trusted Publishing
-                  # npm will automatically detect OIDC from GitHub Actions environment
+                  registry-url: 'https://registry.npmjs.org'
+
+            - name: Update npm to latest version
+              run: npm install -g npm@latest
 
             - name: Install dependencies
               working-directory: src

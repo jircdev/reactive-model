@@ -5,6 +5,10 @@
 	"description": "",
 	"license": "ISC",
 	"type": "module",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/jircdev/reactive-model.git"
+	},
 	"main": "./dist/model/index.cjs",
 	"module": "./dist/model/index.mjs",
 	"types": "./dist/model/index.d.ts",
