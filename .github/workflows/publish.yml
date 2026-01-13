@@ -8,6 +8,9 @@ on:
 jobs:
     build-and-publish:
         runs-on: ubuntu-latest
+        permissions:
+            id-token: write  # Required for OIDC/Trusted Publishing
+            contents: read   # Required for checkout
 
         steps:
             - name: Checkout repository
@@ -32,12 +35,9 @@ jobs:
               working-directory: src
               run: npm run build
 
-            # IMPORTANT: NPM_TOKEN must be an Automation Token (not a regular token)
-            # Automation Tokens don't require OTP and are designed for CI/CD
-            # Create one at: https://www.npmjs.com/settings/[username]/tokens
-            # Select "Automation" token type, then add it to GitHub Secrets as NPM_TOKEN
+            # Trusted Publishing: Uses OIDC authentication automatically
+            # No NODE_AUTH_TOKEN needed - npm detects GitHub Actions OIDC environment
+            # Ensure the workflow filename matches your Trusted Publisher config on npmjs.com
             - name: Publish to NPM
               working-directory: src
-              env:
-                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
               run: npm publish --access public
