@@ -1,3 +1,173 @@
+## 3.0.0
+
+### Cambios Incompatibles
+
+-   **Collection.map está deprecado**: El acceso directo al Map interno mediante `collection.map` ahora muestra una advertencia de deprecación. Usa los nuevos métodos en su lugar:
+    -   `collection.get(id)` - Obtener item por ID
+    -   `collection.has(id)` - Verificar si existe el ID
+    -   `collection.size` - Número de items
+    -   `collection.keys()` / `collection.values()` / `collection.entries()` - Iteradores
+    -   `collection.forEach(callback)` - Iterar items
+
+-   **Firma de Collection.delete() cambiada**: Ahora es síncrono para cumplir con `IReactiveContainer`.
+    -   `collection.delete(id)` - Síncrono, retorna boolean
+    -   `collection.deleteAsync(ids)` - Asíncrono con provider, retorna Promise<boolean[]>
+
+-   **Métodos de verificación de tipo deprecados**: Usa type guards de interfaces en su lugar:
+    -   ❌ `value.isCollection` / `value.isReactive`
+    -   ✅ `isReactiveContainer(value)` / `isReactiveValue(value)`
+
+### Agregado
+
+-   **Interfaces Core**: Sistema de interfaces unificado para todos los valores reactivos
+    -   `IReactiveValue<T>` - Interface base para valores reactivos
+    -   `IReactiveContainer<T, K>` - Interface para estructuras tipo colección
+    -   `isReactiveValue()` / `isReactiveContainer()` - Funciones type guard
+    -   Todas las clases (ReactiveModel, Item, Collection) ahora implementan estas interfaces
+
+-   **ReactiveMap**: Estructura Map clave-valor reactiva
+    -   `@beyond-js/reactive/structures/map`
+    -   Emite eventos `set`, `delete`, `clear`, `change`
+    -   Implementa `IReactiveContainer`
+    -   Soporta keyExtractor para operaciones basadas en arrays
+    -   Seguimiento de cambios con `hasUnpublishedChanges()`, `saveChanges()`, `revert()`
+
+-   **ReactiveArray**: Estructura Array reactiva
+    -   `@beyond-js/reactive/structures/array`
+    -   Versiones reactivas de: `push`, `pop`, `shift`, `unshift`, `splice`, `sort`, `reverse`
+    -   Emite eventos `add`, `remove`, `update`, `reorder`, `change`
+    -   Implementa `IReactiveContainer`
+    -   Métodos no mutantes: `filter`, `map`, `find`, `some`, `every`, `reduce`
+
+-   **ReactiveTree**: Estructura de árbol jerárquica reactiva
+    -   `@beyond-js/reactive/structures/tree`
+    -   Mantiene relaciones padre/hijos
+    -   Acceso basado en rutas: `tree.getByPath('root.child.grandchild')`
+    -   Recorrido: `walkDepthFirst()`, `walkBreadthFirst()`, `findNode()`, `findNodes()`
+    -   Operaciones de nodos: `addNode()`, `removeNode()`, `moveNode()`, `updateNode()`
+    -   Emite eventos `node.added`, `node.removed`, `node.moved`, `change`
+
+-   **Nuevos Métodos de Collection**:
+    -   `get(id)` - Obtener item por ID
+    -   `has(id)` - Verificar si existe el ID
+    -   `size` - Número de items (getter)
+    -   `keys()`, `values()`, `entries()` - Iteradores
+    -   `forEach()` - Iterar con callback
+    -   `clear()` - Remover todos los items
+    -   `find()`, `filter()`, `mapItems()`, `some()`, `every()` - Métodos de consulta
+    -   `deleteAsync()` - Eliminación asíncrona con soporte de provider
+
+-   **Nuevos Métodos de ReactiveModel** (implementación de IReactiveValue):
+    -   `setValue(value)` - Alias para `set()`
+    -   `getValue()` - Alias para `getProperties()`
+    -   `serialize()` - Serialización JSON
+    -   `hasUnpublishedChanges()` - Alias para el getter `unpublished`
+
+-   **Nueva Documentación**:
+    -   `docs/es/structures/reactive-map.md`
+    -   `docs/es/structures/reactive-array.md`
+    -   `docs/es/structures/reactive-tree.md`
+    -   `docs/es/fundamentals/interfaces.md`
+    -   `docs/es/migration-v3.md`
+
+### Cambiado
+
+-   **ReactiveModel**: Ahora implementa `IReactiveValue<Partial<T>>`
+    -   Eliminadas verificaciones hardcodeadas `isReactiveModel()` e `isCollectionModel()`
+    -   Usa verificación de interface `isReactiveValue()` para manejo de propiedades anidadas
+    -   Usa `serialize()` para obtener valores de propiedades reactivas anidadas
+
+-   **Item**: Ahora implementa explícitamente `IReactiveValue<Partial<T>>`
+    -   Agregado método `serialize()`
+
+-   **Collection**: Ahora implementa `IReactiveContainer<T, ItemId>`
+    -   Agregada propiedad `isContainer: true`
+    -   Propiedades estáticas `isCollection` e `isContainer` (deprecadas, usa verificación de instancia)
+    -   `setItems()` ahora acepta `Map<ItemId, T>` además de arrays
+
+-   **Generación de instanceId del Registry**: Cambiado de UUID v4 a UUID v7
+    -   UUID v7 incluye timestamp, proporcionando ordenamiento natural basado en tiempo
+    -   Mejora el rendimiento de índices de base de datos (reduce fragmentación)
+    -   Mejor eficiencia de caché y depuración más fácil
+    -   Sin cambios incompatibles - misma API, solo cambia el formato del ID
+
+-   **AGENTS.md**: Actualizado con cambios de v3.0, nuevas estructuras y documentación de interfaces
+
+### Guía de Migración
+
+Ver `docs/es/migration-v3.md` para instrucciones detalladas de migración de v2.x a v3.0.
+
+---
+
+## 2.3.0
+
+### Agregado
+
+-   **Lifecycle Hooks**: Nuevos métodos protegidos para interceptar operaciones CRUD
+    -   `beforeLoad(args)` / `afterLoad(data)` - Transformar argumentos y resultados de carga
+    -   `beforePublish(data)` / `afterPublish(data)` - Transformar y reaccionar a operaciones de publicación
+    -   `beforeDelete(id)` / `afterDelete(id)` - Validar y reaccionar a operaciones de eliminación
+    -   `beforeSet(props)` / `afterSet(props, result)` - Transformar y reaccionar a cambios de propiedades
+    -   Todos los hooks soportan async/await para operaciones asíncronas
+
+-   **Lifecycle Events**: Nuevos eventos emitidos durante operaciones CRUD
+    -   `pre:load`, `post:load` - Antes y después de carga
+    -   `pre:publish`, `post:publish` - Antes y después de publicación
+    -   `pre:delete`, `post:delete` - Antes y después de eliminación
+    -   `pre:set`, `post:set` - Antes y después de set (vía `setAsync()`)
+
+-   **Sistema de Plugins**: Arquitectura extensible para agregar preocupaciones transversales
+    -   Interface `IReactivePlugin` para definir plugins
+    -   `PluginManager` para registrar/desregistrar plugins globalmente o por entidad
+    -   Orden de ejecución basado en prioridad (mayor prioridad se ejecuta primero)
+    -   Los plugins pueden interceptar y transformar datos en cualquier punto del lifecycle
+    -   Ideal para caché, persistencia, logging, validación y sincronización offline
+
+-   **Computed Properties**: Propiedades derivadas que se recalculan automáticamente
+    -   Define vía array `computed` en opciones del constructor
+    -   Especifica dependencias para invalidación automática de caché
+    -   Emite eventos `<name>.changed` cuando los valores cambian
+    -   Los valores se cachean hasta que las dependencias cambien
+
+-   **Transactions**: Agrupa múltiples cambios con emisión de evento único
+    -   `model.transaction(() => { ... })` - Agrupar cambios
+    -   Solo se emite un evento `change` al final
+    -   Útil para actualizaciones atómicas de propiedades relacionadas
+
+-   **Partial Updates**: Rastrea y publica solo propiedades cambiadas
+    -   `item.changedProperties` - Array de nombres de propiedades modificadas
+    -   `item.getChangedValues()` - Objeto con solo valores cambiados
+    -   `item.publish(undefined, { partial: true })` - Enviar solo cambios
+    -   `item.clearChangedProperties()` - Reiniciar seguimiento
+
+-   **Async Set**: Nuevo método `setAsync()` que espera correctamente los lifecycle hooks
+    -   Usa cuando necesites que los hooks se completen antes de continuar
+    -   Emite eventos `pre:set` y `post:set`
+
+-   **Nueva Documentación**:
+    -   `docs/es/services.md` - Guía para implementar capa de servicios
+    -   `docs/es/backend-usage.md` - Usando ReactiveModel en Node.js/Bun
+    -   `docs/es/plugins.md` - Documentación del sistema de plugins
+
+### Cambiado
+
+-   **Tipos TypeScript Mejorados**: Eliminados la mayoría de tipos `any` para mejor seguridad de tipos
+    -   `IItemProps`, `IEntityProvider`, `ICollectionProvider` ahora usan genéricos apropiados
+    -   `SetPropertiesResult.errors` correctamente tipado
+    -   `ModelProperties<T>` ahora retorna `Partial<T>` en lugar de `any`
+
+-   **AGENTS.md Actualizado**: Templates y convenciones completas para agentes AI
+    -   Templates de código para Item, Collection, Provider, Service
+    -   Convenciones de nomenclatura y estructura de carpetas
+    -   Errores comunes y soluciones
+    -   Checklist de implementación
+
+### Corregido
+
+-   **Seguridad de tipos del Registry**: Mejor tipado para operaciones del registry
+
+---
+
 ## 2.2.0
 
 ### Cambios
@@ -21,109 +191,93 @@
 
 ### Fixed
 
--   **Collection Property Handling in ReactiveModel**: Fixed an issue in the `set` method where collection-type
-    properties were not being properly identified and their items were not being set.
-    -   Previously, when setting properties on a `ReactiveModel`, the code only checked if a property was reactive but
-        did not distinguish between regular reactive models and collections.
-    -   Now, the `set` method properly detects when a property is a collection (via `isCollection` check) and calls
-        `setItems()` instead of `set()` to correctly populate the collection's items.
-    -   This fix ensures that when a collection is defined as a property of a reactive model object, the items are
-        properly set when calling the `set()` method.
-    -   **Impact**: Collections defined as properties in model objects will now correctly receive and set their items
-        when properties are updated.
-    -   **Note**: The `isCollection` getter is for internal use only and may be removed in future versions. It should
-        not be used directly in application code.
+-   **Manejo de Propiedades de Colección en ReactiveModel**: Corregido un problema en el método `set` donde las propiedades de tipo colección no eran identificadas correctamente y sus items no se establecían.
+    -   Anteriormente, al establecer propiedades en un `ReactiveModel`, el código solo verificaba si una propiedad era reactiva pero no distinguía entre modelos reactivos regulares y colecciones.
+    -   Ahora, el método `set` detecta correctamente cuando una propiedad es una colección (vía verificación `isCollection`) y llama a `setItems()` en lugar de `set()` para poblar correctamente los items de la colección.
+    -   Esta corrección asegura que cuando una colección se define como propiedad de un objeto modelo reactivo, los items se establecen correctamente al llamar al método `set()`.
+    -   **Impacto**: Las colecciones definidas como propiedades en objetos modelo ahora recibirán y establecerán correctamente sus items cuando se actualicen las propiedades.
+    -   **Nota**: El getter `isCollection` es solo para uso interno y puede ser removido en versiones futuras. No debe usarse directamente en código de aplicación.
 
 ## 2.1.0
 
-### Added
+### Agregado
 
--   Pagination support in the `load` method:
-    -   The `load` method now supports paginated result fetching using an internal `next` parameter.
-    -   The name of the `next` parameter can be configured using the `nextParamName` option.
-    -   A `limit` parameter was added to specify the number of results per page.
-    -   Providers can now return an object in the form `{ items, next, total }` in addition to a simple array.
-    -   This allows more flexible integration with paginated APIs and improves incremental data loading.
-    -   Example usage:
+-   Soporte de paginación en el método `load`:
+    -   El método `load` ahora soporta obtención de resultados paginados usando un parámetro interno `next`.
+    -   El nombre del parámetro `next` puede configurarse usando la opción `nextParamName`.
+    -   Se agregó un parámetro `limit` para especificar el número de resultados por página.
+    -   Los providers ahora pueden retornar un objeto en la forma `{ items, next, total }` además de un array simple.
+    -   Esto permite integración más flexible con APIs paginadas y mejora la carga incremental de datos.
+    -   Ejemplo de uso:
         ```ts
         collection.load({ limit: 20 });
-        // The load method will handle the `next` parameter internally.
-        // provider may return: { items: [...], next: 'nextCursor', total: 100 }
+        // El método load manejará el parámetro `next` internamente.
+        // el provider puede retornar: { items: [...], next: 'nextCursor', total: 100 }
         ```
 
 ## 2.0.6
 
-### Improved
+### Mejorado
 
--   The `delete` method of `Item` now supports in-memory deletion and ensures communication between the registry and
-    subscribed collections. This integrated improvement guarantees that, when an item is deleted, the change is properly
-    reflected in memory and all related collections are notified, enhancing reactivity and state consistency.
+-   El método `delete` de `Item` ahora soporta eliminación en memoria y asegura comunicación entre el registry y las colecciones suscritas. Esta mejora integrada garantiza que, cuando un item se elimina, el cambio se refleja correctamente en memoria y todas las colecciones relacionadas son notificadas, mejorando la reactividad y consistencia del estado.
 
-### Added
+### Agregado
 
--   Added the `addItems` method to `Collection`.
-    -   **Purpose**: Allows adding multiple items to a collection at once.
-    -   **Behavior**: Receives an array of items, sets them in the collection, and triggers the `items.changed` and
-        `change` events to update subscribers and maintain reactivity.
-    -   **Usage**:
+-   Agregado el método `addItems` a `Collection`.
+    -   **Propósito**: Permite agregar múltiples items a una colección a la vez.
+    -   **Comportamiento**: Recibe un array de items, los establece en la colección y dispara los eventos `items.changed` y `change` para actualizar suscriptores y mantener la reactividad.
+    -   **Uso**:
         ```ts
         collection.addItems([{ id: 1, ... }, { id: 2, ... }]);
         ```
 
 ## 2.0.5
 
-### Added
+### Agregado
 
--   Introduced a new parameter `register` in the `Item` constructor within `IItemProps`.
-    -   **Type**: `boolean`
-    -   **Purpose**: Allows specification of whether collections subscribed to the defined entity need to be informed
-        about this item. This is particularly useful for creating items that already exist outside the application's
-        memory.
-    -   **Behavior**: If `register` is set to `true`, the registry will trigger an event when the item is created to
-        notify the collections. This ensures that collections are aware of items that are instantiated from external
-        sources.
+-   Introducido un nuevo parámetro `register` en el constructor de `Item` dentro de `IItemProps`.
+    -   **Tipo**: `boolean`
+    -   **Propósito**: Permite especificar si las colecciones suscritas a la entidad definida necesitan ser informadas sobre este item. Esto es particularmente útil para crear items que ya existen fuera de la memoria de la aplicación.
+    -   **Comportamiento**: Si `register` se establece en `true`, el registry disparará un evento cuando el item se cree para notificar a las colecciones. Esto asegura que las colecciones sean conscientes de items que se instancian desde fuentes externas.
 
 ## 2.0.4
 
-### Added
+### Agregado
 
--   Added comprehensive JSDoc documentation to key methods in ReactiveModel:
-    -   `validate`: Documents property validation against Zod schema
-    -   `getProperties`: Documents property retrieval including nested objects
-    -   `revert`: Documents state restoration functionality
-    -   `saveChanges`: Documents state persistence functionality
+-   Agregada documentación JSDoc completa a métodos clave en ReactiveModel:
+    -   `validate`: Documenta validación de propiedades contra esquema Zod
+    -   `getProperties`: Documenta recuperación de propiedades incluyendo objetos anidados
+    -   `revert`: Documenta funcionalidad de restauración de estado
+    -   `saveChanges`: Documenta funcionalidad de persistencia de estado
 
 ## 2.0.3
 
 ### Fixed
 
--   Changed `triggerEvent` function in ReactiveModel to an arrow function to maintain proper `this` scope
--   Defined `triggerEvent` as deprecated, it's recommended to use `trigger` method instead.
+-   Cambiado la función `triggerEvent` en ReactiveModel a una función flecha para mantener el scope correcto de `this`
+-   Definido `triggerEvent` como deprecado, se recomienda usar el método `trigger` en su lugar.
 
 ## 2.0.1
 
-This release introduces **Zod** integration for validations, new event-driven enhancements for property changes, a
-reorganization of code structure, and a revised approach to how `Item` and `Collection` receive data from the provider.
-It also changes **how properties** are defined in models—properties are now passed into the constructor rather than
-defined via a `get` property.
+Esta versión introduce integración de **Zod** para validaciones, nuevas mejoras orientadas a eventos para cambios de propiedades, una reorganización de la estructura del código, y un enfoque revisado de cómo `Item` y `Collection` reciben datos del provider. También cambia **cómo se definen las propiedades** en los modelos—las propiedades ahora se pasan al constructor en lugar de definirse vía una propiedad `get`.
 
 ---
 
-### Breaking Changes
+### Cambios Incompatibles
 
-1. **Separate Subpaths for `Item` & `Collection`**
+1. **Subpaths Separados para `Item` & `Collection`**
 
-    - In versions `1.1.x`, both `Item` and `Collection` objects were located under a single subpath.
-    - Now, each has its **own** subpath:
+    - En las versiones `1.1.x`, tanto los objetos `Item` como `Collection` estaban ubicados bajo un solo subpath.
+    - Ahora, cada uno tiene su **propio** subpath:
         - `@beyond-js/reactive/entities/item`
         - `@beyond-js/reactive/entities/collection`
-    - This change **requires updating your imports**.
+    - Este cambio **requiere actualizar tus imports**.
 
-2. **Constructor Property Definitions**
+2. **Definiciones de Propiedades en Constructor**
 
-    - Previously, the **properties** array for a model/item was defined via a **`get` property** inside the class.
-    - **Now**, you must pass the **properties array** directly to the **`super()`** constructor call.
-    - Example (new approach):
+    - Anteriormente, el array de **properties** para un modelo/item se definía vía una **propiedad `get`** dentro de la clase.
+    - **Ahora**, debes pasar el **array de properties** directamente a la llamada del constructor **`super()`**.
+    - Ejemplo (nuevo enfoque):
         ```ts
         export class MyModel extends Model {
         	constructor() {
@@ -134,24 +288,21 @@ defined via a `get` property.
         }
         ```
 
-3. **Constructor Parameters for `Item` & `Collection`**
+3. **Parámetros de Constructor para `Item` & `Collection`**
 
-    - Previously, constructors could receive properties for IndexedDB integration.
-    - **IndexedDB support has been removed** from the core and will be handled via plugins.
-    - **New** requirement: an `"entity"` property in the constructor to identify the entity name (for plugin
-      integrations or custom usage).
+    - Anteriormente, los constructores podían recibir propiedades para integración con IndexedDB.
+    - **El soporte de IndexedDB ha sido removido** del core y será manejado vía plugins.
+    - **Nuevo** requisito: una propiedad `"entity"` en el constructor para identificar el nombre de la entidad (para integraciones de plugins o uso personalizado).
 
-4. **Provider Response Format**
-    - Previously, the `load` methods in both `Item` and `Collection` expected providers to return responses with a
-      specific structure: `{ status: boolean, data: any }`.
-    - **Now**, providers should return the raw data directly:
-        - For `Collection.load()`: An array of items directly (`Item[]`)
-        - For `Item.load()`: The item's data object directly (`ItemData`)
-    - This change decouples the models from specific API response structures, allowing more flexibility in data
-      providers.
-    - Example (old approach):
+4. **Formato de Respuesta del Provider**
+    - Anteriormente, los métodos `load` tanto en `Item` como en `Collection` esperaban que los providers retornaran respuestas con una estructura específica: `{ status: boolean, data: any }`.
+    - **Ahora**, los providers deben retornar los datos crudos directamente:
+        - Para `Collection.load()`: Un array de items directamente (`Item[]`)
+        - Para `Item.load()`: El objeto de datos del item directamente (`ItemData`)
+    - Este cambio desacopla los modelos de estructuras de respuesta de API específicas, permitiendo más flexibilidad en los providers de datos.
+    - Ejemplo (enfoque antiguo):
         ```ts
-        // Before (1.x.x)
+        // Antes (1.x.x)
         async load() {
             const response = await this.provider.load();
             if (response.status) {
@@ -159,30 +310,29 @@ defined via a `get` property.
             }
         }
         ```
-    - Example (new approach):
+    - Ejemplo (nuevo enfoque):
         ```ts
-        // Now (2.0.0)
+        // Ahora (2.0.0)
         async load() {
             const data = await this.provider.load();
             this.set(data);
         }
         ```
-    - **Migration**: Update your providers to handle API responses internally and return only the relevant data to the
-      models.
+    - **Migración**: Actualiza tus providers para manejar respuestas de API internamente y retornar solo los datos relevantes a los modelos.
 
 ---
 
-### New Features & Enhancements
+### Nuevas Características y Mejoras
 
-1. **Zod Integration for Validations**
+1. **Integración de Zod para Validaciones**
 
-    - Zod schemas can now be defined per `Model`, `Item`, or `Collection` (where applicable).
-    - Provides **runtime data validation** and improved type inference.
-    - Example usage:
+    - Los esquemas Zod ahora pueden definirse por `Model`, `Item`, o `Collection` (donde sea aplicable).
+    - Proporciona **validación de datos en tiempo de ejecución** y mejor inferencia de tipos.
+    - Ejemplo de uso:
 
         ```ts
         import { z } from 'zod';
-        //create a getter in the model class definition
+        //crear un getter en la definición de la clase modelo
         get schema () {
             return  z.object({
         	id: z.number().min(1),
@@ -192,121 +342,105 @@ defined via a `get` property.
 
         ```
 
-2. **`validate` Method**
+2. **Método `validate`**
 
-    - A new `validate()` method checks whether **all properties** of an object conform to the attached Zod schema.
-    - It returns validation success/failure or throws an error (depending on your usage).
+    - Un nuevo método `validate()` verifica si **todas las propiedades** de un objeto se conforman al esquema Zod adjunto.
+    - Retorna éxito/fallo de validación o lanza un error (dependiendo de tu uso).
 
-3. **`schema` Property**
+3. **Propiedad `schema`**
 
-    - Entities now have a `schema` property that can reference a Zod schema for validation.
+    - Las entidades ahora tienen una propiedad `schema` que puede referenciar un esquema Zod para validación.
 
-4. **Property Change Events**
+4. **Eventos de Cambio de Propiedades**
 
-    - Each property **fires a custom event** on change, providing **fine-grained reactivity**.
-    - The event signature: `(eventName, updatedObjectOrProperty)`.
-        - The **second parameter** gives direct access to the changed property or object.
+    - Cada propiedad **dispara un evento personalizado** al cambiar, proporcionando **reactividad de grano fino**.
+    - La firma del evento: `(eventName, updatedObjectOrProperty)`.
+        - El **segundo parámetro** da acceso directo a la propiedad u objeto cambiado.
 
-5. **`unpublished` Property**
+5. **Propiedad `unpublished`**
 
-    - A new `unpublished` flag helps track when an object has changed locally but not yet "published" or synced.
-    - Useful for offline/staging workflows.
+    - Una nueva bandera `unpublished` ayuda a rastrear cuando un objeto ha cambiado localmente pero aún no ha sido "publicado" o sincronizado.
+    - Útil para flujos de trabajo offline/staging.
 
-6. **Two Generics in `Item`**
+6. **Dos Genéricos en `Item`**
 
     - `Item<TProps, TProvider>`:
-        - **`TProps`**: interface defining the **properties**.
-        - **`TProvider`**: interface defining the **provider methods**.
-    - Improves TypeScript autocompletion and type safety for data + provider usage.
+        - **`TProps`**: interface que define las **propiedades**.
+        - **`TProvider`**: interface que define los **métodos del provider**.
+    - Mejora el autocompletado de TypeScript y la seguridad de tipos para uso de datos + provider.
 
-7. **Nested Objects in Property Definitions**
+7. **Objetos Anidados en Definiciones de Propiedades**
 
-    - You can now define **nested objects** by marking a property as an object within the property definitions array.
-    - This allows more complex, hierarchical data structures in a single reactive entity.
+    - Ahora puedes definir **objetos anidados** marcando una propiedad como objeto dentro del array de definiciones de propiedades.
+    - Esto permite estructuras de datos más complejas y jerárquicas en una sola entidad reactiva.
 
-8. **`Item` & `Collection` Receive Data from the Provider**
-    - Entity objects (`Item` and `Collection`) now rely on a **provider** to supply the API response.
-    - The provider is responsible for capturing and validating the API response, then returning correctly structured
-      data.
-    - This ensures that the reactive model has **accurate**, **validated** data and centralizes API logic in the
-      provider layer.
+8. **`Item` & `Collection` Reciben Datos del Provider**
+    - Los objetos de entidad (`Item` y `Collection`) ahora dependen de un **provider** para suministrar la respuesta de la API.
+    - El provider es responsable de capturar y validar la respuesta de la API, luego retornar datos correctamente estructurados.
+    - Esto asegura que el modelo reactivo tenga datos **precisos**, **validados** y centraliza la lógica de API en la capa del provider.
 
 ---
 
-### Removed
+### Removido
 
-1. **IndexedDB Core Integration**
-    - The library no longer includes IndexedDB support by default.
-    - This is now **plugin-based**, so you only add it if your project needs offline storage.
+1. **Integración Core de IndexedDB**
+    - La librería ya no incluye soporte de IndexedDB por defecto.
+    - Esto ahora es **basado en plugins**, así que solo lo agregas si tu proyecto necesita almacenamiento offline.
 
 ---
 
-### Summary
+### Resumen
 
-**v2.0.1** significantly improves flexibility and type safety with **Zod** integration, adds more granular **event**
-handling, and refactors code structure into **separate subpaths**. The key **breaking changes** to watch out for
-include:
+**v2.0.1** mejora significativamente la flexibilidad y seguridad de tipos con integración de **Zod**, agrega manejo de **eventos** más granular, y refactoriza la estructura del código en **subpaths separados**. Los **cambios incompatibles** clave a tener en cuenta incluyen:
 
--   **Separate subpaths** for `Item` and `Collection`.
--   **Revised constructor** usage (properties array now passed to `super()`).
--   **IndexedDB** integration removed from the core (now plugin-based).
--   **Entities** must specify an `"entity"` property in the constructor.
--   **API data** is now provided via a **provider** method, which handles and validates the response before populating
-    the model.
+-   **Subpaths separados** para `Item` y `Collection`.
+-   **Uso de constructor revisado** (array de properties ahora se pasa a `super()`).
+-   **IndexedDB** integración removida del core (ahora basado en plugins).
+-   **Entidades** deben especificar una propiedad `"entity"` en el constructor.
+-   **Datos de API** ahora se proporcionan vía un método **provider**, que maneja y valida la respuesta antes de poblar el modelo.
 
-Upgrade carefully to accommodate these changes. Once updated, you'll benefit from stronger validations, more robust
-event-driven behavior, and a clearer separation of concerns between data fetching and reactive state management.
+Actualiza cuidadosamente para acomodar estos cambios. Una vez actualizado, te beneficiarás de validaciones más fuertes, comportamiento más robusto orientado a eventos, y una separación más clara de responsabilidades entre obtención de datos y gestión de estado reactivo.
 
-Enjoy the new features and validations in **v1.2.0**!
+¡Disfruta las nuevas características y validaciones en **v1.2.0**!
 
 ## [1.1.13] - 2024-09-27
 
 ### Fixed
 
--   **Incorrect Error Handling in `save` Method**:
-    -   Removed the call to `fromRemote` on the `publish` method's response, which caused incorrect error propagation.
-    -   Updated the `save` method to handle the `publish` response directly and properly throw the response when
-        `status: false`.
-    -   The actual backend error is now returned to the client instead of the generic error message "ERROR_DATA_QUERY",
-        improving debugging and error handling.
+-   **Manejo Incorrecto de Errores en Método `save`**:
+    -   Removida la llamada a `fromRemote` en la respuesta del método `publish`, que causaba propagación incorrecta de errores.
+    -   Actualizado el método `save` para manejar la respuesta de `publish` directamente y lanzar correctamente la respuesta cuando `status: false`.
+    -   El error real del backend ahora se retorna al cliente en lugar del mensaje de error genérico "ERROR_DATA_QUERY", mejorando la depuración y manejo de errores.
 
 ### Testing
 
--   Errors triggered in the backend are now correctly propagated and received by the client.
+-   Los errores disparados en el backend ahora se propagan correctamente y son recibidos por el cliente.
 
 ## 1.1.12
 
-### Enhancements
+### Mejoras
 
--   **Types and Interfaces Improvement:** Enhanced the ReactiveModel codebase with more explicit types and corrected
-    interfaces, significantly improving TypeScript compatibility and developer experience. This update ensures that
-    developers leveraging TypeScript can work more efficiently with the ReactiveModel, benefiting from stronger type
-    checks and more predictable behavior.
+-   **Mejora de Tipos e Interfaces:** Mejorado el código base de ReactiveModel con tipos más explícitos e interfaces corregidas, mejorando significativamente la compatibilidad con TypeScript y la experiencia del desarrollador. Esta actualización asegura que los desarrolladores que aprovechan TypeScript puedan trabajar más eficientemente con ReactiveModel, beneficiándose de verificaciones de tipos más fuertes y comportamiento más predecible.
 
-### Fixes
+### Correcciones
 
--   **Publish Item Remote Response Handling (#29):** Addressed an issue where the response from publishing an item
-    remotely was not being correctly returned. The issue has been resolved by fine-tuning the response handling
-    mechanism. Now, responses from the remote provider are accurately captured and relayed back to the client through
-    the adapter mechanism. This fix ensures that the Item entity's `response` method faithfully represents the data
-    provided by the remote service, enhancing reliability and data integrity in client-server communications.
+-   **Manejo de Respuesta Remota de Publicación de Item (#29):** Abordado un problema donde la respuesta de publicar un item remotamente no se retornaba correctamente. El problema se ha resuelto ajustando el mecanismo de manejo de respuestas. Ahora, las respuestas del provider remoto se capturan y retransmiten con precisión al cliente a través del mecanismo de adaptador. Esta corrección asegura que el método `response` de la entidad Item represente fielmente los datos proporcionados por el servicio remoto, mejorando la confiabilidad y integridad de datos en comunicaciones cliente-servidor.
 
 ## 1.1.11
 
 #### Fixed
 
--   Solve problem when a item is initialized directly. Now the set method only set defined properties
+-   Resolver problema cuando un item se inicializa directamente. Ahora el método set solo establece propiedades definidas
 
 ## 1.1.10
 
 #### Fixed
 
--   Simplified event handling in the collection loading process to fix the issue of multiple event generation.
+-   Simplificado el manejo de eventos en el proceso de carga de colecciones para corregir el problema de generación múltiple de eventos.
 
 #### Added
 
--   Now, ReactiveModel objects can receive an array of properties in the constructor, following the
-    `IReactiveConstructorSpecs` interface:
+-   Ahora, los objetos ReactiveModel pueden recibir un array de propiedades en el constructor, siguiendo la interface `IReactiveConstructorSpecs`:
 
 ```typescript
 interface IReactiveConstructorSpecs {
@@ -317,79 +451,64 @@ interface IReactiveConstructorSpecs {
 
 ## 1.1.9
 
--   feat: enhance collections to support arbitrary 'where' params for server-side queries and client-side indexeddb
-    lookups
+-   feat: mejorar colecciones para soportar parámetros 'where' arbitrarios para consultas del lado del servidor y búsquedas indexeddb del lado del cliente
 
 ## 1.1.7
 
-#### Enhancements
+#### Mejoras
 
--   **Enhanced Item Identification**: To provide more flexibility and control over item identification, the library now
-    supports and prioritizes IDs defined by the backend. While client-generated IDs are still accepted, backend-defined
-    IDs, when available, will be used as the primary identifier.
+-   **Identificación Mejorada de Items**: Para proporcionar más flexibilidad y control sobre la identificación de items, la librería ahora soporta y prioriza IDs definidos por el backend. Mientras que los IDs generados por el cliente aún se aceptan, los IDs definidos por el backend, cuando estén disponibles, se usarán como identificador principal.
 
-#### What's Changed
+#### Lo que Cambió
 
--   **Priority to Backend IDs**: When an ID is defined from the backend for an item, this ID will now take precedence
-    over any client-generated ID. This ensures that items can be more reliably identified and managed in systems where
-    backend control is paramount.
+-   **Prioridad a IDs del Backend**: Cuando un ID se define desde el backend para un item, este ID ahora tomará precedencia sobre cualquier ID generado por el cliente. Esto asegura que los items puedan identificarse y gestionarse de manera más confiable en sistemas donde el control del backend es primordial.
 
-#### Implications for Existing Projects
+#### Implicaciones para Proyectos Existentes
 
--   **Backward Compatibility**: Existing projects will continue to function as before, using client-generated IDs.
-    However, you can now enhance your item management by integrating backend-defined IDs.
--   **Enhanced Flexibility**: This update provides the flexibility to maintain existing client-side ID generation while
-    also allowing for a more robust backend-driven identification system when needed.
+-   **Compatibilidad Hacia Atrás**: Los proyectos existentes continuarán funcionando como antes, usando IDs generados por el cliente. Sin embargo, ahora puedes mejorar tu gestión de items integrando IDs definidos por el backend.
+-   **Flexibilidad Mejorada**: Esta actualización proporciona la flexibilidad para mantener la generación de IDs del lado del cliente existente mientras también permite un sistema de identificación más robusto impulsado por el backend cuando sea necesario.
 
 ## 1.1.6
 
--   Added concept of Adapters to manage responses obtained from the backend and responses returned by items and
-    collections.
--   bugfix: `fetching`, `loading`, `loaded` and `found` properties work correctly
+-   Agregado concepto de Adapters para gestionar respuestas obtenidas del backend y respuestas retornadas por items y colecciones.
+-   bugfix: las propiedades `fetching`, `loading`, `loaded` y `found` funcionan correctamente
 
 ## 1.1.5
 
--   Added initialise method to be called in item constructors. This method allows you to ensure
--   execute logic in the instance of the object that requires the management of the properties defined in the item.
+-   Agregado método initialise para ser llamado en constructores de items. Este método te permite asegurar
+-   ejecutar lógica en la instancia del objeto que requiere la gestión de las propiedades definidas en el item.
 
 ## 1.1.3
 
--   Added a validation in the localProvider of the Collection class to check if the specified store exists in the
-    database. If the store does not exist, an error will be thrown to handle the situation appropriately.
+-   Agregada una validación en el localProvider de la clase Collection para verificar si el store especificado existe en la base de datos. Si el store no existe, se lanzará un error para manejar la situación apropiadamente.
 
 ### 1.1.2
 
--   Bug fix: Fixed error when passing parameters in the Item post method.
+-   Corrección de error: Corregido error al pasar parámetros en el método post de Item.
 
-## 1.1.1 (July 20, 2023)
+## 1.1.1 (20 de julio, 2023)
 
-### Item and collection
+### Item y collection
 
--   New feature: Now the methods such as save, publish, and load can be overwritten in Children objects and call super
-    method. This is useful when it's necessary to manage logic before executing the method or after it.
--   Bug fix: Fixed an error when the same registry is instantiated multiple times.
+-   Nueva característica: Ahora los métodos como save, publish y load pueden sobrescribirse en objetos Children y llamar al método super. Esto es útil cuando es necesario gestionar lógica antes de ejecutar el método o después de él.
+-   Corrección de error: Corregido un error cuando el mismo registry se instancia múltiples veces.
 
 ## [Unreleased]
 
-### Added
+### Agregado
 
--   **Bulk Deletion in Collections**: The `Collection` class now features a new `delete` method that enables the removal
-    of one or multiple items by their IDs. This method accepts either a single `ItemId` or an array of `ItemId` values.
+-   **Eliminación Masiva en Colecciones**: La clase `Collection` ahora incluye un nuevo método `delete` que permite la eliminación de uno o múltiples items por sus IDs. Este método acepta un solo `ItemId` o un array de valores `ItemId`.
 
-    -   **Provider Integration**: If the associated provider implements a `deleteMany` method, `Collection.delete` will
-        invoke it to synchronize deletions with an external data layer (such as a backend API or database). This ensures
-        that deletions are reflected both in memory and in the persistent data source.
-    -   **In-Memory Fallback**: If the provider does not define a `deleteMany` method, the `delete` method will remove
-        the specified items from the collection's in-memory map only.
-    -   **Usage**:
+    -   **Integración de Provider**: Si el provider asociado implementa un método `deleteMany`, `Collection.delete` lo invocará para sincronizar eliminaciones con una capa de datos externa (como una API backend o base de datos). Esto asegura que las eliminaciones se reflejen tanto en memoria como en la fuente de datos persistente.
+    -   **Fallback en Memoria**: Si el provider no define un método `deleteMany`, el método `delete` eliminará los items especificados del mapa en memoria de la colección solamente.
+    -   **Uso**:
 
         ```ts
-        // Delete a single item
+        // Eliminar un solo item
         await collection.delete(itemId);
 
-        // Delete multiple items
+        // Eliminar múltiples items
         await collection.delete([itemId1, itemId2, itemId3]);
         ```
 
-    -   **Return Value**: Returns a promise that resolves to an array of booleans, indicating the success of each
-        deletion operation.
+    -   **Valor de Retorno**: Retorna una promesa que se resuelve a un array de booleans, indicando el éxito de cada operación de eliminación.
