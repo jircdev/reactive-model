@@ -7,10 +7,7 @@ import type { ITreeNodeData, IReactiveTreeNode } from './types';
  *
  * @template T - Type of data stored in nodes
  */
-export /*bundle*/ class ReactiveTreeNode<T extends ITreeNodeData>
-	extends Events
-	implements IReactiveTreeNode<T>
-{
+export /*bundle*/ class ReactiveTreeNode<T extends ITreeNodeData> extends Events implements IReactiveTreeNode<T> {
 	readonly isReactive: true = true;
 
 	#data: T;

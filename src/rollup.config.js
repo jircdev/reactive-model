@@ -93,9 +93,7 @@ export default [
 	]),
 
 	// Bundle: entities/item
-	...createBundleConfig('modules/entities/item/index.ts', 'dist/entities/item', 'entities/item', [
-		'reactive/model',
-	]),
+	...createBundleConfig('modules/entities/item/index.ts', 'dist/entities/item', 'entities/item', ['reactive/model']),
 
 	// Bundle: entities/collection
 	...createBundleConfig('modules/entities/collection/index.ts', 'dist/entities/collection', 'entities/collection', [

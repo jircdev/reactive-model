@@ -62,7 +62,9 @@
 		]
 	},
 	"dependencies": {
-		"uuid": "^11.0.3",
+		"uuid": "^11.0.3"
+	},
+	"peerDependencies": {
 		"zod": "^3.24.2"
 	},
 	"devDependencies": {

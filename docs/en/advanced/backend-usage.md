@@ -15,8 +15,10 @@ ReactiveModel is designed to work seamlessly on both frontend and backend. This 
 ### Node.js / Bun
 
 ```bash
-npm install reactive
+npm install reactive zod
 ```
+
+**Note:** `zod` is a peer dependency and must be installed separately.
 
 ```typescript
 // Import the same way as on frontend

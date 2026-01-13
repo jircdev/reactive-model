@@ -48,10 +48,7 @@ export type {
  * tree.addNode('electronics', { id: 'phones', name: 'Phones' });
  * ```
  */
-export /*bundle*/ class ReactiveTree<T extends ITreeNodeData>
-	extends Events
-	implements IReactiveValue<T[]>
-{
+export /*bundle*/ class ReactiveTree<T extends ITreeNodeData> extends Events implements IReactiveValue<T[]> {
 	readonly isReactive: true = true;
 
 	#root: ReactiveTreeNode<T>;

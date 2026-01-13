@@ -40,6 +40,8 @@
 npm install reactive zod
 ```
 
+**Note:** `zod` is a peer dependency and must be installed separately. This allows you to control the zod version used in your project.
+
 ```typescript
 import { ReactiveModel } from 'reactive/model';
 
